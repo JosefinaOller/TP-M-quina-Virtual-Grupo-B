@@ -1,0 +1,10 @@
+# depslib dependency file v1.0
+1648510052 source:c:\lucho\dev\projects\c\mv arquitectura de computadoras\tp-maquina-virtual-grupob\código mv\ejecutor\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdint.h>
+	<string.h>
+	"memoria.h"
+
+1648510081 c:\lucho\dev\projects\c\mv arquitectura de computadoras\tp-maquina-virtual-grupob\código mv\ejecutor\memoria.h
+
