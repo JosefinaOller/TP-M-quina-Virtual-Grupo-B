@@ -31,9 +31,11 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="funciones.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="memoria.h" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

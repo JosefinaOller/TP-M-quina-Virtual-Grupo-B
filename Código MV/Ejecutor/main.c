@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 
     vecF[0xFF1]=&STOP;
 
-    fread(&memoria,sizeof(Memoria),1,arch);
+
     fclose(arch);
 
     system("cls");
