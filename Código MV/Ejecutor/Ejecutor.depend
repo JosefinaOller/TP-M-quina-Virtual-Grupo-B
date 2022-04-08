@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1648511936 source:c:\lucho\dev\projects\c\mv arquitectura de computadoras\tp-maquina-virtual-grupob\código mv\ejecutor\main.c
+1649022620 source:c:\lucho\dev\projects\c\mv arquitectura de computadoras\tp-maquina-virtual-grupob\código mv\ejecutor\main.c
 	<stdio.h>
 	<stdlib.h>
 	<stdint.h>
@@ -8,7 +8,15 @@
 	"memoria.h"
 	"funciones.h"
 
-1648510205 c:\lucho\dev\projects\c\mv arquitectura de computadoras\tp-maquina-virtual-grupob\código mv\ejecutor\memoria.h
+1649278015 c:\lucho\dev\projects\c\mv arquitectura de computadoras\tp-maquina-virtual-grupob\código mv\ejecutor\memoria.h
 
-1648511578 c:\lucho\dev\projects\c\mv arquitectura de computadoras\tp-maquina-virtual-grupob\código mv\ejecutor\funciones.h
+1648843932 c:\lucho\dev\projects\c\mv arquitectura de computadoras\tp-maquina-virtual-grupob\código mv\ejecutor\funciones.h
+
+1649022592 source:c:\lucho\dev\projects\c\mv arquitectura de computadoras\tp-maquina-virtual-grupob\código mv\ejecutor\funciones.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<stdint.h>
+	"memoria.h"
+	"funciones.h"
 

@@ -6,7 +6,7 @@
 #include "memoria.h"
 #include "funciones.h"
 
-typedef void (*VectorFunciones[255])(Memoria*);
+typedef void (*VectorFunciones[4096])(Memoria*);
 
 //instruccion  memoria->RAM[memoria->VectorRegistros[4]]
 //operando 1   memoria->RAM[memoria->VectorRegistros[4]+1]
@@ -14,8 +14,13 @@ typedef void (*VectorFunciones[255])(Memoria*);
 
 int main(int argc, char *argv[])
 {
+
     Memoria memoria;
+    Header header;
     VectorFunciones vecF;
+    int ip, cod;
+
+    //FILE *arch=fopen("","rb");
     FILE *arch=fopen(argv[1],"rb");
 
     srand (getpid());   //Cambia la semilla en cada ejecución del programa para la instrucción random
@@ -48,62 +53,23 @@ int main(int argc, char *argv[])
 
     vecF[0xFF1]=&STOP;
 
+    fread(&header,sizeof(Header),1,arch);
+    fread(&memoria,sizeof(Memoria),1,arch);
 
     fclose(arch);
 
     system("cls");
 
+    ip = memoria.VectorDeRegistros[5]++;
+    //cod = decodificaCodigo(memoria.RAM[ip]);
+    cod = decodificaCodigo(0x0C1FFFFF); //Esta linea es para probar entrar a las funciones, despues BORRAR y usar la de arriba
+    //decodificaOperandos(0x0C1FFFFF,&op1,&op2);
+    vecF[cod](&memoria);
+
+   /* while( (0 <= memoria.VectorDeRegistros[5]) && (memoria.VectorDeRegistros[5]<memoria.VectorDeRegistros[0]) ){
+        //Aca van las lineas de arriba
+    }*/
+
     return 0;
 }
-
-void MOV(Memoria *memoria){}
-
-void ADD(Memoria *memoria){}
-
-void SUB(Memoria *memoria){}
-
-void SWAP(Memoria *memoria){}
-
-void MUL(Memoria *memoria){}
-
-void DIV(Memoria *memoria){}
-
-void CMP(Memoria *memoria){}
-
-void SHL(Memoria *memoria){}
-
-void SHR(Memoria *memoria){}
-
-void AND(Memoria *memoria){}
-
-void OR(Memoria *memoria){}
-
-void XOR(Memoria *memoria){}
-
-void SYS(Memoria *memoria){}
-
-void JMP(Memoria *memoria){}
-
-void JZ(Memoria *memoria){}
-
-void JP(Memoria *memoria){}
-
-void JN(Memoria *memoria){}
-
-void JNZ(Memoria *memoria){}
-
-void JNP(Memoria *memoria){}
-
-void JNN(Memoria *memoria){}
-
-void LDL(Memoria *memoria){}
-
-void LDH(Memoria *memoria){}
-
-void RND(Memoria *memoria){}
-
-void NOT(Memoria *memoria){}
-
-void STOP(Memoria *memoria){}
-
 
