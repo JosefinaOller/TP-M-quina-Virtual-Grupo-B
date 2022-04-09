@@ -13,3 +13,8 @@ typedef struct{
     char argB[16];
     char comentario[1025];
 }Linea; //la estructura de línea
+
+typedef struct{
+    char etiqueta[16];
+    int codigo;
+} Label;
