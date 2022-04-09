@@ -1,0 +1,21 @@
+# depslib dependency file v1.0
+1649444504 source:c:\maquina virtual\2022\mvc\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"prototipos.h"
+
+1649444545 c:\maquina virtual\2022\mvc\prototipos.h
+
+1649444569 source:c:\maquina virtual\2022\mvc\mnemonico.c
+	<string.h>
+	"prototipos.h"
+
+1649448214 source:c:\maquina virtual\2022\mvc\parser.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"parser.h"
+
+1649448179 c:\maquina virtual\2022\mvc\parser.h
+
