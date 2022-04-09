@@ -7,4 +7,3 @@ typedef struct{
     int bloque[6];
 } Header;
 
-

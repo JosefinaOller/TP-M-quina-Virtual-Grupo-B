@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 #include "memoria.h"
@@ -18,6 +17,7 @@ int main(int argc, char *argv[])
     Memoria memoria;
     Header header;
     VectorFunciones vecF;
+    Operandos op;
     int ip, cod;
 
     //FILE *arch=fopen("","rb");
@@ -54,22 +54,41 @@ int main(int argc, char *argv[])
     vecF[0xFF1]=&STOP;
 
     fread(&header,sizeof(Header),1,arch);
-    fread(&memoria,sizeof(Memoria),1,arch);
 
-    fclose(arch);
+    //Verificacion del header
+    //if (verificoHeader(header)){
+    if (1)
+    {
 
-    system("cls");
+        //fread(&memoria,sizeof(header[1]),1,arch);
+        fread(&memoria,sizeof(Memoria),1,arch);
 
-    ip = memoria.VectorDeRegistros[5]++;
-    //cod = decodificaCodigo(memoria.RAM[ip]);
-    cod = decodificaCodigo(0x0C1FFFFF); //Esta linea es para probar entrar a las funciones, despues BORRAR y usar la de arriba
-    //decodificaOperandos(0x0C1FFFFF,&op1,&op2);
-    vecF[cod](&memoria);
+        fclose(arch);
 
-   /* while( (0 <= memoria.VectorDeRegistros[5]) && (memoria.VectorDeRegistros[5]<memoria.VectorDeRegistros[0]) ){
-        //Aca van las lineas de arriba
-    }*/
+        system("cls");
 
+        ip = memoria.VectorDeRegistros[5]++;
+
+        //cod = decodificaCodigo(memoria.RAM[ip]);
+
+        int aux = 0x05003002;
+        memoria.RAM[30]=15;
+        memoria.VectorDeRegistros[0] = 20;
+        memoria.VectorDeRegistros[2] = 0xFFFA;
+        memoria.VectorDeRegistros[3] = 0xFFFB;
+
+        cod = decodificaCodigo(aux); //Esta linea es para probar entrar a las funciones, despues BORRAR y usar la de arriba
+        decodificaOperandos(memoria,cod,aux,&op);
+        printf("Operando A: %d | Tipo A: %d | RegA: %d \n",op.operandoA[0],op.operandoA[1],op.operandoA[2]);
+        printf("Operando B: %d | Tipo B: %d | RegB: %d",op.operandoB[0],op.operandoB[1],op.operandoB[2]);
+        //vecF[cod](&memoria);
+
+        /* while( (0 <= memoria.VectorDeRegistros[5]) && (memoria.VectorDeRegistros[5]<memoria.VectorDeRegistros[0]) ){
+             //Aca van las lineas de arriba
+         }*/
+    }
+    else
+        printf("El archivo recibido no pertenece a la MV-1 V.22");
     return 0;
 }
 

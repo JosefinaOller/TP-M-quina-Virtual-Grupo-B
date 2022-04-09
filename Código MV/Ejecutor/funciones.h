@@ -1,3 +1,8 @@
+typedef struct{
+    int operandoA[3];
+    int operandoB[3];
+} Operandos;
+
 void MOV(Memoria *);
 void ADD(Memoria *);
 void SUB(Memoria *);
@@ -28,4 +33,6 @@ void STOP(Memoria *);
 
 //-------------------------
 
+int verificoHeader(Header);
 int decodificaCodigo(int);
+void decodificaOperandos(Memoria,int,int, Operandos*);
