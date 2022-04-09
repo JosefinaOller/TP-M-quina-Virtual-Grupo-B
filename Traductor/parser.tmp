@@ -1,1 +1,1 @@
-MOV AX, 123 ;inicializa AX
+mov [10], 0 ;inicializo variables
