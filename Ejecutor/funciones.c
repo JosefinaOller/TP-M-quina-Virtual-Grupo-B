@@ -10,15 +10,48 @@
 //int aux = (0x0BFFEFAC & 0x0C000000) / 0x01000000;
 
 
-void MOV(Memoria *memoria)
-{
+void MOV(Memoria *memoria, Operandos op){
+    if (op.operandoA[1] == 1) //De registro
+        memoria->VectorDeRegistros[op.operandoA[3]] = op.operandoB[0];
+    else if (op.operandoA[1] == 2) //Directo
+        memoria->RAM[memoria->VectorDeRegistros[0] + op.operandoA[0]] = op.operandoB[0];
 }
 
 void ADD(Memoria *memoria) {}
 
 void SUB(Memoria *memoria) {}
 
-void SWAP(Memoria *memoria) {}
+void SWAP(Memoria *memoria, Operandos op) {
+    int aux;
+
+    if ((op.operandoA[1] != 0) && (op.operandoB[1] != 0)) //No es inmediato
+    {
+        if ((op.operandoA[1] == 1) && (op.operandoB[1] == 1)) //Ambos tipo de registro
+        {
+            aux = memoria->VectorDeRegistros[op.operandoA[0]];
+            memoria->VectorDeRegistros[op.operandoA[0]] = memoria->VectorDeRegistros[op.operandoB[0]];
+            memoria->VectorDeRegistros[op.operandoB[0]]= aux;
+        }
+        else if ((op.operandoA[1] == 2) && (op.operandoB[1] == 2)) //Ambos son de tipo Directo
+        {
+            aux = memoria->RAM[op.operandoA[0] + memoria->VectorDeRegistros[0]];
+            memoria->RAM[op.operandoA[0] + memoria->VectorDeRegistros[0]] = memoria->RAM[op.operandoB[0] + memoria->VectorDeRegistros[0]];
+            memoria->RAM[op.operandoB[0] + memoria->VectorDeRegistros[0]] = aux;
+        }
+        else if ((op.operandoA[1] == 1) && (op.operandoB[1] == 2)) //A tipo de registro y B tipo directo
+        {
+            aux = memoria->VectorDeRegistros[op.operandoA[0]];
+            memoria->VectorDeRegistros[op.operandoA[0]] = memoria->RAM[op.operandoB[0] + memoria->VectorDeRegistros[0]];
+            memoria->RAM[op.operandoB[0] + memoria->VectorDeRegistros[0]] = aux;
+        }
+        else //A tipo directo y B tipo de registro
+        {
+            aux = memoria->RAM[op.operandoA[0] + memoria->VectorDeRegistros[0]];
+            memoria->RAM[op.operandoA[0] + memoria->VectorDeRegistros[0]] = memoria->VectorDeRegistros[op.operandoB[0]];
+            memoria->VectorDeRegistros[op.operandoB[0]] = aux;
+        }
+    }
+}
 
 void MUL(Memoria *memoria) {}
 
@@ -30,11 +63,59 @@ void SHL(Memoria *memoria) {}
 
 void SHR(Memoria *memoria) {}
 
-void AND(Memoria *memoria) {}
+void AND(Memoria *memoria, Operandos op) {
+    int aux;
 
-void OR(Memoria *memoria) {}
+    aux = op.operandoA[0] & op.operandoB[0];
 
-void XOR(Memoria *memoria) {}
+    if (op.operandoA[1] == 0) //A tipo inmediato
+        memoria->VectorDeRegistros[op.operandoA[0]] = aux;
+    else if (op.operandoA[1] == 1) //A tipo Directo
+        memoria->RAM[op.operandoA[0] + memoria->VectorDeRegistros[0]] = aux;
+
+    if (aux == 0)
+        memoria->VectorDeRegistros[8] = 0x1;
+    else if(aux < 0)
+        memoria->VectorDeRegistros[8] = 0x80000000;
+    else
+        memoria->VectorDeRegistros[8] = 0;
+}
+
+void OR(Memoria *memoria, Operandos op) {
+    int aux;
+
+    aux = op.operandoA[0] | op.operandoB[0];
+
+    if (op.operandoA[1] == 0) //A tipo inmediato
+        memoria->VectorDeRegistros[op.operandoA[0]] = aux;
+    else if (op.operandoA[1] == 1) //A tipo Directo
+        memoria->RAM[op.operandoA[0] + memoria->VectorDeRegistros[0]] = aux;
+
+    if (aux == 0)
+        memoria->VectorDeRegistros[8] = 0x1;
+    else if(aux < 0)
+        memoria->VectorDeRegistros[8] = 0x80000000;
+    else
+        memoria->VectorDeRegistros[8] = 0;
+}
+
+void XOR(Memoria *memoria, Operandos op) {
+    int aux;
+
+    aux = op.operandoA[0] ^ op.operandoB[0];
+
+    if (op.operandoA[1] == 0) //A tipo inmediato
+        memoria->VectorDeRegistros[op.operandoA[0]] = aux;
+    else if (op.operandoA[1] == 1) //A tipo Directo
+        memoria->RAM[op.operandoA[0] + memoria->VectorDeRegistros[0]] = aux;
+
+    if (aux == 0)
+        memoria->VectorDeRegistros[8] = 0x1;
+    else if(aux < 0)
+        memoria->VectorDeRegistros[8] = 0x80000000;
+    else
+        memoria->VectorDeRegistros[8] = 0;
+}
 
 void SYS(Memoria *memoria) {}
 
@@ -52,13 +133,33 @@ void JNP(Memoria *memoria) {}
 
 void JNN(Memoria *memoria) {}
 
-void LDL(Memoria *memoria) {}
+void LDL(Memoria *memoria, Operandos op) {
+    memoria->VectorDeRegistros[9] = (op.operandoA[0] & 0x3) + (memoria->VectorDeRegistros[9] & 0xFFFFFFF3);
+}
 
-void LDH(Memoria *memoria) {}
+void LDH(Memoria *memoria, Operandos op) {
+    memoria->VectorDeRegistros[9] = ((op.operandoA[0] & 0x3) << 30) + (memoria->VectorDeRegistros[9] & 0x3FFFFFFF);
+}
 
 void RND(Memoria *memoria) {}
 
-void NOT(Memoria *memoria) {}
+void NOT(Memoria *memoria, Operandos op) {
+    int aux;
+
+    aux = ~op.operandoA[0];
+
+    if (op.operandoA[1] == 0) //A tipo inmediato
+        memoria->VectorDeRegistros[op.operandoA[0]] = aux;
+    else if (op.operandoA[1] == 1) //A tipo Directo
+        memoria->RAM[op.operandoA[0] + memoria->VectorDeRegistros[0]] = aux;
+
+    if (aux == 0)
+        memoria->VectorDeRegistros[8] = 0x1;
+    else if(aux < 0)
+        memoria->VectorDeRegistros[8] = 0x80000000;
+    else
+        memoria->VectorDeRegistros[8] = 0;
+}
 
 void STOP(Memoria *memoria) {}
 
@@ -97,8 +198,6 @@ int decodificaCodigo(int instruccion)
 
 void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos *op)
 {
-    int valorReg;
-
     if (codigo < 0xF)
     {
         //Tiene 2 operandos
@@ -116,25 +215,25 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
 
         else if ( op->operandoB[1] == 1 ){ //Registro
             op->operandoB[2] = (instruccion & 0x30) / 0x10;
-            valorReg = instruccion & 0xF;
+            op->operandoB[3] = instruccion & 0xF;
 
             if (op->operandoB[2] == 0)
                 //Registro de 4 bytes
-                op->operandoB[0] = memoria.VectorDeRegistros[valorReg];
+                op->operandoB[0] = memoria.VectorDeRegistros[op->operandoB[3]];
 
             else if (op->operandoB[2] == 1)
 
                 //4to byte del registro
-                op->operandoB[0] = memoria.VectorDeRegistros[valorReg] & 0xF;
+                op->operandoB[0] = memoria.VectorDeRegistros[op->operandoB[3]] & 0xF;
 
 
             else if (op->operandoB[2] == 2)
                 //3er byte del registro
-                op->operandoB[0] = memoria.VectorDeRegistros[valorReg] & 0xF0;
+                op->operandoB[0] = memoria.VectorDeRegistros[op->operandoB[3]] & 0xF0;
 
             else if (op->operandoB[2] == 3)
                 //Registro de 2 bytes
-                op->operandoB[0] = memoria.VectorDeRegistros[valorReg] & 0xFF;
+                op->operandoB[0] = memoria.VectorDeRegistros[op->operandoB[3]] & 0xFF;
         }
 
         else if (op->operandoB[1] == 2) //Directo
@@ -143,28 +242,28 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
         //--------------------------------------------------------------------------------------------
         //Operando A
 
-        if (op->operandoA[1] == 0) //Tipop de operando A: inmediato
+        if (op->operandoA[1] == 0) //Tipo de operando A: inmediato
             op->operandoA[0] = (instruccion & 0xFFF000) / 0x1000;
         else if(op->operandoA[1] == 1) //Tipo de operando A: de registro
         {
-            valorReg = (instruccion & 0xF000) / 0x1000;
+            op->operandoA[3] = (instruccion & 0xF000) / 0x1000;
             op->operandoA[2] = (instruccion & 0x30000) / 0x10000;
 
             if (op->operandoA[2] == 0)
                 //Registro de 4 bytes
-                op->operandoA[0] = memoria.VectorDeRegistros[valorReg];
+                op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]];
 
             else if(op->operandoA[2] == 1)
                 //4to byte del registro
-                op->operandoA[0] = (memoria.VectorDeRegistros[valorReg] & 0xF);
+                op->operandoA[0] = (memoria.VectorDeRegistros[op->operandoA[3]] & 0xF);
 
             else if (op->operandoA[2] == 2)
                 //3er byte del registro
-                op->operandoA[0] = (memoria.VectorDeRegistros[valorReg] & 0xF0);
+                op->operandoA[0] = (memoria.VectorDeRegistros[op->operandoA[3]] & 0xF0);
 
             else if (op->operandoA[2] == 3)
                 //Registro de 2 bytes
-                op->operandoA[0] = (memoria.VectorDeRegistros[valorReg] & 0xFF);
+                op->operandoA[0] = (memoria.VectorDeRegistros[op->operandoA[3]] & 0xFF);
         }
         else if (op->operandoA[1] == 2) // Tipo de operando A: directo
             op->operandoA[0] = memoria.RAM[((instruccion & 0xFFF000) / 0x1000)+ memoria.VectorDeRegistros[0]];
@@ -183,20 +282,20 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
         else if (op->operandoA[1] == 1) //De registro
         {
             op->operandoA[2] = (instruccion & 0x30) / 0x10;
-            valorReg = instruccion & 0xF;
+            op->operandoA[3] = instruccion & 0xF;
 
             if (op->operandoA[2]  == 0)
                 //Registro de 4 bytes
-                op->operandoA[0] = memoria.VectorDeRegistros[valorReg];
+                op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]];
             else if (op->operandoA[2] == 1)
                 //4to byte del registro
-                op->operandoA[0] = memoria.VectorDeRegistros[valorReg] & 0xF;
+                op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]] & 0xF;
             else if (op->operandoA[2] == 2)
                 //3er byte del registro
-                op->operandoA[0] = memoria.VectorDeRegistros[valorReg] & 0xF0;
+                op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]] & 0xF0;
             else if (op->operandoA[2]  == 3)
                 //Registro de 2 bytes
-                op->operandoA[0] = memoria.VectorDeRegistros[valorReg] & 0xFF;
+                op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]] & 0xFF;
         }
         else if (op->operandoA[2] == 2) //Directo
             op->operandoA[0] = memoria.RAM[(instruccion & 0xFFFF) + memoria.VectorDeRegistros[0]];

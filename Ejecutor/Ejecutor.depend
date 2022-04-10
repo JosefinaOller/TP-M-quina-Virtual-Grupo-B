@@ -37,3 +37,22 @@
 	"memoria.h"
 	"funciones.h"
 
+1649537955 source:d:\users\paula\documents\facultad\arquitectura de computadoras\mv\parte 1\tp\tp-maquina-virtual-grupob\ejecutor\funciones.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"memoria.h"
+	"funciones.h"
+
+1649532624 d:\users\paula\documents\facultad\arquitectura de computadoras\mv\parte 1\tp\tp-maquina-virtual-grupob\ejecutor\memoria.h
+
+1649557625 d:\users\paula\documents\facultad\arquitectura de computadoras\mv\parte 1\tp\tp-maquina-virtual-grupob\ejecutor\funciones.h
+
+1649550100 source:d:\users\paula\documents\facultad\arquitectura de computadoras\mv\parte 1\tp\tp-maquina-virtual-grupob\ejecutor\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+	"memoria.h"
+	"funciones.h"
+
