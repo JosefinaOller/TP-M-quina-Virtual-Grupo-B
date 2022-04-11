@@ -41,3 +41,25 @@
 	"prototipos.h"
 	"parser.h"
 
+1649630300 source:c:\users\win10\documents\github\tp-maquina-virtual-grupob\traductor\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<ctype.h>
+	"prototipos.h"
+	"parser.h"
+
+1649610168 c:\users\win10\documents\github\tp-maquina-virtual-grupob\traductor\prototipos.h
+
+1649610168 c:\users\win10\documents\github\tp-maquina-virtual-grupob\traductor\parser.h
+
+1649610165 source:c:\users\win10\documents\github\tp-maquina-virtual-grupob\traductor\mnemonico.c
+	<string.h>
+	"prototipos.h"
+
+1649610167 source:c:\users\win10\documents\github\tp-maquina-virtual-grupob\traductor\parser.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"parser.h"
+
