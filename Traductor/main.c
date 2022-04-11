@@ -28,9 +28,8 @@ int main(int argc, const char *argv[]){
             strcpy(asmar,argv[i]);
         else if(strstr(argv[i],".mv1"))
             strcpy(binario,argv[i]);
-        else
-            if (strstr (argv[i],"-o")) //El flag o, si esta activado, no se muestrà pero se genera el archivo binario.
-             o=0;
+        else if (strstr (argv[i],"-o")) //El flag o, si esta activado, no se muestrà pero se genera el archivo binario.
+            o=0;
     }
     if (argc>=2)
         traduce(asmar,vecMnem,o,binario);
@@ -211,35 +210,58 @@ int busquedaLabel(Label rotulos[],char etiqueta[],int cantRotulos,int *error){ /
 }
 int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int cantRotulos, int *error){
     int i, inst = 0;//Inicializo instrucción
+    size_t length;
     Mnemonico mnem;
     char *out = NULL;
+    if (vecMnem!=NULL)
+        length = 25;//(sizeof(vecMnem)/sizeof(vecMnem[0]));
     for (i = 0; i < strlen(codigo.mnem); i++)
         codigo.mnem[i] = toupper(codigo.mnem[i]);
     i = 0;
-    while(i<24 && strcmp(codigo.mnem, vecMnem[i].etiqueta) != 0)
+    while(i<length && strcmp(codigo.mnem, vecMnem[i].etiqueta) != 0)
         i++;
-    mnem = vecMnem[i];
-    if (mnem.cantOp == 2){
-        int topA = tipoOperando(codigo.argA);
-        int topB = tipoOperando(codigo.argB);
-        int vopA = (topA!=1) ? anyToInt(codigo.argA, &out) : AEntero(codigo.argA);
-        int vopB = (topB!=1) ? anyToInt(codigo.argB, &out) : AEntero(codigo.argB);
-        inst = (mnem.codigo << 28) | ((topA << 26) & 0x0C000000) | ((topB << 24) & 0x03000000) | ((vopA << 12) & 0x00FFF000) | (vopB & 0x00000FFF);
-    }else if (mnem.cantOp == 1){
-        int j = 0, top, vop;
-        while (j<cantRotulos && strcmp(codigo.argA, rotulos[j].etiqueta) != 0)
-            j++;
-        if (j<cantRotulos){
-            top = 0;//inmediato
-            vop = rotulos[j].codigo;
-        }
-        else{
-            top = tipoOperando(codigo.argA);
-            vop = (top!=1) ? anyToInt(codigo.argA, &out) : AEntero(codigo.argA);
-        }
-        inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
-    }else
-        inst = 0xFF100000;
+    if (i == length){
+        printf("Error de sintaxis\n");
+        *(error) = -1;
+        inst=0xFFFFFFFF;
+    }
+    else{
+        mnem = vecMnem[i];
+        if (mnem.cantOp == 2){
+            int topA = tipoOperando(codigo.argA);
+            int topB = tipoOperando(codigo.argB);
+            int vopA = (topA!=1) ? anyToInt(codigo.argA, &out) : AEntero(codigo.argA);
+            int vopB = (topB!=1) ? anyToInt(codigo.argB, &out) : AEntero(codigo.argB);
+            inst = (mnem.codigo << 28) | ((topA << 26) & 0x0C000000) | ((topB << 24) & 0x03000000) | ((vopA << 12) & 0x00FFF000) | (vopB & 0x00000FFF);
+        }else if (mnem.cantOp == 1){
+            int j = 0, top, vop;
+            while (j<cantRotulos && strcmp(codigo.argA, rotulos[j].etiqueta) != 0)
+                j++;
+            if (j<cantRotulos){
+                top = 0;//inmediato
+                vop = rotulos[j].codigo;
+                inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
+            }
+            else{
+                top = tipoOperando(codigo.argA);
+                if (top != 1){
+                    vop = anyToInt(codigo.argA, &out);
+                    inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
+                }
+                else{
+                    vop = AEntero(codigo.argA);
+                    if (vop != 0xFFF)
+                        inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
+                    else{
+                        printf("No se encuentra el rótulo\n");
+                        *(error) = 0xFFF;
+                        inst = 0xF0000000 | (vop & 0x0000FFFF);
+                    }
+                }
+            }
+        }else
+            inst = 0xFF100000;
+    }
     return inst;
 }
 int tipoOperando(char vop[]){
@@ -251,7 +273,7 @@ int tipoOperando(char vop[]){
         return 2;//directo
 }
 int anyToInt(char *s, char **out){
-    char *BASES = {"**$*****@*#*****%"};
+    char *BASES = {"[]$*****@*#*****%"};
     int base = 10;
     char *bp = strchr(BASES, *s);
     if (bp!=NULL){
@@ -263,19 +285,23 @@ int anyToInt(char *s, char **out){
 int AEntero(char vop[]){
     //Registros = {"DS","","","","","IP","","","CC","AC","A","B","C","D","E","F"};
     int valor;
+    for (int i = 0; i < strlen(vop); i++)
+        vop[i] = toupper(vop[i]);
     if (strcmp(vop, "DS")==0)
         valor = 0x0;
     else if (strcmp(vop, "IP")==0)
         valor = 0x5;
     else if (strcmp(vop, "CC")==0)
         valor = 0x8;
+    else if (strcmp(vop, "AC")==0)
+        valor = 0x9;
     else if (strcmp(vop, "EAX")==0 || strcmp(vop, "AX")==0 || strcmp(vop, "AH")==0 || strcmp(vop, "AL")==0){
         valor = 0xA;
         if (strcmp(vop, "AX")==0)
             valor = valor | (0x3 << 4);
         else if (strcmp(vop, "AH")==0)
             valor = valor | (0x2 << 4);
-        else
+        else if (strcmp(vop, "AL")==0)
             valor = valor | (0x1 << 4);
     }
     else if (strcmp(vop, "EBX")==0 || strcmp(vop, "BX")==0 || strcmp(vop, "BH")==0 || strcmp(vop, "BL")==0){
@@ -284,7 +310,7 @@ int AEntero(char vop[]){
             valor = valor | (0x3 << 4);
         else if (strcmp(vop, "BH")==0)
             valor = valor | (0x2 << 4);
-        else
+        else if (strcmp(vop, "BL")==0)
             valor = valor | (0x1 << 4);
     }
     else if (strcmp(vop, "ECX")==0 || strcmp(vop, "CX")==0 || strcmp(vop, "CH")==0 || strcmp(vop, "CL")==0){
@@ -293,7 +319,7 @@ int AEntero(char vop[]){
             valor = valor | (0x3 << 4);
         else if (strcmp(vop, "CH")==0)
             valor = valor | (0x2 << 4);
-        else
+        else if (strcmp(vop, "CL")==0)
             valor = valor | (0x1 << 4);
     }
     else if (strcmp(vop, "EDX")==0 || strcmp(vop, "DX")==0 || strcmp(vop, "DH")==0 || strcmp(vop, "DL")==0){
@@ -302,7 +328,7 @@ int AEntero(char vop[]){
             valor = valor | (0x3 << 4);
         else if (strcmp(vop, "DH")==0)
             valor = valor | (0x2 << 4);
-        else
+        else if (strcmp(vop, "DL")==0)
             valor = valor | (0x1 << 4);
     }
     else if (strcmp(vop, "EEX")==0 || strcmp(vop, "EX")==0 || strcmp(vop, "EH")==0 || strcmp(vop, "EL")==0){
@@ -311,7 +337,7 @@ int AEntero(char vop[]){
             valor = valor | (0x3 << 4);
         else if (strcmp(vop, "EH")==0)
             valor = valor | (0x2 << 4);
-        else
+        else if (strcmp(vop, "EL")==0)
             valor = valor | (0x1 << 4);
     }
     else if (strcmp(vop, "EFX")==0 || strcmp(vop, "FX")==0 || strcmp(vop, "FH")==0 || strcmp(vop, "FL")==0){
@@ -320,10 +346,10 @@ int AEntero(char vop[]){
             valor = valor | (0x3 << 4);
         else if (strcmp(vop, "FH")==0)
             valor = valor | (0x2 << 4);
-        else
+        else if (strcmp(vop, "FL")==0)
             valor = valor | (0x1 << 4);
     }
-    else//AC
-        valor = 0x9;
+    else//Si hubo error
+        valor = 0xFFF;
     return valor;
 }
