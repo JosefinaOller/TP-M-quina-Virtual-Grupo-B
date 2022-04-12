@@ -14,6 +14,7 @@ int codificaInstruccion(Linea, Mnemonico[], Label[], int, int*);
 int tipoOperando(char[]);
 int anyToInt(char*, char**);
 int AEntero(char[]);
+void salida(Linea, int, int);
 int main(int argc, const char *argv[]){
     char asmar[20],binario[20];
     int o=1,i;
@@ -113,6 +114,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
                         fwrite(&inst,sizeof(int),1,archESCRITURA);
                 }
                 if(o){ //Si el flag de ocultamiento esta desactivado, muestro lineas
+                    salida(codigo[i], i, inst);
                 }
             }
         }
@@ -352,4 +354,42 @@ int AEntero(char vop[]){
     else//Si hubo error
         valor = 0xFFF;
     return valor;
+}
+void salida(Linea codigo, int i, int inst){
+    printf("[%04d]: %02X %02X %02X %02X", i, (inst>>24)&0xFF, (inst>>16)&0xFF, (inst>>8)&0xFF, (inst>>0)&0xFF);
+    if(strcmp(codigo.label, "") != 0)
+        printf("%12s: %s ", codigo.label, codigo.mnem);
+    else
+        printf("%12d: %s ", i+1, codigo.mnem);
+    if (strcmp(codigo.argA, "") != 0){
+        switch (strlen(codigo.mnem)){
+            case 2: printf("%17s", codigo.argA);
+            break;
+            case 3: printf("%16s", codigo.argA);
+            break;
+            case 4: printf("%15s", codigo.argA);
+            break;
+        }
+        if (strcmp(codigo.argB, "") != 0){
+            printf(", %s", codigo.argB);//;%s
+        }
+    }
+    if (strcmp(codigo.comentario, "") != 0)
+        if (strcmp(codigo.argB, "") != 0){
+            switch (strlen(codigo.argB)){
+                case 1: printf("%10s%s", ";", codigo.comentario);
+                break;
+                case 2: printf("%9s%s", ";", codigo.comentario);
+                break;
+                case 3: printf("%8s%s", ";", codigo.comentario);
+                break;
+                case 4: printf("%7s%s", ";", codigo.comentario);
+                break;
+            }
+        }
+        else if (strcmp(codigo.argA, "") != 0)
+            printf("%13s%s", ";", codigo.comentario);
+        else
+            printf("%20s%s", ";", codigo.comentario);
+    printf("\n");
 }
