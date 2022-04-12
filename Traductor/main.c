@@ -10,11 +10,12 @@ void estructuraASM(char[], Linea[], int*, char[][100], int*, int[]);
 void procesarLinea(char[], char[], char[], char[], char[], char[]);
 void lecturaLabels(char*, Label[], int*, int*);
 int busquedaLabel(Label[], char[], int, int*);
-int codificaInstruccion(Linea, Mnemonico[], Label[], int, int*);
+int codificaInstruccion(Linea, Mnemonico[], Label[], int, int*, int*, int*);
 int tipoOperando(char[]);
 int anyToInt(char*, char**);
 int AEntero(char[]);
-void salida(Linea, int, int);
+void truncamiento(int, int*, int*);
+void salida(Linea, int, int, int, int);
 int main(int argc, const char *argv[]){
     char asmar[20],binario[20];
     int o=1,i;
@@ -82,7 +83,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
     char header[5],reservado[10],listaComentarios[100][100];//para guardar comentarios
     Label rotulos[100];
     Linea codigo[500];
-    int i,cantRotulos=0,error=0,conLin=0,nComentarios=0,indicelinea[100],inst;
+    int i,cantRotulos=0,error=0,conLin=0,nComentarios=0,indicelinea[100],inst, wrgA, wrgB;
     lecturaLabels(nombAsm,rotulos,&cantRotulos,&error); //para guardar los rotulos y su posicion
     if(error)
         printf("Error de archivo\n");
@@ -108,17 +109,16 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
             //codigo
 
             for(i=0;i<conLin;i++){//0-11
+                wrgA = wrgB = 0;//Advertencias
                 if(strcmp(codigo[i].mnem,"")!=0){
-                    inst=codificaInstruccion(codigo[i], vecMnem, rotulos, cantRotulos, &error); //a completar, hay que hacer la funcion de codificarInstruccion que arma la instruccion en un int
+                    inst=codificaInstruccion(codigo[i], vecMnem, rotulos, cantRotulos, &error, &wrgA, &wrgB); //codificaInstruccion arma la instrucción en un int
                     if(!error) //Si no hay error, grabo la instruccion codificada
                         fwrite(&inst,sizeof(int),1,archESCRITURA);
                 }
-                if(o){ //Si el flag de ocultamiento esta desactivado, muestro lineas
-                    salida(codigo[i], i, inst);
-                }
+                if(o) //Si el flag de ocultamiento esta desactivado, muestro lineas
+                    salida(codigo[i], i, inst, wrgA, wrgB);
             }
         }
-        //Hay que poner lo de advertencia
     }
     fclose(archESCRITURA);
     if(error){ //Si hay error de traduccion, borro el archivo binario
@@ -210,7 +210,7 @@ int busquedaLabel(Label rotulos[],char etiqueta[],int cantRotulos,int *error){ /
         return -1;
     }
 }
-int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int cantRotulos, int *error){
+int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int cantRotulos, int *error, int *wrgA, int *wrgB){
     int i, inst = 0;//Inicializo instrucción
     size_t length;
     Mnemonico mnem;
@@ -234,6 +234,10 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
             int topB = tipoOperando(codigo.argB);
             int vopA = (topA!=1) ? anyToInt(codigo.argA, &out) : AEntero(codigo.argA);
             int vopB = (topB!=1) ? anyToInt(codigo.argB, &out) : AEntero(codigo.argB);
+            if (topA == 0)
+                truncamiento(2, &vopA, wrgA);
+            if (topB == 0)
+                truncamiento(2, &vopB, wrgB);
             inst = (mnem.codigo << 28) | ((topA << 26) & 0x0C000000) | ((topB << 24) & 0x03000000) | ((vopA << 12) & 0x00FFF000) | (vopB & 0x00000FFF);
         }else if (mnem.cantOp == 1){
             int j = 0, top, vop;
@@ -242,12 +246,15 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
             if (j<cantRotulos){
                 top = 0;//inmediato
                 vop = rotulos[j].codigo;
+                truncamiento(1, &vop, wrgA);
                 inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
             }
             else{
                 top = tipoOperando(codigo.argA);
                 if (top != 1){
                     vop = anyToInt(codigo.argA, &out);
+                    if (top == 0)
+                        truncamiento(1, &vop, wrgA);
                     inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
                 }
                 else{
@@ -355,7 +362,18 @@ int AEntero(char vop[]){
         valor = 0xFFF;
     return valor;
 }
-void salida(Linea codigo, int i, int inst){
+void truncamiento(int cantOperandos, int *valor, int *flag){//Sólo entra si el operando es inmediato
+    int maxval = (cantOperandos == 2)? 0xFFF : 0xFFFF;
+    if ((*valor) > maxval){
+        int j = 1;
+        (*flag) = 1;
+        do{
+            (*valor) = (*valor) >> j;
+            j++;
+        }while ((*valor) <= maxval);
+    }
+}
+void salida(Linea codigo, int i, int inst, int wrgA, int wrgB){
     printf("[%04d]: %02X %02X %02X %02X", i, (inst>>24)&0xFF, (inst>>16)&0xFF, (inst>>8)&0xFF, (inst>>0)&0xFF);
     if(strcmp(codigo.label, "") != 0)
         printf("%12s: %s ", codigo.label, codigo.mnem);
@@ -392,4 +410,8 @@ void salida(Linea codigo, int i, int inst){
         else
             printf("%20s%s", ";", codigo.comentario);
     printf("\n");
+    if (wrgA)
+        printf("Warning: Línea %d Argumento A truncado\n", i);
+    if (wrgB)
+        printf("Warning: Línea %d Argumento B truncado\n", i);
 }
