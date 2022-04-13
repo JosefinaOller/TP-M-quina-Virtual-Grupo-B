@@ -12,6 +12,7 @@ void lecturaLabels(char*, Label[], int*, int*);
 int busquedaLabel(Label[], char[], int, int*);
 int codificaInstruccion(Linea, Mnemonico[], Label[], int, int*, int*, int*);
 int tipoOperando(char[]);
+void eliminaCorchetes(char[]);
 int anyToInt(char*, char**);
 int AEntero(char[]);
 void truncamiento(int, int*, int*);
@@ -23,8 +24,8 @@ int main(int argc, const char *argv[]){
     Mnemonico vecMnem[MNEMAX];
     cargaVecMnem(vecMnem); //Carga todos los mnemonicos con sus datos.
     argc=2;
-    argv[0]="2.asm";
-    argv[1]="2.mv1";
+    argv[0]="1.asm";
+    argv[1]="1.mv1";
     for(i=0;i<argc;i++){
         if(strstr(argv[i],".asm"))
             strcpy(asmar,argv[i]);
@@ -245,12 +246,33 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                 if (strcmp(codigo.argA, "") != 0 && strcmp(codigo.argB, "") != 0){
                     int topA = tipoOperando(codigo.argA);
                     int topB = tipoOperando(codigo.argB);
-                    int vopA = (topA!=1) ? anyToInt(codigo.argA, &out) : AEntero(codigo.argA);
-                    int vopB = (topB!=1) ? anyToInt(codigo.argB, &out) : AEntero(codigo.argB);
-                    if (topA == 0)
+                    int vopA, vopB;
+                    switch (topA){
+                    case 0:
+                        vopA = (codigo.argA[0] == '\'')? codigo.argA[1]: anyToInt(codigo.argA, &out);
                         truncamiento(2, &vopA, wrgA);
-                    if (topB == 0)
+                        break;
+                    case 1:
+                        vopA = AEntero(codigo.argA);
+                        break;
+                    case 2:
+                        eliminaCorchetes(codigo.argA);
+                        vopA = (codigo.argA[0] == '\'')? codigo.argA[1]: anyToInt(codigo.argA, &out);
+                        break;
+                    }
+                    switch (topB){
+                    case 0:
+                        vopB = (codigo.argB[0] == '\'')? codigo.argB[1]: anyToInt(codigo.argB, &out);
                         truncamiento(2, &vopB, wrgB);
+                        break;
+                    case 1:
+                        vopB = AEntero(codigo.argB);
+                        break;
+                    case 2:
+                        eliminaCorchetes(codigo.argB);
+                        vopB = (codigo.argB[0] == '\'')? codigo.argB[1]: anyToInt(codigo.argB, &out);
+                        break;
+                    }
                     inst = (mnem.codigo << 28) | ((topA << 26) & 0x0C000000) | ((topB << 24) & 0x03000000) | ((vopA << 12) & 0x00FFF000) | (vopB & 0x00000FFF);
                 }else{
                     printf("Error de sintaxis\n");
@@ -270,13 +292,13 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                     }
                     else{
                         top = tipoOperando(codigo.argA);
-                        if (top != 1){
-                            vop = anyToInt(codigo.argA, &out);
-                            if (top == 0)
-                                truncamiento(1, &vop, wrgA);
+                        switch (top){
+                        case 0:
+                            vop = (codigo.argA[0] == '\'')? codigo.argA[1]: anyToInt(codigo.argA, &out);
+                            truncamiento(1, &vop, wrgA);
                             inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
-                        }
-                        else{
+                            break;
+                        case 1:
                             vop = AEntero(codigo.argA);
                             if (vop != 0xFFF)
                                 inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
@@ -285,6 +307,12 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                                 *(error) = 0xFFF;
                                 inst = 0xF0000000 | (vop & 0x0000FFFF);
                             }
+                            break;
+                        case 2:
+                            eliminaCorchetes(codigo.argA);
+                            vop = (codigo.argA[0] == '\'')? codigo.argA[1]: anyToInt(codigo.argA, &out);
+                            inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
+                            break;
                         }
                     }
                 }else{
@@ -310,8 +338,16 @@ int tipoOperando(char vop[]){
     else
         return 2;//directo
 }
+void eliminaCorchetes(char vop[]){
+    char aux[4] = {'\0'};
+    int n = strlen(vop)-1;
+    if (vop[0]=='[' && vop[n]==']')
+        for (int i = 0; i < n; i++)
+            aux[i] = vop[i+1];
+    strcpy(vop, aux);
+}
 int anyToInt(char *s, char **out){
-    char *BASES = {"[]$*****@*#*****%"};
+    char *BASES = {"**$*****@*#*****%"};
     int base = 10;
     char *bp = strchr(BASES, *s);
     if (bp!=NULL){
@@ -394,12 +430,8 @@ int AEntero(char vop[]){
 void truncamiento(int cantOperandos, int *valor, int *flag){//Sólo entra si el operando es inmediato
     int maxval = (cantOperandos == 2)? 0xFFF : 0xFFFF;
     if ((*valor) > maxval){
-        int j = 1;
         (*flag) = 1;
-        do{
-            (*valor) = (*valor) >> j;
-            j++;
-        }while ((*valor) <= maxval);
+        (*valor) = (*valor) % maxval;
     }
 }
 void salida(Linea codigo, int i, int inst, int wrgA, int wrgB){
