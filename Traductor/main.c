@@ -23,8 +23,8 @@ int main(int argc, const char *argv[]){
     Mnemonico vecMnem[MNEMAX];
     cargaVecMnem(vecMnem); //Carga todos los mnemonicos con sus datos.
     argc=2;
-    argv[0]="3.asm";
-    argv[1]="3.mv1";
+    argv[0]="2.asm";
+    argv[1]="2.mv1";
     for(i=0;i<argc;i++){
         if(strstr(argv[i],".asm"))
             strcpy(asmar,argv[i]);
@@ -80,7 +80,7 @@ void cargaVecMnem(Mnemonico vecMnem[]){ //Carga datos de mnenomicos
 void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcion que procesa las instrucciones,las imprime y genera el archivo binario
 
     FILE *archESCRITURA; //para el archivo binario
-    char header[5],reservado[10],listaComentarios[100][100];//para guardar comentarios
+    char reservado[10],listaComentarios[100][100];//para guardar comentarios
     Label rotulos[100];
     Linea codigo[500];
     int i,cantRotulos=0,error=0,conLin=0,nComentarios=0,indicelinea[100],inst, wrgA, wrgB,kcom=0;
@@ -96,14 +96,14 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
             //empiezo a generar el archivo binario
             archESCRITURA=fopen(binario,"wb");
             //la cabecera
-            strcpy(header,"MV-1");
+            int header=0x4D562D31;
             fwrite(&header,sizeof(int),1,archESCRITURA);
             fwrite(&conLin,sizeof(int),1,archESCRITURA);
             strcpy(reservado,"");
             fwrite(&reservado,sizeof(int),1,archESCRITURA);
             fwrite(&reservado,sizeof(int),1,archESCRITURA);
             fwrite(&reservado,sizeof(int),1,archESCRITURA);
-            strcpy(header,"V.22");
+            header=0x562E3232;
             fwrite(&header,sizeof(int),1,archESCRITURA);
 
             //codigo
