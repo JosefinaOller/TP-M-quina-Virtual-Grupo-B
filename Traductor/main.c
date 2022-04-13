@@ -23,8 +23,8 @@ int main(int argc, const char *argv[]){
     Mnemonico vecMnem[MNEMAX];
     cargaVecMnem(vecMnem); //Carga todos los mnemonicos con sus datos.
     argc=2;
-    argv[0]="prueba.asm";
-    argv[1]="prueba.bin";
+    argv[0]="3.asm";
+    argv[1]="3.mv1";
     for(i=0;i<argc;i++){
         if(strstr(argv[i],".asm"))
             strcpy(asmar,argv[i]);
@@ -83,7 +83,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
     char header[5],reservado[10],listaComentarios[100][100];//para guardar comentarios
     Label rotulos[100];
     Linea codigo[500];
-    int i,cantRotulos=0,error=0,conLin=0,nComentarios=0,indicelinea[100],inst, wrgA, wrgB;
+    int i,cantRotulos=0,error=0,conLin=0,nComentarios=0,indicelinea[100],inst, wrgA, wrgB,kcom=0;
     lecturaLabels(nombAsm,rotulos,&cantRotulos,&error); //para guardar los rotulos y su posicion
     if(error)
         printf("Error de archivo\n");
@@ -108,15 +108,20 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
 
             //codigo
 
-            for(i=0;i<conLin;i++){//0-11
+            for(i=0;i<conLin;i++){
                 wrgA = wrgB = 0;//Advertencias
                 if(strcmp(codigo[i].mnem,"")!=0){
                     inst=codificaInstruccion(codigo[i], vecMnem, rotulos, cantRotulos, &error, &wrgA, &wrgB); //codificaInstruccion arma la instrucción en un int
                     if(!error) //Si no hay error, grabo la instruccion codificada
                         fwrite(&inst,sizeof(int),1,archESCRITURA);
                 }
-                if(o) //Si el flag de ocultamiento esta desactivado, muestro lineas
-                    salida(codigo[i], i, inst, wrgA, wrgB);
+                if(o){
+                   while(i==indicelinea[kcom] && strcmp(listaComentarios[kcom],"")!=0){
+                        printf("%3s\n",strtok(listaComentarios[kcom++],"\n"));
+                   }
+                   salida(codigo[i], i, inst, wrgA, wrgB);
+                } //Si el flag de ocultamiento esta desactivado, muestro lineas
+
             }
         }
     }
@@ -139,11 +144,12 @@ void estructuraASM(char nombAsm[],Linea codigo[],int *conLin,char listaComentari
             strcpy(rotulo,"");strcpy(mnem,"");strcpy(argA,"");strcpy(argB,"");strcpy(com,""); //los inicializo
             procesarLinea(linea,rotulo,mnem,argA,argB,com);
             cargaLinea(rotulo,mnem,argA,argB,com,&codigo[*conLin]);
-            if(strcmp(com,"")!=0){
-                strcpy(listaComentarios[*nComentarios],linea);
-                indicelinea[(*nComentarios)++]=*conLin;
+            if(strcmp(com,"")!=0 && strcmp(rotulo,"")==0  && strcmp(mnem,"")==0 && strcmp(argA,"")==0 && strcmp(argB,"")==0){
+                    strcpy(listaComentarios[*nComentarios],linea);
+                    indicelinea[(*nComentarios)++]=*conLin;
             }
-            (*conLin)++;
+            if(strcmp(rotulo,"")!=0  || strcmp(mnem,"")!=0 || strcmp(argA,"")!=0 || strcmp(argB,"")!=0)
+                    (*conLin)++;
         }
     }
     else
@@ -178,19 +184,24 @@ void procesarLinea(char linea[],char rotulo[],char mnem[],char argA[],char argB[
 void lecturaLabels(char *archivo,Label rotulos[],int *cantRotulos,int *error){
 
     FILE *arch=fopen(archivo,"rt");
-    char linea[500],rotulo[16];
+    char linea[500],rotulo[16],mnem[5];
     int nrolinea=0;
     if(arch!=NULL){
         while(fgets(linea,500,arch)!=NULL){
            char **parsed = parseline(linea);
            strcpy(rotulo,parsed[0] ? parsed[0] : "");
+           strcpy(mnem,parsed[1] ? parsed[1] : "");
            freeline(parsed);
            if(strcmp(rotulo,"")!=0){ //Hay rotulo
                 strcpy(rotulos[*cantRotulos].etiqueta,rotulo);
                 rotulos[*cantRotulos].codigo=nrolinea;
                 (*cantRotulos)++;
            }
-           nrolinea++;
+           else{
+            if(strcmp(mnem,"")!=0)
+                nrolinea++;
+           }
+
         }
     }
     else{
@@ -224,7 +235,7 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
         while(i<length && strcmp(codigo.mnem, vecMnem[i].etiqueta) != 0)
             i++;
         if (i == length){
-            printf("Error de instrucción\n");
+            printf("Error de instruccion\n");
             *(error) = -2;
             inst = 0xFFFFFFFE;
         }
@@ -270,7 +281,7 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                             if (vop != 0xFFF)
                                 inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
                             else{
-                                printf("No se encuentra el rótulo\n");
+                                printf("No se encuentra el rotulo\n");
                                 *(error) = 0xFFF;
                                 inst = 0xF0000000 | (vop & 0x0000FFFF);
                             }
