@@ -206,7 +206,7 @@ int busquedaLabel(Label rotulos[],char etiqueta[],int cantRotulos,int *error){ /
     if (i<cantRotulos)
         return rotulos[i].codigo;
     else{
-        *error=1;
+        *error = 1;
         return -1;
     }
 }
@@ -217,59 +217,77 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
     char *out = NULL;
     if (vecMnem!=NULL)
         length = 25;//(sizeof(vecMnem)/sizeof(vecMnem[0]));
-    for (i = 0; i < strlen(codigo.mnem); i++)
-        codigo.mnem[i] = toupper(codigo.mnem[i]);
-    i = 0;
-    while(i<length && strcmp(codigo.mnem, vecMnem[i].etiqueta) != 0)
-        i++;
-    if (i == length){
+    if (strcmp(codigo.mnem, "") != 0){
+        for (i = 0; i < strlen(codigo.mnem); i++)
+            codigo.mnem[i] = toupper(codigo.mnem[i]);
+        i = 0;
+        while(i<length && strcmp(codigo.mnem, vecMnem[i].etiqueta) != 0)
+            i++;
+        if (i == length){
+            printf("Error de instrucción\n");
+            *(error) = -2;
+            inst = 0xFFFFFFFE;
+        }
+        else{
+            mnem = vecMnem[i];
+            if (mnem.cantOp == 2){
+                if (strcmp(codigo.argA, "") != 0 && strcmp(codigo.argB, "") != 0){
+                    int topA = tipoOperando(codigo.argA);
+                    int topB = tipoOperando(codigo.argB);
+                    int vopA = (topA!=1) ? anyToInt(codigo.argA, &out) : AEntero(codigo.argA);
+                    int vopB = (topB!=1) ? anyToInt(codigo.argB, &out) : AEntero(codigo.argB);
+                    if (topA == 0)
+                        truncamiento(2, &vopA, wrgA);
+                    if (topB == 0)
+                        truncamiento(2, &vopB, wrgB);
+                    inst = (mnem.codigo << 28) | ((topA << 26) & 0x0C000000) | ((topB << 24) & 0x03000000) | ((vopA << 12) & 0x00FFF000) | (vopB & 0x00000FFF);
+                }else{
+                    printf("Error de sintaxis\n");
+                    *(error) = -1;
+                    inst = 0xFFFFFFFF;
+                }
+            }else if (mnem.cantOp == 1){
+                int j = 0, top, vop;
+                if (strcmp(codigo.argA, "") != 0 && strcmp(codigo.argB, "") == 0){
+                    while (j<cantRotulos && strcmp(codigo.argA, rotulos[j].etiqueta) != 0)
+                        j++;
+                    if (j<cantRotulos){
+                        top = 0;//inmediato
+                        vop = rotulos[j].codigo;
+                        truncamiento(1, &vop, wrgA);
+                        inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
+                    }
+                    else{
+                        top = tipoOperando(codigo.argA);
+                        if (top != 1){
+                            vop = anyToInt(codigo.argA, &out);
+                            if (top == 0)
+                                truncamiento(1, &vop, wrgA);
+                            inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
+                        }
+                        else{
+                            vop = AEntero(codigo.argA);
+                            if (vop != 0xFFF)
+                                inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
+                            else{
+                                printf("No se encuentra el rótulo\n");
+                                *(error) = 0xFFF;
+                                inst = 0xF0000000 | (vop & 0x0000FFFF);
+                            }
+                        }
+                    }
+                }else{
+                    printf("Error de sintaxis\n");
+                    *(error) = -1;
+                    inst = 0xFFFFFFFF;
+                }
+            }else
+                inst = 0xFF100000;
+        }
+    }else{
         printf("Error de sintaxis\n");
         *(error) = -1;
         inst=0xFFFFFFFF;
-    }
-    else{
-        mnem = vecMnem[i];
-        if (mnem.cantOp == 2){
-            int topA = tipoOperando(codigo.argA);
-            int topB = tipoOperando(codigo.argB);
-            int vopA = (topA!=1) ? anyToInt(codigo.argA, &out) : AEntero(codigo.argA);
-            int vopB = (topB!=1) ? anyToInt(codigo.argB, &out) : AEntero(codigo.argB);
-            if (topA == 0)
-                truncamiento(2, &vopA, wrgA);
-            if (topB == 0)
-                truncamiento(2, &vopB, wrgB);
-            inst = (mnem.codigo << 28) | ((topA << 26) & 0x0C000000) | ((topB << 24) & 0x03000000) | ((vopA << 12) & 0x00FFF000) | (vopB & 0x00000FFF);
-        }else if (mnem.cantOp == 1){
-            int j = 0, top, vop;
-            while (j<cantRotulos && strcmp(codigo.argA, rotulos[j].etiqueta) != 0)
-                j++;
-            if (j<cantRotulos){
-                top = 0;//inmediato
-                vop = rotulos[j].codigo;
-                truncamiento(1, &vop, wrgA);
-                inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
-            }
-            else{
-                top = tipoOperando(codigo.argA);
-                if (top != 1){
-                    vop = anyToInt(codigo.argA, &out);
-                    if (top == 0)
-                        truncamiento(1, &vop, wrgA);
-                    inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
-                }
-                else{
-                    vop = AEntero(codigo.argA);
-                    if (vop != 0xFFF)
-                        inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
-                    else{
-                        printf("No se encuentra el rótulo\n");
-                        *(error) = 0xFFF;
-                        inst = 0xF0000000 | (vop & 0x0000FFFF);
-                    }
-                }
-            }
-        }else
-            inst = 0xFF100000;
     }
     return inst;
 }
