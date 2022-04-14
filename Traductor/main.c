@@ -23,9 +23,6 @@ int main(int argc, const char *argv[]){
 
     Mnemonico vecMnem[MNEMAX];
     cargaVecMnem(vecMnem); //Carga todos los mnemonicos con sus datos.
-    argc=2;
-    argv[0]="5.asm";
-    argv[1]="5.mv1";
     for(i=0;i<argc;i++){
         if(strstr(argv[i],".asm"))
             strcpy(asmar,argv[i]);
@@ -197,6 +194,7 @@ void lecturaLabels(char *archivo,Label rotulos[],int *cantRotulos,int *error){
                 strcpy(rotulos[*cantRotulos].etiqueta,rotulo);
                 rotulos[*cantRotulos].codigo=nrolinea;
                 (*cantRotulos)++;
+                nrolinea++;
            }
            else{
             if(strcmp(mnem,"")!=0)
