@@ -24,8 +24,8 @@ int main(int argc, const char *argv[]){
     Mnemonico vecMnem[MNEMAX];
     cargaVecMnem(vecMnem); //Carga todos los mnemonicos con sus datos.
     argc=2;
-    argv[0]="1.asm";
-    argv[1]="1.mv1";
+    argv[0]="5.asm";
+    argv[1]="5.mv1";
     for(i=0;i<argc;i++){
         if(strstr(argv[i],".asm"))
             strcpy(asmar,argv[i]);
@@ -288,7 +288,7 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                         top = 0;//inmediato
                         vop = rotulos[j].codigo;
                         truncamiento(1, &vop, wrgA);
-                        inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
+                        inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x00C00000) | (vop & 0x0000FFFF);
                     }
                     else{
                         top = tipoOperando(codigo.argA);
@@ -296,12 +296,12 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                         case 0:
                             vop = (codigo.argA[0] == '\'')? codigo.argA[1]: anyToInt(codigo.argA, &out);
                             truncamiento(1, &vop, wrgA);
-                            inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
+                            inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x00C00000) | (vop & 0x0000FFFF);
                             break;
                         case 1:
                             vop = AEntero(codigo.argA);
                             if (vop != 0xFFF)
-                                inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
+                                inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x00C00000) | (vop & 0x0000FFFF);
                             else{
                                 printf("No se encuentra el rotulo\n");
                                 *(error) = 0xFFF;
@@ -311,7 +311,7 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                         case 2:
                             eliminaCorchetes(codigo.argA);
                             vop = (codigo.argA[0] == '\'')? codigo.argA[1]: anyToInt(codigo.argA, &out);
-                            inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x03000000) | (vop & 0x0000FFFF);
+                            inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x00C00000) | (vop & 0x0000FFFF);
                             break;
                         }
                     }
@@ -431,7 +431,7 @@ void truncamiento(int cantOperandos, int *valor, int *flag){//Sólo entra si el o
     int maxval = (cantOperandos == 2)? 0xFFF : 0xFFFF;
     if ((*valor) > maxval){
         (*flag) = 1;
-        (*valor) = (*valor) % maxval;
+        (*valor) = (*valor) % (maxval+1);
     }
 }
 void salida(Linea codigo, int i, int inst, int wrgA, int wrgB){
