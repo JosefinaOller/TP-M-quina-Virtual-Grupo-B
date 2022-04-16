@@ -23,7 +23,6 @@ void salida(Linea, int, int, int, int);
 int main(int argc, const char *argv[]){
     char asmar[20],binario[20];
     int o=1,i;
-
     Mnemonico vecMnem[MNEMAX];
     cargaVecMnem(vecMnem); //Carga todos los mnemonicos con sus datos.
     for(i=1;i<argc;i++){
@@ -324,7 +323,7 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
     return inst;
 }
 int tipoOperando(char vop[]){
-    if (isdigit(vop[0]) || vop[0]=='#' || vop[0]=='@' || vop[0]=='%' || vop[0]=='$' || vop[0]=='\'')
+    if (isdigit(vop[0]) || vop[0]=='#' || vop[0]=='@' || vop[0]=='%' || vop[0]=='$' || vop[0]=='\'' || vop[0]=='-')
         return 0;//inmediato
     else if (isalpha(vop[0]))
         return 1;//de registro
