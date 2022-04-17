@@ -1794,4 +1794,7 @@ int cuentaChars(char cadena[], char caracter,int longitud)
     return cont;
 }
 
-
+void inicializaRegistros(Memoria *mem){
+    for (int i=0;i<16; i++)
+        mem->VectorDeRegistros[i]=0;
+}

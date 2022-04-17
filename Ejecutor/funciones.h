@@ -44,6 +44,7 @@ void STOP(Memoria *, OperandosYFlags);
 
 //-------------------------
 
+void inicializaRegistros(Memoria*);
 void imprimeMnemonico(int);
 void stringRegistro(int[],char[]);
 void imprimeEstadoRegistros(int[]);

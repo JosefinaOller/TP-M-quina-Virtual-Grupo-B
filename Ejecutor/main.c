@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
     OperandosYFlags op;
     int ip, cod;
 
+    inicializaRegistros(&memoria);
     inicializaFlags(&op,argc,argv);
 
     if (op.flags[1] == 1)
