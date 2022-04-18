@@ -880,7 +880,7 @@ void SYS1(Memoria *memoria, OperandosYFlags op)
         char sAux[255];
 
         if (prompt == 0)
-            printf("[%04d]: ", memoria->VectorDeRegistros[5]-1);
+            printf("[%04d]: ", edx + (i - memoria->VectorDeRegistros[0]));
 
         scanf("%[^\n]%*c",sAux);
 
@@ -903,7 +903,7 @@ void SYS1(Memoria *memoria, OperandosYFlags op)
             for (int i = (edx + memoria->VectorDeRegistros[0]); i< (edx + cx + memoria->VectorDeRegistros[0]); i++)
             {
                 if (prompt == 0)
-                    printf("[%04d]: ", memoria->VectorDeRegistros[5]-1);
+                    printf("[%04d]: ", edx + (i - memoria->VectorDeRegistros[0]));
                 scanf("%s",num);
                 QuitaCaracter(num,'\'',strlen(num));
                 QuitaCaracter(num,'#',strlen(num));
@@ -916,7 +916,7 @@ void SYS1(Memoria *memoria, OperandosYFlags op)
             for (int i = (edx + memoria->VectorDeRegistros[0]); i< (edx + cx + memoria->VectorDeRegistros[0]); i++)
             {
                 if (prompt == 0)
-                    printf("[%04d]: ", memoria->VectorDeRegistros[5]-1);
+                    printf("[%04d]: ", edx + (i - memoria->VectorDeRegistros[0]));
                 scanf("%s",num);
                 QuitaCaracter(num,'@',strlen(num));
                 sscanf(num,"%o",&(memoria->RAM[i]));
@@ -928,7 +928,7 @@ void SYS1(Memoria *memoria, OperandosYFlags op)
             for (int i = (edx + memoria->VectorDeRegistros[0]); i< (edx + cx + memoria->VectorDeRegistros[0]); i++)
             {
                 if (prompt == 0)
-                    printf("[%04d]: ", memoria->VectorDeRegistros[5]-1);
+                    printf("[%04d]: ", edx + (i - memoria->VectorDeRegistros[0]));
                 scanf("%s",num);
                 QuitaCaracter(num,'%',strlen(num));
                 sscanf(num,"%X",&(memoria->RAM[i]));
