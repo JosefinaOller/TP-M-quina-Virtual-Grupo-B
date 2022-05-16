@@ -26,6 +26,9 @@ void SHR(Memoria *, OperandosYFlags);
 void AND(Memoria *, OperandosYFlags);
 void OR(Memoria *, OperandosYFlags);
 void XOR(Memoria *, OperandosYFlags);
+void SLEN(Memoria *, OperandosYFlags);
+void SMOV(Memoria *, OperandosYFlags);
+void SCMP(Memoria *, OperandosYFlags);
 
 void SYS(Memoria *, OperandosYFlags);
 void JMP(Memoria *, OperandosYFlags);
@@ -39,7 +42,11 @@ void LDL(Memoria *, OperandosYFlags);
 void LDH(Memoria *, OperandosYFlags);
 void RND(Memoria *, OperandosYFlags);
 void NOT(Memoria *, OperandosYFlags);
+void PUSH(Memoria *, OperandosYFlags);
+void POP(Memoria *, OperandosYFlags);
+void CALL(Memoria *, OperandosYFlags);
 
+void RET(Memoria *, OperandosYFlags);
 void STOP(Memoria *, OperandosYFlags);
 
 //-------------------------
@@ -53,10 +60,15 @@ void disassembler(Memoria,OperandosYFlags);
 void inicializaFlags(OperandosYFlags*,int,char*[]);
 void iniciaVectorFunciones(VectorFunciones);
 int verificoHeader(Header);
+int seteoSegmentos(Memoria*,Header);
 int decodificaCodigo(int);
 void decodificaOperandos(Memoria,int,int, OperandosYFlags*);
 void SYS1(Memoria *, OperandosYFlags);
 void SYS2(Memoria *, OperandosYFlags);
+void SYS3(Memoria *, OperandosYFlags);
+void SYS4(Memoria *, OperandosYFlags);
+void SYS7(Memoria *, OperandosYFlags);
+void SYSD(Memoria *, OperandosYFlags);
 void SYSF(Memoria *, OperandosYFlags);
 void QuitaCaracter(char cadena[],char caracter,int longitud);
 int cuentaChars(char cadena[], char caracter,int longitud);

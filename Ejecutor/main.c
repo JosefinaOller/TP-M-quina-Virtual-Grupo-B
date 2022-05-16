@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     OperandosYFlags op;
     int ip, cod;
 
-    inicializaRegistros(&memoria);
+
     inicializaFlags(&op,argc,argv);
 
     if (op.flags[1] == 1)
@@ -27,34 +27,38 @@ int main(int argc, char *argv[])
 
     fread(&header,sizeof(Header),1,arch);
 
-    int size[header.bloque[1]];
+    int size[header.bloque[4]];
 
     if (verificoHeader(header))
     {
-        fread(&memoria,sizeof(size),1,arch);
+        if (seteoSegmentos(&memoria,header)){
+            inicializaRegistros(&memoria);
 
-        fclose(arch);
+            fread(&memoria,sizeof(size),1,arch);
+            fclose(arch);
 
-        //Se setean IP y DS
-        memoria.VectorDeRegistros[0] = header.bloque[1];
-        memoria.VectorDeRegistros[5] = 0;
 
-        if (op.flags[2] == 1){
+            if (op.flags[2] == 1){
             cod = decodificaCodigo(0xF000000F);
             decodificaOperandos(memoria,cod,0xF000000F,&op);
             vecF[cod](&memoria,op);
-        }
+            }
 
-        //Ejecución del programa
-        while( (0 <= memoria.VectorDeRegistros[5]) && (memoria.VectorDeRegistros[5]<memoria.VectorDeRegistros[0]) ){
-            ip = memoria.VectorDeRegistros[5]++;
-            cod = decodificaCodigo(memoria.RAM[ip]);
-            decodificaOperandos(memoria,cod,memoria.RAM[ip],&op);
-            vecF[cod](&memoria,op);
+            //Ejecución del programa
+            while( (0 <= memoria.VectorDeRegistros[5]) && (memoria.VectorDeRegistros[5]<memoria.VectorDeRegistros[0]) ){
+                ip = memoria.VectorDeRegistros[5]++;
+                cod = decodificaCodigo(memoria.RAM[ip]);
+                decodificaOperandos(memoria,cod,memoria.RAM[ip],&op);
+                vecF[cod](&memoria,op);
+            }
+
+        } else{
+            printf("El proceso no puede ser cargado por memoria insuficiente.");
+            fclose(arch);
         }
     }
     else{
-        printf("El archivo recibido no pertenece a la MV-1 V.22");
+        printf("El formato del archivo recibido no pertenece a la MV-2 V.22 (x.mv2).");
         fclose(arch);
     }
     return 0;

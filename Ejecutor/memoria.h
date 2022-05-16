@@ -1,5 +1,5 @@
 typedef struct{
-    int RAM[4096];
+    int RAM[8192];
     int VectorDeRegistros[16];
     } Memoria;
 

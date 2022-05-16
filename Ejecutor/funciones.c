@@ -841,25 +841,42 @@ void XOR(Memoria *memoria, OperandosYFlags op)
 
 }
 
+void SLEN(Memoria *memoria, OperandosYFlags op){
+}
+
+void SMOV(Memoria *memoria, OperandosYFlags op){
+}
+
+void SCMP(Memoria *memoria, OperandosYFlags op){
+}
+
 void SYS(Memoria *memoria, OperandosYFlags op)
 {
-    void (*FuncionesSYS[3])(Memoria *,OperandosYFlags);
+    void (*FuncionesSYS[7])(Memoria *,OperandosYFlags);
 
     FuncionesSYS[0]=&SYS1;
     FuncionesSYS[1]=&SYS2;
     FuncionesSYS[2]=&SYSF;
+    FuncionesSYS[3]=&SYS3;
+    FuncionesSYS[4]=&SYS4;
+    FuncionesSYS[5]=&SYS7;
+    FuncionesSYS[6]=&SYSD;
 
-    if ( op.operandoA[0] == 0x1 )  //SYS READ
-    {
-        FuncionesSYS[0](memoria,op);
-    }
-    else if (op.operandoA[0] == 0x2)    //SYS WRITE
-    {
-        FuncionesSYS[1](memoria,op);
-    }
-    else if (op.operandoA[0] == 0xF)    //SYS BREAKPOINT
-    {
-        FuncionesSYS[2](memoria,op);
+    switch (op.operandoA[0]){
+        case 0x1: FuncionesSYS[0](memoria,op);
+        break;
+        case 0x2: FuncionesSYS[1](memoria,op);
+        break;
+        case 0x3: FuncionesSYS[3](memoria,op);
+        break;
+        case 0x4: FuncionesSYS[4](memoria,op);
+        break;
+        case 0x7: FuncionesSYS[5](memoria,op);
+        break;
+        case 0xD: FuncionesSYS[6](memoria,op);
+        break;
+        case 0xF: FuncionesSYS[2](memoria,op);
+        break;
     }
 }
 
@@ -968,6 +985,18 @@ void SYS2(Memoria *memoria, OperandosYFlags op)
             printf("\n");
     }
     printf("\n");
+}
+
+void SYS3(Memoria *memoria, OperandosYFlags op){
+}
+
+void SYS4(Memoria *memoria, OperandosYFlags op){
+}
+
+void SYS7(Memoria *memoria, OperandosYFlags op){
+}
+
+void SYSD(Memoria *memoria, OperandosYFlags op){
 }
 
 void SYSF(Memoria *memoria, OperandosYFlags op)
@@ -1182,6 +1211,18 @@ void NOT(Memoria *memoria, OperandosYFlags op)
         memoria->VectorDeRegistros[8] = 0x80000000;
     else
         memoria->VectorDeRegistros[8] = 0;
+}
+
+void PUSH(Memoria *memoria, OperandosYFlags op){
+}
+
+void POP(Memoria *memoria, OperandosYFlags op){
+}
+
+void CALL(Memoria *memoria, OperandosYFlags op){
+}
+
+void RET(Memoria *memoria, OperandosYFlags op){
 }
 
 void STOP(Memoria *memoria, OperandosYFlags op)
@@ -1590,6 +1631,9 @@ void iniciaVectorFunciones(VectorFunciones vecF)
     vecF[0x09]=&AND;
     vecF[0x0A]=&OR;
     vecF[0x0B]=&XOR;
+    vecF[0x0C]=&SLEN;
+    vecF[0x0D]=&SMOV;
+    vecF[0x0E]=&SCMP;
 
     vecF[0xF0]=&SYS;
     vecF[0xF1]=&JMP;
@@ -1603,7 +1647,11 @@ void iniciaVectorFunciones(VectorFunciones vecF)
     vecF[0xF9]=&LDH;
     vecF[0xFA]=&RND;
     vecF[0xFB]=&NOT;
+    vecF[0xFC]=&PUSH;
+    vecF[0xFD]=&POP;
+    vecF[0xFE]=&CALL;
 
+    vecF[0xFF0]=&RET;
     vecF[0xFF1]=&STOP;
 }
 
@@ -1611,12 +1659,27 @@ int verificoHeader(Header header)
 {
     int ret=0;
 
-    // MV-1: 0x4D562D31
+    // MV-2: 0x4D562D32
     // V.22: 0x562E3232
 
-    if ((header.bloque[0] == 0x4D562D31) && (header.bloque[5] == 0x562E3232))
+    if ((header.bloque[0] == 0x4D562D32) && (header.bloque[5] == 0x562E3232))
         ret = 1;
 
+    return ret;
+}
+
+int seteoSegmentos(Memoria *mem,Header header)
+{
+    int segSize = header.bloque[1] + header.bloque[2] + header.bloque[3] + header.bloque[4];
+    int ret = 0;
+
+    if (sizeof(*mem)>=segSize){
+        mem->VectorDeRegistros[3] = header.bloque[4] * 0x1000;                                                          //CS
+        mem->VectorDeRegistros[0] = header.bloque[1] * 0x1000 + header.bloque[4];                                       //DS
+        mem->VectorDeRegistros[2] = header.bloque[3] * 0x1000 + (header.bloque[4] + header.bloque[1]);                  //ES
+        mem->VectorDeRegistros[1] = (header.bloque[2] * 0x1000) + ( (mem->VectorDeRegistros[2]&0xFFFF) + header.bloque[3]);  //SS
+        ret = 1;
+    }
     return ret;
 }
 
@@ -1658,12 +1721,13 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
         if (op->operandoB[1] == 0)
         {
             //Inmediato
-            op->operandoB[0] = instruccion & 0xFFF;
             if ( (op->operandoB[0] & 0x800) != 0 )
             {
                 op->operandoB[0]<<=20;
                 op->operandoB[0]>>=20;
+
             }
+            op->operandoB[0] = instruccion & 0xFFF;
         }
         else if ( op->operandoB[1] == 1 )
         {
@@ -1797,4 +1861,10 @@ int cuentaChars(char cadena[], char caracter,int longitud)
 void inicializaRegistros(Memoria *mem){
     for (int i=0;i<16; i++)
         mem->VectorDeRegistros[i]=0;
+
+    mem->VectorDeRegistros[4] = 0x00020000;
+    mem->VectorDeRegistros[5] = 0x00030000;
+    mem->VectorDeRegistros[6] = 0x00010000 + ((mem->VectorDeRegistros[1] / 0x1000) & 0xFFFF);
+    mem->VectorDeRegistros[7] = 0x00010000;
+
 }
