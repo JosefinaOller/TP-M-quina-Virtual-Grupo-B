@@ -12,7 +12,7 @@ typedef struct{
     //operando[1]: Tipo de operando
     //operando[2]: Tipo de registro del operando
     //operando[3]: Valor del registro (0 a 15)
-    //operando[4]: Valor de X: [X] //[15] [EAX=201 + 5]
+    //operando[4]: Valor de X: [X] //
     //operando[5]: Offset del operando (caso indirecto)
     //flag[0]: -b
     //flag[1]: -c

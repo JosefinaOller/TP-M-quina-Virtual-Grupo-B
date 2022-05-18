@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     memoria.RAM[410] = 198;
     memoria.RAM[610] = 100;
 
-    int inst = 0x0C05A001;
+    int inst = 0x1C05A801;
 
     cod = decodificaCodigo(inst);
     decodificaOperandos(memoria,cod,inst,&op);

@@ -42,7 +42,6 @@ void MOV(Memoria *memoria, OperandosYFlags op)
         memoria->RAM[op.segmento.ds + op.operandoA[4]] = op.operandoB[0];
     }
     else if (op.operandoA[1] == 3){
-        printf("OP4: %d\n",op.operandoA[4]);
         if (op.segmento.actual == 0){ //DS
             memoria->RAM[op.segmento.ds + op.operandoA[4]] = op.operandoB[0];
         } else if (op.segmento.actual == 2){ //ES
@@ -109,9 +108,24 @@ void ADD(Memoria *memoria, OperandosYFlags op)
     else if (op.operandoA[1] == 2)
     {
         //Si el operando A es directo
-        aux = memoria->RAM[memoria->VectorDeRegistros[0] + op.operandoA[4]] + op.operandoB[0];
+        aux = memoria->RAM[op.segmento.ds + op.operandoA[4]] + op.operandoB[0];
         cc = aux;
-        memoria->RAM[memoria->VectorDeRegistros[0] + op.operandoA[4]] = aux;
+        memoria->RAM[op.segmento.ds + op.operandoA[4]] = aux;
+    } else if (op.operandoA[1] == 3)
+    {   //Indirecto
+        if (op.segmento.actual == 0){ //DS
+            aux =  memoria->RAM[op.segmento.ds + op.operandoA[4]] + op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.ds + op.operandoA[4]] = aux;
+        } else if (op.segmento.actual == 2){ //ES
+            aux =  memoria->RAM[op.segmento.es + op.operandoA[4]] + op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.es + op.operandoA[4]] = aux;
+        }  else if (op.segmento.actual == 1){ //SS
+            aux =  memoria->RAM[op.segmento.ss + op.operandoA[4]] + op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.ss + op.operandoA[4]] = aux;
+        }
     }
 
     if ( cc<0 )
@@ -1759,13 +1773,12 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
         if (op->operandoB[1] == 0)
         {
             //Inmediato
+            op->operandoB[0] = instruccion & 0xFFF;
             if ( (op->operandoB[0] & 0x800) != 0 )
             {
                 op->operandoB[0]<<=20;
                 op->operandoB[0]>>=20;
-
             }
-            op->operandoB[0] = instruccion & 0xFFF;
         }
         else if ( op->operandoB[1] == 1 )
         {
@@ -1776,16 +1789,37 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
             if (op->operandoB[2] == 0)
                 //Registro de 4 bytes
                 op->operandoB[0] = memoria.VectorDeRegistros[op->operandoB[3]];
-            else if (op->operandoB[2] == 1)
+            else if (op->operandoB[2] == 1){
+
                 //4to byte del registro
                 op->operandoB[0] = memoria.VectorDeRegistros[op->operandoB[3]] & 0xFF;
-            else if (op->operandoB[2] == 2)
+                if ( (op->operandoB[0] & 0x80) != 0 )
+                {
+                    op->operandoB[0]<<=24;
+                    op->operandoB[0]>>=24;
+                }
+            }
+            else if (op->operandoB[2] == 2){
+
                 //3er byte del registro
                 //En este caso particular, el operando B queda corrido hacia la derecha
                 op->operandoB[0] = (memoria.VectorDeRegistros[op->operandoB[3]] & 0xFF00) / 0x100;
-            else if (op->operandoB[2] == 3)
+                if ( (op->operandoB[0] & 0x80) != 0 )
+                {
+                    op->operandoB[0]<<=24;
+                    op->operandoB[0]>>=24;
+                }
+            }
+            else if (op->operandoB[2] == 3){
+
                 //Registro de 2 bytes
                 op->operandoB[0] = memoria.VectorDeRegistros[op->operandoB[3]] & 0xFFFF;
+                if ( (op->operandoB[0] & 0x8000) != 0 )
+                {
+                    op->operandoB[0]<<=16;
+                    op->operandoB[0]>>=16;
+                }
+            }
         }
         else if (op->operandoB[1] == 2) //Directo
         {
@@ -1843,9 +1877,15 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
 
         if (op->error!=1)
         {
-            if (op->operandoA[1] == 0)
+            if (op->operandoA[1] == 0){
                 //Inmediato
                 op->operandoA[0] = (instruccion & 0xFFF000) / 0x1000;
+                if ( (op->operandoA[0] & 0x800) != 0 )
+                {
+                    op->operandoA[0]<<=20;
+                    op->operandoA[0]>>=20;
+                }
+            }
             else if(op->operandoA[1] == 1)
             {
                 //Registro
@@ -1855,15 +1895,36 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
                 if (op->operandoA[2] == 0)
                     //Registro de 4 bytes
                     op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]];
-                else if(op->operandoA[2] == 1)
+                else if(op->operandoA[2] == 1){
+
                     //4to byte del registro
                     op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]] & 0xFF;
-                else if (op->operandoA[2] == 2)
+                    if ( (op->operandoA[0] & 0x80) != 0 )
+                    {
+                        op->operandoA[0]<<=24;
+                        op->operandoA[0]>>=24;
+                    }
+                }
+                else if (op->operandoA[2] == 2){
+
                     //3er byte del registro
                     op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]] & 0xFF00;
-                else if (op->operandoA[2] == 3)
+                    if ( (op->operandoA[0] & 0x80) != 0 )
+                    {
+                        op->operandoA[0]<<=24;
+                        op->operandoA[0]>>=24;
+                    }
+                }
+                else if (op->operandoA[2] == 3){
+
                     //Registro de 2 bytes
                     op->operandoA[0] = (memoria.VectorDeRegistros[op->operandoA[3]] & 0xFFFF);
+                    if ( (op->operandoA[0] & 0x8000) != 0 )
+                    {
+                        op->operandoA[0]<<=16;
+                        op->operandoA[0]>>=16;
+                    }
+                }
             }
             else if (op->operandoA[1] == 2)
             {
@@ -1929,6 +1990,12 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
         if (op->operandoA[1] == 0) //Inmediato
         {
             op->operandoA[0] = instruccion & 0xFFFF;
+
+            if ( (op->operandoA[0] & 0x8000) != 0 )
+            {
+                op->operandoA[0]<<=16;
+                op->operandoA[0]>>=16;
+            }
         }
         else if (op->operandoA[1] == 1)
         {
@@ -1939,16 +2006,36 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
             if (op->operandoA[2]  == 0)
                 //Registro de 4 bytes
                 op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]];
-            else if (op->operandoA[2] == 1)
+            else if (op->operandoA[2] == 1){
+
                 //4to byte del registro
                 op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]] & 0xFF;
-            else if (op->operandoA[2] == 2)
+                if ( (op->operandoA[0] & 0x80) != 0 )
+                {
+                    op->operandoA[0]<<=24;
+                    op->operandoA[0]>>=24;
+                }
+            }
+            else if (op->operandoA[2] == 2){
+
                 //3er byte del registro
                 ////En este caso particular, el operando A queda corrido hacia la derecha
                 op->operandoA[0] = (memoria.VectorDeRegistros[op->operandoA[3]] & 0xFF00) / 0x10;
-            else if (op->operandoA[2]  == 3)
+                if ( (op->operandoA[0] & 0x80) != 0 )
+                {
+                    op->operandoA[0]<<=24;
+                    op->operandoA[0]>>=24;
+                }
+            }
+            else if (op->operandoA[2]  == 3){
                 //Registro de 2 bytes
                 op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]] & 0xFFFF;
+                if ( (op->operandoA[0] & 0x8000) != 0 )
+                {
+                    op->operandoA[0]<<=16;
+                    op->operandoA[0]>>=16;
+                }
+            }
 
         }
         else if (op->operandoA[1] == 2)  //Directo
