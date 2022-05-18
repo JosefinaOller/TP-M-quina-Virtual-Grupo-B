@@ -31,7 +31,12 @@ int main(int argc, char *argv[])
     memoria.VectorDeRegistros[2] = 0x00C80190;//ES
     memoria.VectorDeRegistros[1] = 0x00C80258;//SS
 
-    memoria.VectorDeRegistros[10] = 0x0001000C9;
+    op.segmento.ds = memoria.VectorDeRegistros[0]&0xFFFF;
+    op.segmento.es = memoria.VectorDeRegistros[2]&0xFFFF;
+    op.segmento.ss = memoria.VectorDeRegistros[1]&0xFFFF;
+    op.segmento.finSS = (memoria.VectorDeRegistros[1]&0xFFFF) + (memoria.VectorDeRegistros[1]/0x10000);
+
+    memoria.VectorDeRegistros[10] = 0x00000005;
 
     memoria.RAM[201] = 150;
     memoria.RAM[202] = 100;
@@ -39,13 +44,14 @@ int main(int argc, char *argv[])
     memoria.RAM[410] = 198;
     memoria.RAM[610] = 100;
 
-    int inst = 0x0F05A05A;
+    int inst = 0x0C05A001;
 
     cod = decodificaCodigo(inst);
     decodificaOperandos(memoria,cod,inst,&op);
-    printf("Cod: %X\n",cod);
-    printf("OPb[0]: %d | OPa[0]: %d\n",op.operandoB[0],op.operandoA[0]);
-    //vecF[cod](&memoria,op);
+    //printf("Cod: %X\n",cod);
+    //printf("OPb[0]: %d | OPa[0]: %d\n",op.operandoB[0],op.operandoA[0]);
+    vecF[cod](&memoria,op);
+    printf("ADD? : %d\n",memoria.RAM[210]);
 
     //-----------------------------------------
     /*
@@ -72,7 +78,7 @@ int main(int argc, char *argv[])
 
     if (verificoHeader(header))
     {
-        if (seteoSegmentos(&memoria,header)){
+        if (seteoSegmentos(&memoria,header,&op)){
             inicializaRegistros(&memoria);
 
             fread(&memoria,sizeof(size),1,arch);

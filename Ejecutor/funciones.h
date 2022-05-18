@@ -1,16 +1,29 @@
 typedef struct{
+    int actual;
+    int cs;
+    int ds;
+    int es;
+    int ss;
+    int finSS;
+} Segmento;
+
+typedef struct{
     //operando[0]: Valor del operando
     //operando[1]: Tipo de operando
     //operando[2]: Tipo de registro del operando
     //operando[3]: Valor del registro (0 a 15)
-    //operando[4]: Valor de X: [X]
+    //operando[4]: Valor de X: [X] //[15] [EAX=201 + 5]
+    //operando[5]: Offset del operando (caso indirecto)
     //flag[0]: -b
     //flag[1]: -c
     //flag[2]: -d
-    int operandoA[5];
-    int operandoB[5];
+    //error: Error en la ejecución
+    //Segmento: Posiciones iniciales de segmentos y segmento actual
+    int operandoA[6];
+    int operandoB[6];
     int flags[3];
     int error;
+    Segmento segmento;
 } OperandosYFlags;
 
 typedef void (*VectorFunciones[4096])(Memoria*,OperandosYFlags);
@@ -52,18 +65,15 @@ void STOP(Memoria *, OperandosYFlags);
 
 //-------------------------
 
-void inicializaRegistros(Memoria*);
+int decodificaCodigo(int);
+int verificoHeader(Header);
+int seteoSegmentos(Memoria*,Header,OperandosYFlags*);
+int cuentaChars(char cadena[], char caracter,int longitud);
+
 void imprimeMnemonico(int);
 void stringRegistro(int[],char[]);
+void inicializaRegistros(Memoria*);
 void imprimeEstadoRegistros(int[]);
-void imprimeOperandos(OperandosYFlags,int,int);
-void disassembler(Memoria,OperandosYFlags);
-void inicializaFlags(OperandosYFlags*,int,char*[]);
-void iniciaVectorFunciones(VectorFunciones);
-int verificoHeader(Header);
-int seteoSegmentos(Memoria*,Header);
-int decodificaCodigo(int);
-void decodificaOperandos(Memoria,int,int, OperandosYFlags*);
 void SYS1(Memoria *, OperandosYFlags);
 void SYS2(Memoria *, OperandosYFlags);
 void SYS3(Memoria *, OperandosYFlags);
@@ -71,5 +81,9 @@ void SYS4(Memoria *, OperandosYFlags);
 void SYS7(Memoria *, OperandosYFlags);
 void SYSD(Memoria *, OperandosYFlags);
 void SYSF(Memoria *, OperandosYFlags);
+void disassembler(Memoria,OperandosYFlags);
+void iniciaVectorFunciones(VectorFunciones);
+void imprimeOperandos(OperandosYFlags,int,int);
+void inicializaFlags(OperandosYFlags*,int,char*[]);
+void decodificaOperandos(Memoria,int,int, OperandosYFlags*);
 void QuitaCaracter(char cadena[],char caracter,int longitud);
-int cuentaChars(char cadena[], char caracter,int longitud);
