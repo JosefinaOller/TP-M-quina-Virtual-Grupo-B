@@ -13,6 +13,47 @@ int main(int argc, char *argv[])
     OperandosYFlags op;
     int ip, cod;
 
+    for(int i=0; i<3; i++)
+        op.flags[i]=1;
+    op.error=0;
+
+    if (op.flags[1] == 1)
+        system("cls");
+
+    srand (getpid());   //Cambia la semilla en cada ejecución del programa para la instrucción random
+
+    iniciaVectorFunciones(vecF);
+
+    inicializaRegistros(&memoria);
+
+    memoria.VectorDeRegistros[3] = 0x00C80000;//CS
+    memoria.VectorDeRegistros[0] = 0x00C800C8;//DS
+    memoria.VectorDeRegistros[2] = 0x00C80190;//ES
+    memoria.VectorDeRegistros[1] = 0x00C80258;//SS
+
+    memoria.VectorDeRegistros[10] = 0x0001000C9;
+
+    memoria.RAM[201] = 150;
+    memoria.RAM[202] = 100;
+    memoria.RAM[210] = 999;
+    memoria.RAM[410] = 198;
+    memoria.RAM[610] = 100;
+
+    int inst = 0x0F05A05A;
+
+    cod = decodificaCodigo(inst);
+    decodificaOperandos(memoria,cod,inst,&op);
+    printf("Cod: %X\n",cod);
+    printf("OPb[0]: %d | OPa[0]: %d\n",op.operandoB[0],op.operandoA[0]);
+    //vecF[cod](&memoria,op);
+
+    //-----------------------------------------
+    /*
+    Memoria memoria;
+    Header header;
+    VectorFunciones vecF;
+    OperandosYFlags op;
+    int ip, cod;
 
     inicializaFlags(&op,argc,argv);
 
@@ -39,13 +80,13 @@ int main(int argc, char *argv[])
 
 
             if (op.flags[2] == 1){
-            cod = decodificaCodigo(0xF000000F);
-            decodificaOperandos(memoria,cod,0xF000000F,&op);
-            vecF[cod](&memoria,op);
+                cod = decodificaCodigo(0xF000000F);
+                decodificaOperandos(memoria,cod,0xF000000F,&op);
+                vecF[cod](&memoria,op);
             }
 
             //Ejecución del programa
-            while( (0 <= memoria.VectorDeRegistros[5]) && (memoria.VectorDeRegistros[5]<memoria.VectorDeRegistros[0]) ){
+            while( (0 <= memoria.VectorDeRegistros[5]) && (memoria.VectorDeRegistros[5]<memoria.VectorDeRegistros[0]) && op.error==0){
                 ip = memoria.VectorDeRegistros[5]++;
                 cod = decodificaCodigo(memoria.RAM[ip]);
                 decodificaOperandos(memoria,cod,memoria.RAM[ip],&op);
@@ -61,6 +102,7 @@ int main(int argc, char *argv[])
         printf("El formato del archivo recibido no pertenece a la MV-2 V.22 (x.mv2).");
         fclose(arch);
     }
+*/
     return 0;
 }
 

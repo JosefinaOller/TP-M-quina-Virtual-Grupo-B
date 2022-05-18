@@ -10,6 +10,7 @@ typedef struct{
     int operandoA[5];
     int operandoB[5];
     int flags[3];
+    int error;
 } OperandosYFlags;
 
 typedef void (*VectorFunciones[4096])(Memoria*,OperandosYFlags);

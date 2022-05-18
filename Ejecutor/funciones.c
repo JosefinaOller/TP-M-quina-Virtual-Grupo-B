@@ -841,13 +841,16 @@ void XOR(Memoria *memoria, OperandosYFlags op)
 
 }
 
-void SLEN(Memoria *memoria, OperandosYFlags op){
+void SLEN(Memoria *memoria, OperandosYFlags op)
+{
 }
 
-void SMOV(Memoria *memoria, OperandosYFlags op){
+void SMOV(Memoria *memoria, OperandosYFlags op)
+{
 }
 
-void SCMP(Memoria *memoria, OperandosYFlags op){
+void SCMP(Memoria *memoria, OperandosYFlags op)
+{
 }
 
 void SYS(Memoria *memoria, OperandosYFlags op)
@@ -862,20 +865,28 @@ void SYS(Memoria *memoria, OperandosYFlags op)
     FuncionesSYS[5]=&SYS7;
     FuncionesSYS[6]=&SYSD;
 
-    switch (op.operandoA[0]){
-        case 0x1: FuncionesSYS[0](memoria,op);
+    switch (op.operandoA[0])
+    {
+    case 0x1:
+        FuncionesSYS[0](memoria,op);
         break;
-        case 0x2: FuncionesSYS[1](memoria,op);
+    case 0x2:
+        FuncionesSYS[1](memoria,op);
         break;
-        case 0x3: FuncionesSYS[3](memoria,op);
+    case 0x3:
+        FuncionesSYS[3](memoria,op);
         break;
-        case 0x4: FuncionesSYS[4](memoria,op);
+    case 0x4:
+        FuncionesSYS[4](memoria,op);
         break;
-        case 0x7: FuncionesSYS[5](memoria,op);
+    case 0x7:
+        FuncionesSYS[5](memoria,op);
         break;
-        case 0xD: FuncionesSYS[6](memoria,op);
+    case 0xD:
+        FuncionesSYS[6](memoria,op);
         break;
-        case 0xF: FuncionesSYS[2](memoria,op);
+    case 0xF:
+        FuncionesSYS[2](memoria,op);
         break;
     }
 }
@@ -987,16 +998,20 @@ void SYS2(Memoria *memoria, OperandosYFlags op)
     printf("\n");
 }
 
-void SYS3(Memoria *memoria, OperandosYFlags op){
+void SYS3(Memoria *memoria, OperandosYFlags op)
+{
 }
 
-void SYS4(Memoria *memoria, OperandosYFlags op){
+void SYS4(Memoria *memoria, OperandosYFlags op)
+{
 }
 
-void SYS7(Memoria *memoria, OperandosYFlags op){
+void SYS7(Memoria *memoria, OperandosYFlags op)
+{
 }
 
-void SYSD(Memoria *memoria, OperandosYFlags op){
+void SYSD(Memoria *memoria, OperandosYFlags op)
+{
 }
 
 void SYSF(Memoria *memoria, OperandosYFlags op)
@@ -1213,16 +1228,20 @@ void NOT(Memoria *memoria, OperandosYFlags op)
         memoria->VectorDeRegistros[8] = 0;
 }
 
-void PUSH(Memoria *memoria, OperandosYFlags op){
+void PUSH(Memoria *memoria, OperandosYFlags op)
+{
 }
 
-void POP(Memoria *memoria, OperandosYFlags op){
+void POP(Memoria *memoria, OperandosYFlags op)
+{
 }
 
-void CALL(Memoria *memoria, OperandosYFlags op){
+void CALL(Memoria *memoria, OperandosYFlags op)
+{
 }
 
-void RET(Memoria *memoria, OperandosYFlags op){
+void RET(Memoria *memoria, OperandosYFlags op)
+{
 }
 
 void STOP(Memoria *memoria, OperandosYFlags op)
@@ -1603,7 +1622,7 @@ void disassembler(Memoria memoria, OperandosYFlags op)
 void inicializaFlags(OperandosYFlags *op,int argc,char *argv[])
 {
 
-    for(int i=0; i<4; i++)
+    for(int i=0; i<3; i++)
         op->flags[i]=0;
 
     for(int i=2; i<argc; i++)
@@ -1615,6 +1634,7 @@ void inicializaFlags(OperandosYFlags *op,int argc,char *argv[])
         else if(!strcmp(argv[i],"-d"))
             op->flags[2]=1;
     }
+    op->error = 0;
 }
 
 void iniciaVectorFunciones(VectorFunciones vecF)
@@ -1673,7 +1693,8 @@ int seteoSegmentos(Memoria *mem,Header header)
     int segSize = header.bloque[1] + header.bloque[2] + header.bloque[3] + header.bloque[4];
     int ret = 0;
 
-    if (sizeof(*mem)>=segSize){
+    if (sizeof(*mem)>=segSize)
+    {
         mem->VectorDeRegistros[3] = header.bloque[4] * 0x1000;                                                          //CS
         mem->VectorDeRegistros[0] = header.bloque[1] * 0x1000 + header.bloque[4];                                       //DS
         mem->VectorDeRegistros[2] = header.bloque[3] * 0x1000 + (header.bloque[4] + header.bloque[1]);                  //ES
@@ -1751,41 +1772,135 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
         }
         else if (op->operandoB[1] == 2) //Directo
         {
-            op->operandoB[0] = memoria.RAM[ (instruccion & 0xFFF) + memoria.VectorDeRegistros[0]];
-            op->operandoB[4] = (instruccion & 0xFFF);
+            op->operandoB[4] = (instruccion & 0xFFF) ;
+
+            if ((op->operandoB[4]+(memoria.VectorDeRegistros[0]&0xFFFF))>=(memoria.VectorDeRegistros[2]&0xFFFF))
+            {
+                op->error = 1;
+                printf("Segmentation Fault\n");
+            }
+            else
+                op->operandoB[0] = memoria.RAM[op->operandoB[4] + (memoria.VectorDeRegistros[0]&0xFFFF)];
+
+        }
+        else if (op->operandoB[1] == 3)
+        {
+            //Indirecto
+
+            int ds = memoria.VectorDeRegistros[0]&0xFFFF;
+            int es = memoria.VectorDeRegistros[2]&0xFFFF;
+            int ss = memoria.VectorDeRegistros[1]&0xFFFF;
+            int finSS = (memoria.VectorDeRegistros[1]&0xFFFF) + (memoria.VectorDeRegistros[1]/0x10000);
+
+            //Registro
+            op->operandoB[2] = 0;   //4 bytes
+            op->operandoB[3] = instruccion & 0xF; //REG
+            op->operandoB[4] = (memoria.VectorDeRegistros[op->operandoB[3]] & 0xFFFF) + ((instruccion & 0xFF0) / 0x10); // [REG+OFFSET]
+
+            //Segmento
+            int segmento = (memoria.VectorDeRegistros[op->operandoB[3]] / 0x10000) & 0xF;
+
+            if (segmento == 0)  //DS
+            {
+                if ((op->operandoB[4] + ds <= ds) || (op->operandoB[4] + ds >= es))
+                    op->error = 1;
+            }
+            else if (segmento == 1)    //SS
+            {
+                if ((op->operandoB[4] + ss <= ss) || (op->operandoB[4] + ss >= finSS))
+                    op->error = 1;
+            }
+            else if (segmento == 2)    //ES
+            {
+                if ((op->operandoB[4] + es <= es) || (op->operandoB[4] + es >= ss))
+                    op->error = 1;
+            }
+
+            if (op->error==1)
+                printf("Segmentation Fault\n");
+            else
+                op->operandoB[0] = memoria.RAM[(memoria.VectorDeRegistros[segmento]&0xFFFF) + op->operandoB[4]];
         }
 
         //--------------------------------------------------------------------------------------------
         //Operando A
 
-        if (op->operandoA[1] == 0)
-            //Inmediato
-            op->operandoA[0] = (instruccion & 0xFFF000) / 0x1000;
-        else if(op->operandoA[1] == 1)
+        if (op->error!=1)
         {
-            //Registro
-            op->operandoA[3] = (instruccion & 0xF000) / 0x1000;
-            op->operandoA[2] = (instruccion & 0x30000) / 0x10000;
+            if (op->operandoA[1] == 0)
+                //Inmediato
+                op->operandoA[0] = (instruccion & 0xFFF000) / 0x1000;
+            else if(op->operandoA[1] == 1)
+            {
+                //Registro
+                op->operandoA[3] = (instruccion & 0xF000) / 0x1000;
+                op->operandoA[2] = (instruccion & 0x30000) / 0x10000;
 
-            if (op->operandoA[2] == 0)
-                //Registro de 4 bytes
-                op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]];
-            else if(op->operandoA[2] == 1)
-                //4to byte del registro
-                op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]] & 0xFF;
-            else if (op->operandoA[2] == 2)
-                //3er byte del registro
-                op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]] & 0xFF00;
-            else if (op->operandoA[2] == 3)
-                //Registro de 2 bytes
-                op->operandoA[0] = (memoria.VectorDeRegistros[op->operandoA[3]] & 0xFFFF);
-        }
-        else if (op->operandoA[1] == 2)
-        {
+                if (op->operandoA[2] == 0)
+                    //Registro de 4 bytes
+                    op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]];
+                else if(op->operandoA[2] == 1)
+                    //4to byte del registro
+                    op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]] & 0xFF;
+                else if (op->operandoA[2] == 2)
+                    //3er byte del registro
+                    op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]] & 0xFF00;
+                else if (op->operandoA[2] == 3)
+                    //Registro de 2 bytes
+                    op->operandoA[0] = (memoria.VectorDeRegistros[op->operandoA[3]] & 0xFFFF);
+            }
+            else if (op->operandoA[1] == 2)
+            {
+                // Tipo de operando A: directo
+                op->operandoA[4] = (instruccion & 0xFFF000) / 0x1000 ;
 
-            // Tipo de operando A: directo
-            op->operandoA[0] = memoria.RAM[((instruccion & 0xFFF000) / 0x1000)+ memoria.VectorDeRegistros[0]];
-            op->operandoA[4] = (instruccion & 0xFFF000) / 0x1000;
+                if ((op->operandoA[4]+(memoria.VectorDeRegistros[0]&0xFFFF))>=(memoria.VectorDeRegistros[2]&0xFFFF))
+                {
+                    op->error = 1;
+                    printf("Segmentation Fault\n");
+                }
+                else
+                    op->operandoA[0] = memoria.RAM[op->operandoA[4] + (memoria.VectorDeRegistros[0]&0xFFFF)];
+            }
+            else if (op->operandoA[1] == 3)
+            {
+                //Indirecto
+
+                int ds = memoria.VectorDeRegistros[0]&0xFFFF;
+                int es = memoria.VectorDeRegistros[2]&0xFFFF;
+                int ss = memoria.VectorDeRegistros[1]&0xFFFF;
+                int finSS = (memoria.VectorDeRegistros[1]&0xFFFF) + (memoria.VectorDeRegistros[1]/0x10000);
+
+                //Registro
+                op->operandoA[2] = 0;   //4 bytes
+                op->operandoA[3] = (instruccion & 0xF000) / 0x1000; //REG
+                op->operandoA[4] = (memoria.VectorDeRegistros[op->operandoA[3]] & 0xFFFF) + ((instruccion & 0xFF0000) / 0x10000); // [REG+OFFSET]
+
+                //Segmento
+                int segmento = (memoria.VectorDeRegistros[op->operandoA[3]] / 0x10000) & 0xF;
+                printf("Segmento: %d\n",segmento);
+
+                if (segmento == 0)  //DS
+                {
+                    if ((op->operandoA[4] + ds <= ds) || (op->operandoA[4] + ds >= es))
+                        op->error = 1;
+                }
+                else if (segmento == 1)    //SS
+                {
+                    if ((op->operandoA[4] + ss <= ss) || (op->operandoA[4] + ss >= finSS))
+                        op->error = 1;
+                }
+                else if (segmento == 2)    //ES
+                {
+                    if ((op->operandoA[4] + es <= es) || (op->operandoA[4] + es >= ss))
+                        op->error = 1;
+                }
+
+                if (op->error==1)
+                    printf("Segmentation Fault\n");
+                else
+                    op->operandoA[0] = memoria.RAM[(memoria.VectorDeRegistros[segmento]&0xFFFF) + op->operandoA[4]];
+            }
         }
     }
     else if (codigo < 0xFF)
@@ -1824,8 +1939,54 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
         }
         else if (op->operandoA[1] == 2)  //Directo
         {
-            op->operandoA[0] = memoria.RAM[(instruccion & 0xFFFF) + memoria.VectorDeRegistros[0]];
             op->operandoA[4] = (instruccion & 0xFFFF);
+
+            if ((op->operandoA[4]+(memoria.VectorDeRegistros[0]&0xFFFF))>=(memoria.VectorDeRegistros[2]&0xFFFF))
+            {
+                op->error = 1;
+                printf("Segmentation Fault\n");
+            }
+            else
+                op->operandoA[0] = memoria.RAM[op->operandoA[4] + (memoria.VectorDeRegistros[0]&0xFFFF)];
+
+        }
+        else if (op->operandoA[1] == 3)
+        {
+            //Indirecto
+
+            int ds = memoria.VectorDeRegistros[0]&0xFFFF;
+            int es = memoria.VectorDeRegistros[2]&0xFFFF;
+            int ss = memoria.VectorDeRegistros[1]&0xFFFF;
+            int finSS = (memoria.VectorDeRegistros[1]&0xFFFF) + (memoria.VectorDeRegistros[1]/0x10000);
+
+            //Registro
+            op->operandoA[2] = 0;   //4 bytes
+            op->operandoA[3] = instruccion & 0xF; //REG
+            op->operandoA[4] = (memoria.VectorDeRegistros[op->operandoA[3]] & 0xFFFF) + ((instruccion & 0xFF0) / 0x10); // [REG+OFFSET]
+
+            //Segmento
+            int segmento = (memoria.VectorDeRegistros[op->operandoA[3]] / 0x10000) & 0xF;
+
+            if (segmento == 0)  //DS
+            {
+                if ((op->operandoA[4] + ds <= ds) || (op->operandoA[4] + ds >= es))
+                    op->error = 1;
+            }
+            else if (segmento == 1)    //SS
+            {
+                if ((op->operandoA[4] + ss <= ss) || (op->operandoA[4] + ss >= finSS))
+                    op->error = 1;
+            }
+            else if (segmento == 2)    //ES
+            {
+                if ((op->operandoA[4] + es <= es) || (op->operandoA[4] + es >= ss))
+                    op->error = 1;
+            }
+
+            if (op->error==1)
+                printf("Segmentation Fault\n");
+            else
+                op->operandoA[0] = memoria.RAM[(memoria.VectorDeRegistros[segmento]&0xFFFF) + op->operandoA[4]];
         }
     }
 }
@@ -1858,8 +2019,9 @@ int cuentaChars(char cadena[], char caracter,int longitud)
     return cont;
 }
 
-void inicializaRegistros(Memoria *mem){
-    for (int i=0;i<16; i++)
+void inicializaRegistros(Memoria *mem)
+{
+    for (int i=0; i<16; i++)
         mem->VectorDeRegistros[i]=0;
 
     mem->VectorDeRegistros[4] = 0x00020000;
