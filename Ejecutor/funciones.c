@@ -41,12 +41,18 @@ void MOV(Memoria *memoria, OperandosYFlags op)
         //Si el operando A es directo
         memoria->RAM[op.segmento.ds + op.operandoA[4]] = op.operandoB[0];
     }
-    else if (op.operandoA[1] == 3){
-        if (op.segmento.actual == 0){ //DS
+    else if (op.operandoA[1] == 3)
+    {
+        if (op.segmento.actual == 0)  //DS
+        {
             memoria->RAM[op.segmento.ds + op.operandoA[4]] = op.operandoB[0];
-        } else if (op.segmento.actual == 2){ //ES
+        }
+        else if (op.segmento.actual == 2)    //ES
+        {
             memoria->RAM[op.segmento.es + op.operandoA[4]] = op.operandoB[0];
-        }  else if (op.segmento.actual == 1){ //SS
+        }
+        else if (op.segmento.actual == 1)     //SS
+        {
             memoria->RAM[op.segmento.ss + op.operandoA[4]] = op.operandoB[0];
         }
 
@@ -111,17 +117,24 @@ void ADD(Memoria *memoria, OperandosYFlags op)
         aux = memoria->RAM[op.segmento.ds + op.operandoA[4]] + op.operandoB[0];
         cc = aux;
         memoria->RAM[op.segmento.ds + op.operandoA[4]] = aux;
-    } else if (op.operandoA[1] == 3)
-    {   //Indirecto
-        if (op.segmento.actual == 0){ //DS
+    }
+    else if (op.operandoA[1] == 3)
+    {
+        //Indirecto
+        if (op.segmento.actual == 0)  //DS
+        {
             aux =  memoria->RAM[op.segmento.ds + op.operandoA[4]] + op.operandoB[0];
             cc = aux;
             memoria->RAM[op.segmento.ds + op.operandoA[4]] = aux;
-        } else if (op.segmento.actual == 2){ //ES
+        }
+        else if (op.segmento.actual == 2)    //ES
+        {
             aux =  memoria->RAM[op.segmento.es + op.operandoA[4]] + op.operandoB[0];
             cc = aux;
             memoria->RAM[op.segmento.es + op.operandoA[4]] = aux;
-        }  else if (op.segmento.actual == 1){ //SS
+        }
+        else if (op.segmento.actual == 1)     //SS
+        {
             aux =  memoria->RAM[op.segmento.ss + op.operandoA[4]] + op.operandoB[0];
             cc = aux;
             memoria->RAM[op.segmento.ss + op.operandoA[4]] = aux;
@@ -186,14 +199,35 @@ void SUB(Memoria *memoria, OperandosYFlags op)
             }
             memoria->VectorDeRegistros[op.operandoA[3]] = (memoria->VectorDeRegistros[op.operandoA[3]] & 0xFFFF0000) + aux;
         }
-
     }
     else if (op.operandoA[1] == 2)
     {
         //Si el operando A es directo
-        aux = memoria->RAM[memoria->VectorDeRegistros[0] + op.operandoA[4]] - op.operandoB[0];
+        aux = memoria->RAM[op.segmento.ds + op.operandoA[4]] - op.operandoB[0];
         cc = aux;
-        memoria->RAM[memoria->VectorDeRegistros[0] + op.operandoA[4]] = aux;
+        memoria->RAM[op.segmento.ds + op.operandoA[4]] = aux;
+    }
+    else if (op.operandoA[1] == 3)
+    {
+        //Indirecto
+        if (op.segmento.actual == 0)  //DS
+        {
+            aux =  memoria->RAM[op.segmento.ds + op.operandoA[4]] - op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.ds + op.operandoA[4]] = aux;
+        }
+        else if (op.segmento.actual == 2)    //ES
+        {
+            aux =  memoria->RAM[op.segmento.es + op.operandoA[4]] - op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.es + op.operandoA[4]] = aux;
+        }
+        else if (op.segmento.actual == 1)     //SS
+        {
+            aux =  memoria->RAM[op.segmento.ss + op.operandoA[4]] - op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.ss + op.operandoA[4]] = aux;
+        }
     }
 
     if ( cc<0 )
@@ -377,11 +411,34 @@ void MUL(Memoria *memoria, OperandosYFlags op)
     else if (op.operandoA[1] == 2)
     {
         //Si el operando A es directo
-        aux = memoria->RAM[memoria->VectorDeRegistros[0] + op.operandoA[4]] * op.operandoB[0];
+        aux = memoria->RAM[op.segmento.ds + op.operandoA[4]] * op.operandoB[0];
         cc = aux;
-        memoria->RAM[memoria->VectorDeRegistros[0] + op.operandoA[4]] = aux;
+        memoria->RAM[op.segmento.ds + op.operandoA[4]] = aux;
 
     }
+    else if (op.operandoA[1] == 3)
+    {
+        //Indirecto
+        if (op.segmento.actual == 0)  //DS
+        {
+            aux =  memoria->RAM[op.segmento.ds + op.operandoA[4]] * op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.ds + op.operandoA[4]] = aux;
+        }
+        else if (op.segmento.actual == 2)    //ES
+        {
+            aux =  memoria->RAM[op.segmento.es + op.operandoA[4]] * op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.es + op.operandoA[4]] = aux;
+        }
+        else if (op.segmento.actual == 1)     //SS
+        {
+            aux =  memoria->RAM[op.segmento.ss + op.operandoA[4]] * op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.ss + op.operandoA[4]] = aux;
+        }
+    }
+
     if ( cc<0 )
         memoria->VectorDeRegistros[8] = 0x80000000;
     else if ( cc==0 )
@@ -451,12 +508,43 @@ void DIV(Memoria *memoria, OperandosYFlags op)
         {
             //Si el operando A es directo
 
-            valorInicial = memoria->RAM[memoria->VectorDeRegistros[0] + op.operandoA[4]];
-            aux = memoria->RAM[memoria->VectorDeRegistros[0] + op.operandoA[4]] / op.operandoB[0];
+            valorInicial = memoria->RAM[op.segmento.ds + op.operandoA[4]];
+            aux = memoria->RAM[op.segmento.ds + op.operandoA[4]] / op.operandoB[0];
             cc = aux;
             memoria->RAM[memoria->VectorDeRegistros[0] + op.operandoA[4]] = aux;
             memoria->VectorDeRegistros[9] = valorInicial % op.operandoB[0];
         }
+        else if (op.operandoA[1] == 3)
+        {
+            //Indirecto
+            if (op.segmento.actual == 0)  //DS
+            {
+                valorInicial = memoria->RAM[op.segmento.ds + op.operandoA[4]];
+
+                aux = memoria->RAM[op.segmento.ds + op.operandoA[4]] / op.operandoB[0];
+                cc = aux;
+                memoria->RAM[op.segmento.ds + op.operandoA[4]] = aux;
+            }
+            else if (op.segmento.actual == 2)    //ES
+            {
+                valorInicial = memoria->RAM[op.segmento.es + op.operandoA[4]];
+
+                aux = memoria->RAM[op.segmento.es + op.operandoA[4]] / op.operandoB[0];
+                cc = aux;
+                memoria->RAM[op.segmento.es + op.operandoA[4]] = aux;
+            }
+            else if (op.segmento.actual == 1)     //SS
+            {
+                valorInicial = memoria->RAM[op.segmento.es + op.operandoA[4]];
+
+                aux = memoria->RAM[op.segmento.es + op.operandoA[4]] / op.operandoB[0];
+                cc = aux;
+                memoria->RAM[op.segmento.es + op.operandoA[4]] = aux;
+            }
+
+            memoria->VectorDeRegistros[9] = valorInicial % op.operandoB[0];
+        }
+
         if ( cc<0 )
             memoria->VectorDeRegistros[8] = 0x80000000;
         else if ( cc==0 )
@@ -503,12 +591,28 @@ void CMP(Memoria *memoria, OperandosYFlags op)
     else if (op.operandoA[1] == 2)
     {
         //Si el operando A es directo
-        aux = memoria->RAM[memoria->VectorDeRegistros[0] + op.operandoA[4]] - op.operandoB[0];
+        aux = memoria->RAM[op.segmento.ds + op.operandoA[4]] - op.operandoB[0];
     }
     else if (op.operandoA[1] == 0)
     {
         //Si el operando A es inmediato
         aux = op.operandoA[0] - op.operandoB[0];
+    }
+    else if (op.operandoA[1] == 3)
+    {
+        //Indirecto
+        if (op.segmento.actual == 0)  //DS
+        {
+            aux = memoria->RAM[op.segmento.ds + op.operandoA[4]] - op.operandoB[0];
+        }
+        else if (op.segmento.actual == 2)    //ES
+        {
+            aux = memoria->RAM[op.segmento.es + op.operandoA[4]] - op.operandoB[0];
+        }
+        else if (op.segmento.actual == 1)     //SS
+        {
+            aux = memoria->RAM[op.segmento.ss + op.operandoA[4]] - op.operandoB[0];
+        }
     }
 
     if (aux == 0)
@@ -574,11 +678,34 @@ void SHL(Memoria *memoria, OperandosYFlags op)
     else if (op.operandoA[1] == 2)
     {
         //Si el operando A es directo
-        aux = memoria->RAM[memoria->VectorDeRegistros[0] + op.operandoA[4]] << op.operandoB[0];
+        aux = memoria->RAM[op.segmento.ds + op.operandoA[4]] << op.operandoB[0];
         cc = aux;
-        memoria->RAM[memoria->VectorDeRegistros[0] + op.operandoA[4]] = aux;
-
+        memoria->RAM[op.segmento.ds + op.operandoA[4]] = aux;
     }
+    else if (op.operandoA[1] == 3)
+    {
+        //Indirecto
+        if (op.segmento.actual == 0)  //DS
+        {
+            aux =  memoria->RAM[op.segmento.ds + op.operandoA[4]] << op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.ds + op.operandoA[4]] = aux;
+        }
+        else if (op.segmento.actual == 2)    //ES
+        {
+            aux =  memoria->RAM[op.segmento.es + op.operandoA[4]] << op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.es + op.operandoA[4]] = aux;
+        }
+        else if (op.segmento.actual == 1)     //SS
+        {
+            aux =  memoria->RAM[op.segmento.ss + op.operandoA[4]] << op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.ss + op.operandoA[4]] = aux;
+        }
+    }
+
+
     if (cc == 0)
         memoria->VectorDeRegistros[8] = 0x1;
     else if (cc < 0)
@@ -644,11 +771,34 @@ void SHR(Memoria *memoria, OperandosYFlags op)
     else if (op.operandoA[1] == 2)
     {
         //Si el operando A es directo
-        aux = memoria->RAM[memoria->VectorDeRegistros[0] + op.operandoA[4]] >> op.operandoB[0];
+        aux = memoria->RAM[op.segmento.ds + op.operandoA[4]] >> op.operandoB[0];
         cc = aux;
-        memoria->RAM[memoria->VectorDeRegistros[0] + op.operandoA[4]] = aux;
+        memoria->RAM[op.segmento.ds + op.operandoA[4]] = aux;
 
     }
+    else if (op.operandoA[1] == 3)
+    {
+        //Indirecto
+        if (op.segmento.actual == 0)  //DS
+        {
+            aux =  memoria->RAM[op.segmento.ds + op.operandoA[4]] >> op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.ds + op.operandoA[4]] = aux;
+        }
+        else if (op.segmento.actual == 2)    //ES
+        {
+            aux =  memoria->RAM[op.segmento.es + op.operandoA[4]] >> op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.es + op.operandoA[4]] = aux;
+        }
+        else if (op.segmento.actual == 1)     //SS
+        {
+            aux =  memoria->RAM[op.segmento.ss + op.operandoA[4]] >> op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.ss + op.operandoA[4]] = aux;
+        }
+    }
+
     if (cc == 0)
         memoria->VectorDeRegistros[8] = 0x1;
     else if (cc < 0)
@@ -715,9 +865,32 @@ void AND(Memoria *memoria, OperandosYFlags op)
         //Directo
         aux = op.operandoA[0] & op.operandoB[0];
         cc = aux;
-        memoria->RAM[op.operandoA[4] + memoria->VectorDeRegistros[0]] = aux;
+        memoria->RAM[op.operandoA[4] + op.segmento.ds] = aux;
 
     }
+    else if (op.operandoA[1] == 3)
+    {
+        //Indirecto
+        if (op.segmento.actual == 0)  //DS
+        {
+            aux =  op.operandoA[0] & op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.ds + op.operandoA[4]] = aux;
+        }
+        else if (op.segmento.actual == 2)    //ES
+        {
+            aux =  op.operandoA[0] & op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.es + op.operandoA[4]] = aux;
+        }
+        else if (op.segmento.actual == 1)     //SS
+        {
+            aux = op.operandoA[0] & op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.ss + op.operandoA[4]] = aux;
+        }
+    }
+
     if (cc == 0)
         memoria->VectorDeRegistros[8] = 0x1;
     else if(cc < 0)
@@ -784,9 +957,32 @@ void OR(Memoria *memoria, OperandosYFlags op)
         //Directo
         aux = op.operandoA[0] | op.operandoB[0];
         cc = aux;
-        memoria->RAM[op.operandoA[4] + memoria->VectorDeRegistros[0]] = aux;
+        memoria->RAM[op.operandoA[4] + op.segmento.ds] = aux;
 
     }
+    else if (op.operandoA[1] == 3)
+    {
+        //Indirecto
+        if (op.segmento.actual == 0)  //DS
+        {
+            aux =  op.operandoA[0] | op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.ds + op.operandoA[4]] = aux;
+        }
+        else if (op.segmento.actual == 2)    //ES
+        {
+            aux =  op.operandoA[0] | op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.es + op.operandoA[4]] = aux;
+        }
+        else if (op.segmento.actual == 1)     //SS
+        {
+            aux = op.operandoA[0] | op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.ss + op.operandoA[4]] = aux;
+        }
+    }
+
     if (cc == 0)
         memoria->VectorDeRegistros[8] = 0x1;
     else if(cc < 0)
@@ -853,9 +1049,32 @@ void XOR(Memoria *memoria, OperandosYFlags op)
         //Directo
         aux = op.operandoA[0] ^ op.operandoB[0];
         cc = aux;
-        memoria->RAM[op.operandoA[4] + memoria->VectorDeRegistros[0]] = aux;
+        memoria->RAM[op.operandoA[4] + op.segmento.ds] = aux;
 
     }
+    else if (op.operandoA[1] == 3)
+    {
+        //Indirecto
+        if (op.segmento.actual == 0)  //DS
+        {
+            aux =  op.operandoA[0] ^ op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.ds + op.operandoA[4]] = aux;
+        }
+        else if (op.segmento.actual == 2)    //ES
+        {
+            aux =  op.operandoA[0] ^ op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.es + op.operandoA[4]] = aux;
+        }
+        else if (op.segmento.actual == 1)     //SS
+        {
+            aux = op.operandoA[0] ^ op.operandoB[0];
+            cc = aux;
+            memoria->RAM[op.segmento.ss + op.operandoA[4]] = aux;
+        }
+    }
+
     if (cc == 0)
         memoria->VectorDeRegistros[8] = 0x1;
     else if(cc < 0)
@@ -1037,6 +1256,7 @@ void SYS7(Memoria *memoria, OperandosYFlags op)
 
 void SYSD(Memoria *memoria, OperandosYFlags op)
 {
+    //DISCOOOOO TE ODIOOOO
 }
 
 void SYSF(Memoria *memoria, OperandosYFlags op)
@@ -1121,48 +1341,48 @@ void SYSF(Memoria *memoria, OperandosYFlags op)
 
 void JMP(Memoria *memoria, OperandosYFlags op)
 {
-    if (op.operandoA[0] < memoria->VectorDeRegistros[0])
+    if (op.operandoA[0] < op.segmento.ds)
         memoria->VectorDeRegistros[5] = op.operandoA[0];
 }
 
 void JZ(Memoria *memoria, OperandosYFlags op)
 {
-    if (op.operandoA[0] < memoria->VectorDeRegistros[0])
+    if (op.operandoA[0] < op.segmento.ds)
         if (memoria->VectorDeRegistros[8] == 0x1)
             memoria->VectorDeRegistros[5] = op.operandoA[0];
 }
 
 void JP(Memoria *memoria, OperandosYFlags op)
 {
-    if (op.operandoA[0] < memoria->VectorDeRegistros[0])
+    if (op.operandoA[0] < op.segmento.ds)
         if (memoria->VectorDeRegistros[8] == 0)
             memoria->VectorDeRegistros[5] = op.operandoA[0];
 }
 
 void JN(Memoria *memoria, OperandosYFlags op)
 {
-    if (op.operandoA[0] < memoria->VectorDeRegistros[0])
+    if (op.operandoA[0] < op.segmento.ds)
         if (memoria->VectorDeRegistros[8] == 0x80000000)
             memoria->VectorDeRegistros[5] = op.operandoA[0];
 }
 
 void JNZ(Memoria *memoria, OperandosYFlags op)
 {
-    if (op.operandoA[0] < memoria->VectorDeRegistros[0])
+    if (op.operandoA[0] < op.segmento.ds)
         if (memoria->VectorDeRegistros[8]!= 0x1)
             memoria->VectorDeRegistros[5] = op.operandoA[0];
 }
 
 void JNP(Memoria *memoria, OperandosYFlags op)
 {
-    if (op.operandoA[0] < memoria->VectorDeRegistros[0])
+    if (op.operandoA[0] < op.segmento.ds)
         if (memoria->VectorDeRegistros[8] != 0)
             memoria->VectorDeRegistros[5] = op.operandoA[0];
 }
 
 void JNN(Memoria *memoria, OperandosYFlags op)
 {
-    if (op.operandoA[0] < memoria->VectorDeRegistros[0])
+    if (op.operandoA[0] < op.segmento.ds)
         if (memoria->VectorDeRegistros[8] != 0x80000000)
             memoria->VectorDeRegistros[5] = op.operandoA[0];
 }
@@ -1179,9 +1399,6 @@ void LDH(Memoria *memoria, OperandosYFlags op)
 
 void RND(Memoria *memoria, OperandosYFlags op)
 {
-    //La descripción de la instrucción en la hoja está mal
-    //RND debe almacenar en AC un valor aleatorio entre 0 y el valor del operando
-
     memoria->VectorDeRegistros[9] = rand() % (op.operandoA[0]+1);
 }
 
@@ -1241,9 +1458,27 @@ void NOT(Memoria *memoria, OperandosYFlags op)
     else if (op.operandoA[1] == 2)
     {
         //Directo
-        memoria->RAM[op.operandoA[4] + memoria->VectorDeRegistros[0]] = aux;
+        memoria->RAM[op.operandoA[4] + op.segmento.ds] = aux;
         cc = aux;
     }
+    else if (op.operandoA[1] == 3)
+    {
+        //Indirecto
+        if (op.segmento.actual == 0)  //DS
+        {
+            memoria->RAM[op.segmento.ds + op.operandoA[4]] = aux;
+        }
+        else if (op.segmento.actual == 2)    //ES
+        {
+            memoria->RAM[op.segmento.es + op.operandoA[4]] = aux;
+        }
+        else if (op.segmento.actual == 1)     //SS
+        {
+            memoria->RAM[op.segmento.ss + op.operandoA[4]] = aux;
+        }
+        cc = aux;
+    }
+
 
     if (cc == 0)
         memoria->VectorDeRegistros[8] = 0x1;
@@ -1789,7 +2024,8 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
             if (op->operandoB[2] == 0)
                 //Registro de 4 bytes
                 op->operandoB[0] = memoria.VectorDeRegistros[op->operandoB[3]];
-            else if (op->operandoB[2] == 1){
+            else if (op->operandoB[2] == 1)
+            {
 
                 //4to byte del registro
                 op->operandoB[0] = memoria.VectorDeRegistros[op->operandoB[3]] & 0xFF;
@@ -1799,7 +2035,8 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
                     op->operandoB[0]>>=24;
                 }
             }
-            else if (op->operandoB[2] == 2){
+            else if (op->operandoB[2] == 2)
+            {
 
                 //3er byte del registro
                 //En este caso particular, el operando B queda corrido hacia la derecha
@@ -1810,7 +2047,8 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
                     op->operandoB[0]>>=24;
                 }
             }
-            else if (op->operandoB[2] == 3){
+            else if (op->operandoB[2] == 3)
+            {
 
                 //Registro de 2 bytes
                 op->operandoB[0] = memoria.VectorDeRegistros[op->operandoB[3]] & 0xFFFF;
@@ -1877,7 +2115,8 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
 
         if (op->error!=1)
         {
-            if (op->operandoA[1] == 0){
+            if (op->operandoA[1] == 0)
+            {
                 //Inmediato
                 op->operandoA[0] = (instruccion & 0xFFF000) / 0x1000;
                 if ( (op->operandoA[0] & 0x800) != 0 )
@@ -1895,7 +2134,8 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
                 if (op->operandoA[2] == 0)
                     //Registro de 4 bytes
                     op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]];
-                else if(op->operandoA[2] == 1){
+                else if(op->operandoA[2] == 1)
+                {
 
                     //4to byte del registro
                     op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]] & 0xFF;
@@ -1905,7 +2145,8 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
                         op->operandoA[0]>>=24;
                     }
                 }
-                else if (op->operandoA[2] == 2){
+                else if (op->operandoA[2] == 2)
+                {
 
                     //3er byte del registro
                     op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]] & 0xFF00;
@@ -1915,7 +2156,8 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
                         op->operandoA[0]>>=24;
                     }
                 }
-                else if (op->operandoA[2] == 3){
+                else if (op->operandoA[2] == 3)
+                {
 
                     //Registro de 2 bytes
                     op->operandoA[0] = (memoria.VectorDeRegistros[op->operandoA[3]] & 0xFFFF);
@@ -2006,7 +2248,8 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
             if (op->operandoA[2]  == 0)
                 //Registro de 4 bytes
                 op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]];
-            else if (op->operandoA[2] == 1){
+            else if (op->operandoA[2] == 1)
+            {
 
                 //4to byte del registro
                 op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]] & 0xFF;
@@ -2016,7 +2259,8 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
                     op->operandoA[0]>>=24;
                 }
             }
-            else if (op->operandoA[2] == 2){
+            else if (op->operandoA[2] == 2)
+            {
 
                 //3er byte del registro
                 ////En este caso particular, el operando A queda corrido hacia la derecha
@@ -2027,7 +2271,8 @@ void decodificaOperandos(Memoria memoria, int codigo, int instruccion, Operandos
                     op->operandoA[0]>>=24;
                 }
             }
-            else if (op->operandoA[2]  == 3){
+            else if (op->operandoA[2]  == 3)
+            {
                 //Registro de 2 bytes
                 op->operandoA[0] = memoria.VectorDeRegistros[op->operandoA[3]] & 0xFFFF;
                 if ( (op->operandoA[0] & 0x8000) != 0 )
@@ -2128,5 +2373,4 @@ void inicializaRegistros(Memoria *mem)
     mem->VectorDeRegistros[5] = 0x00030000;
     mem->VectorDeRegistros[6] = 0x00010000 + ((mem->VectorDeRegistros[1] / 0x1000) & 0xFFFF);
     mem->VectorDeRegistros[7] = 0x00010000;
-
 }
