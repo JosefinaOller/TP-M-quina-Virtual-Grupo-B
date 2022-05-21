@@ -24,12 +24,13 @@ int main(int argc, char *argv[])
 
     iniciaVectorFunciones(vecF);
 
-    inicializaRegistros(&memoria);
+    inicializaRegistros(&memoria,op);
 
     memoria.VectorDeRegistros[3] = 0x00C80000;//CS
     memoria.VectorDeRegistros[0] = 0x00C800C8;//DS
     memoria.VectorDeRegistros[2] = 0x00C80190;//ES
     memoria.VectorDeRegistros[1] = 0x00C80258;//SS
+    memoria.VectorDeRegistros[6] = 0x00010000 + ((op.segmento.finSS+1) & 0xFFFF); //SP
 
     op.segmento.ds = memoria.VectorDeRegistros[0]&0xFFFF;
     op.segmento.es = memoria.VectorDeRegistros[2]&0xFFFF;
@@ -79,7 +80,7 @@ int main(int argc, char *argv[])
     if (verificoHeader(header))
     {
         if (seteoSegmentos(&memoria,header,&op)){
-            inicializaRegistros(&memoria);
+            inicializaRegistros(&memoria,op);
 
             fread(&memoria,sizeof(size),1,arch);
             fclose(arch);

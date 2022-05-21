@@ -1,5 +1,6 @@
 typedef struct{
-    int actual;
+    int actualA;
+    int actualB;
     int cs;
     int ds;
     int es;
@@ -72,7 +73,6 @@ int cuentaChars(char cadena[], char caracter,int longitud);
 
 void imprimeMnemonico(int);
 void stringRegistro(int[],char[]);
-void inicializaRegistros(Memoria*);
 void imprimeEstadoRegistros(int[]);
 void SYS1(Memoria *, OperandosYFlags);
 void SYS2(Memoria *, OperandosYFlags);
@@ -84,6 +84,7 @@ void SYSF(Memoria *, OperandosYFlags);
 void disassembler(Memoria,OperandosYFlags);
 void iniciaVectorFunciones(VectorFunciones);
 void imprimeOperandos(OperandosYFlags,int,int);
+void inicializaRegistros(Memoria*,OperandosYFlags);
 void inicializaFlags(OperandosYFlags*,int,char*[]);
 void decodificaOperandos(Memoria,int,int, OperandosYFlags*);
 void QuitaCaracter(char cadena[],char caracter,int longitud);
