@@ -18,3 +18,6 @@ typedef struct{
     char etiqueta[16];
     int codigo;
 } Label;
+
+void cargaMnemonico(char[],int ,int , Mnemonico *);
+void cargaLinea(char [],char [],char [], char [], char [], Linea *);
