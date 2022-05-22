@@ -9,6 +9,26 @@ typedef struct{
 } Segmento;
 
 typedef struct{
+    int idTipo;
+    int version;
+    long long int GUID1;
+    long long int GUID2;
+    int fechaCreacion;
+    int horaCreacion;
+    char tipo;
+    unsigned char cantCilindros;
+    unsigned char cantCabezas;
+    unsigned char cantSectores;
+    unsigned int tamSector;
+    int relleno[118];
+} DiskHead;
+
+typedef struct{
+    int cant;
+    FILE *arch[255];
+} Disco;
+
+typedef struct{
     //operando[0]: Valor del operando
     //operando[1]: Tipo de operando
     //operando[2]: Tipo de registro del operando
@@ -25,6 +45,7 @@ typedef struct{
     int flags[3];
     int error;
     Segmento segmento;
+    Disco discos;
 } OperandosYFlags;
 
 typedef void (*VectorFunciones[4096])(Memoria*,OperandosYFlags);
@@ -83,8 +104,9 @@ void SYSD(Memoria *, OperandosYFlags);
 void SYSF(Memoria *, OperandosYFlags);
 void disassembler(Memoria,OperandosYFlags);
 void iniciaVectorFunciones(VectorFunciones);
+void inicializaDisco(int, OperandosYFlags *);
 void imprimeOperandos(OperandosYFlags,int,int);
 void inicializaRegistros(Memoria*,OperandosYFlags);
-void inicializaFlags(OperandosYFlags*,int,char*[]);
+void inicializaFlagsYDiscos(OperandosYFlags*,int,char*[]);
 void decodificaOperandos(Memoria,int,int, OperandosYFlags*);
 void QuitaCaracter(char cadena[],char caracter,int longitud);

@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     OperandosYFlags op;
     int ip, cod;
 
-    inicializaFlags(&op,argc,argv);
+    inicializaFlagsYDiscos(&op,argc,argv);
 
     if (op.flags[1] == 1)
         system("cls");

@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "memoria.h"
 #include "funciones.h"
+
 
 
 void MOV(Memoria *memoria, OperandosYFlags op)
@@ -1250,19 +1252,23 @@ void SYS1(Memoria *memoria, OperandosYFlags op)
     int aux;
 
     aux = memoria->VectorDeRegistros[13] / 0x10000;
-    if (aux == 0){
+    if (aux == 0)
+    {
         seg = op.segmento.ds;
         finSeg = op.segmento.es;
     }
-    else if (aux == 1){
+    else if (aux == 1)
+    {
         seg = op.segmento.ss;
         finSeg = op.segmento.finSS;
     }
-    else if (aux == 2){
+    else if (aux == 2)
+    {
         seg = op.segmento.es;
         finSeg = op.segmento.ss;
     }
-    else if (aux == 3){
+    else if (aux == 3)
+    {
         seg = op.segmento.cs;
         finSeg = op.segmento.ds;
     }
@@ -1284,14 +1290,19 @@ void SYS1(Memoria *memoria, OperandosYFlags op)
         while ((i<finSeg) && (j<strlen(sAux)) && (i <= (i + cx)))
         {
             memoria->RAM[i] = sAux[j];
-            i++; j++;
+            i++;
+            j++;
         }
-        if (i>=finSeg){
+        if (i>=finSeg)
+        {
             op.error=1;
             printf("Segmentation Fault");
-        } else if (j == strlen(sAux)){
+        }
+        else if (j == strlen(sAux))
+        {
             memoria->RAM[i] = 0;
-        } else
+        }
+        else
             memoria->RAM[i-1] = 0;
 
     }
@@ -1299,18 +1310,24 @@ void SYS1(Memoria *memoria, OperandosYFlags op)
     {
         tipoDato = (ax & 0xF);
 
-        while ((i<finSeg) && (i < (i + cx))){
+        while ((i<finSeg) && (i < (i + cx)))
+        {
             if (prompt == 0)
                 printf("[%04d]: ", i);
             scanf("%s",num);
-            if (tipoDato == 0x1){
+            if (tipoDato == 0x1)
+            {
                 QuitaCaracter(num,'\'',strlen(num));
                 QuitaCaracter(num,'#',strlen(num));
                 memoria->RAM[i] = atoi(num);
-            } else if (tipoDato == 0x4){
+            }
+            else if (tipoDato == 0x4)
+            {
                 QuitaCaracter(num,'@',strlen(num));
                 sscanf(num,"%o",&(memoria->RAM[i]));
-            } else if (tipoDato == 0x8){
+            }
+            else if (tipoDato == 0x8)
+            {
                 QuitaCaracter(num,'%',strlen(num));
                 sscanf(num,"%X",&(memoria->RAM[i]));
             }
@@ -1343,7 +1360,8 @@ void SYS2(Memoria *memoria, OperandosYFlags op)
 
     i = edx + seg;
 
-    while (i<i+cx){
+    while (i<i+cx)
+    {
         if (prompt == 0)
             printf("[%04d]: ",i);
         if ( (tipoDato & 0x10) == 0x10)
@@ -1384,19 +1402,23 @@ void SYS3(Memoria *memoria, OperandosYFlags op)
 
     //Veo segmento de memoria donde se almacena el string
     aux = memoria->VectorDeRegistros[13] / 0x10000;
-    if (aux == 0){
+    if (aux == 0)
+    {
         seg = op.segmento.ds;
         finSeg = op.segmento.es;
     }
-    else if (aux == 1){
+    else if (aux == 1)
+    {
         seg = op.segmento.ss;
         finSeg = op.segmento.finSS;
     }
-    else if (aux == 2){
+    else if (aux == 2)
+    {
         seg = op.segmento.es;
         finSeg = op.segmento.ss;
     }
-    else if (aux == 3){
+    else if (aux == 3)
+    {
         seg = op.segmento.cs;
         finSeg = op.segmento.ds;
     }
@@ -1410,17 +1432,23 @@ void SYS3(Memoria *memoria, OperandosYFlags op)
     strcpy(cad,fgets(cad,cx,stdin));
     cadLength = strlen(cad);
 
-    while ( (i<finSeg) && (i<(edx + seg + cx)) && (j<cadLength) ){
+    while ( (i<finSeg) && (i<(edx + seg + cx)) && (j<cadLength) )
+    {
         memoria->RAM[i] = cad[j];
-        i++; j++;
+        i++;
+        j++;
     }
 
-    if (i>=finSeg){
+    if (i>=finSeg)
+    {
         op.error=1;
         printf("Segmentation Fault");
-    } else if (j>=cadLength){
+    }
+    else if (j>=cadLength)
+    {
         memoria->RAM[i-1] = 0;
-    } else
+    }
+    else
         memoria->RAM[i] = 0;
 }
 
@@ -1773,11 +1801,14 @@ void POP(Memoria *memoria, OperandosYFlags op)
 void CALL(Memoria *memoria, OperandosYFlags op)
 {
     int aux = --memoria->VectorDeRegistros[6];
-    if (aux >= op.segmento.ss){
+    if (aux >= op.segmento.ss)
+    {
         memoria->RAM[(memoria->VectorDeRegistros[6])] = memoria->VectorDeRegistros[5];
         if (op.operandoA[0] < op.segmento.ds)
             memoria->VectorDeRegistros[5] = op.operandoA[0];
-    } else{
+    }
+    else
+    {
         op.error=1;
         printf("Stack Overflow");
     }
@@ -1791,7 +1822,9 @@ void RET(Memoria *memoria, OperandosYFlags op)
     {
         op.error=1;
         printf("Stack Underflow");
-    } else{
+    }
+    else
+    {
         aux = memoria->RAM[(memoria->VectorDeRegistros[6])++];
         if (aux < op.segmento.ds)
             memoria->VectorDeRegistros[5] = aux;
@@ -2173,8 +2206,71 @@ void disassembler(Memoria memoria, OperandosYFlags op)
     imprimeEstadoRegistros(memoria.VectorDeRegistros);
 }
 
-void inicializaFlags(OperandosYFlags *op,int argc,char *argv[])
+void inicializaDisco(int nro, OperandosYFlags *op)
 {
+    char nombreDisco[20];
+    char aux[20];
+    FILE *arch;
+    DiskHead header;
+    int r1, r2;
+    time_t hora;
+    struct tm *t;
+    char strHora[80];
+
+    itoa(nro,aux,10);
+    strcpy(nombreDisco,"disco");
+    strcat(nombreDisco,aux);
+    strcat(nombreDisco,".vdd");
+
+    arch = fopen(nombreDisco,"r+");
+    if (arch!=NULL)
+        op->discos.arch[nro] = arch;
+    else
+    {
+        op->discos.arch[nro] = fopen(nombreDisco,"w+");
+        if (op->discos.arch[nro]!=NULL)
+        {
+            header.idTipo = 0x56444430;
+
+            header.version = 1;
+
+            r1 = rand() % RAND_MAX;
+            r2 = rand() % RAND_MAX;
+            header.GUID1 = (r1*0x10000) + r2;
+            r1 = rand() % RAND_MAX;
+            r2 = rand() % RAND_MAX;
+            header.GUID2 = (r1*0x10000) + r2;
+
+            hora = time(0);
+            t = localtime(&hora);
+            strftime(strHora, sizeof(strHora), "%Y%m%d%H%M%S", t);
+            header.fechaCreacion = (strHora[0]&0xF)<<28 | (strHora[1]&0xF)<<24 |
+                (strHora[2]&0xF)<<20 | (strHora[3]&0xF)<<16 | (strHora[4]&0xF)<<12 |
+                (strHora[5]&0xF)<<8 | (strHora[6]&0xF)<<4 | (strHora[7]&0xF);
+            header.horaCreacion = (strHora[8]&0xF)<<28 | (strHora[9]&0xF)<<24 |
+                (strHora[10]&0xF)<<20 | (strHora[11]&0xF)<<16 | (strHora[12]&0xF)<<12 |
+                (strHora[13]&0xF)<<8 | (strHora[14]&0xF)<<4 | (strHora[15]&0xF);
+
+            header.tipo = 1;
+            header.cantCilindros = 128;
+            header.cantCabezas = 128;
+            header.cantSectores = 128;
+            header.tamSector = 512;
+
+            for (int i=0; i<118; i++)
+                header.relleno[i]=0;
+
+            fwrite(&header,sizeof(DiskHead),1,op->discos.arch[nro]);
+        }
+    }
+}
+
+void inicializaFlagsYDiscos(OperandosYFlags *op,int argc,char *argv[])
+{
+    op->discos.cant=0;
+
+    for (int i=0; i<255; i++)
+        op->discos.arch[i] = NULL;
 
     for(int i=0; i<3; i++)
         op->flags[i]=0;
@@ -2187,6 +2283,8 @@ void inicializaFlags(OperandosYFlags *op,int argc,char *argv[])
             op->flags[1]=1;
         else if(!strcmp(argv[i],"-d"))
             op->flags[2]=1;
+        else if( strstr(argv[i],"vdd") != NULL)
+            inicializaDisco((op->discos.cant)++,op);
     }
     op->error = 0;
 }
