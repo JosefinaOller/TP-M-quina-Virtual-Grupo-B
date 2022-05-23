@@ -6,9 +6,9 @@
 #include "parser.h"
 void cargaVecMnem(Mnemonico[]);
 void traduce(char[], Mnemonico[], int, char[]);
-void estructuraASM(char[], Linea[], int*, char[][100], int*, int[]);
+void estructuraASM(char[], Linea[], int*, char[][100], int*, int[], int*, int*, int*);
 void procesarLinea(char[], char[], char[], char[], char[], char[]);
-void lecturaLabels(char*, Label[], int*, int*);
+void lecturaLabels(char*, Label[], int*, int*, char[], int*);
 int busquedaLabel(Label[], char[], int, int*);
 int codificaInstruccion(Linea, Mnemonico[], Label[], int, int*, int*, int*);
 int tipoOperando(char[]);
@@ -200,6 +200,60 @@ void lecturaLabels(char *archivo,Label rotulos[],int *cantRotulos,int *error){
             if(strcmp(mnem,"")!=0)
                 nrolinea++;
            }
+<<<<<<< Updated upstream
+=======
+        }
+    /*}
+
+    else{
+        printf("Error de archivo\n");
+        *error=1;
+    }
+    fclose(arch);*/
+    while(fgets(linea,500,arch)!=NULL){ //vuelvo a leer para las constantes
+
+           char **parsed = parseline(linea);
+           strcpy(constante,parsed[7] ? parsed[7] : ""); //Constante
+           strcpy(const_valor,parsed[8] ? parsed[8] : ""); //Valor del constante
+           freeline(parsed);
+
+           if(strcmp(constante,"")!=0){ //Hay constante,no se cuenta como linea, decimal,octal,hexadecimal
+                strcpy(rotulos[*cantRotulos].etiqueta,constante); //tengo que analizar si hay uno duplicado
+                switch(constante_valor[0]){
+                    case '#':
+                        sscanf(constante_valor+1,"%d",&(rotulos[*cantRotulos].codigo));
+                        break;
+                    case '@':
+                        sscanf(constante_valor+1,"%o",&(rotulos[*cantRotulos].codigo));
+                        break;
+                    case '%':
+                        sscanf(constante_valor+1,"%x",&(rotulos[*cantRotulos].codigo));
+                        break;
+                    case '0' ... '9':
+                        rotulos[*cantRotulos].codigo=atoi(constante_valor);
+                        break;
+                    case '-': //VER
+                        rotulos[*cantRotulos].codigo=atoi(constante_valor);
+                        break;
+                    case '\'': //VER
+                        sscanf(constante_valor+1,"%d",&(rotulos[*cantRotulos].codigo));
+                        break;
+                    case '"': //Tratamiento especial
+                        int i=1;
+                        while(constante_valor[i]!='"'){
+                            rotulos[*cantRotulos].codigo=(*nroLinea);
+                            strings[i-1]=constante_valor[i];
+                            (*nroLinea)++;
+                            i++;
+                        }
+                        strings[i-1]='\0';
+                        (*nroLinea);
+                        break;
+                }
+                (*cantRotulos)++;
+           }
+
+>>>>>>> Stashed changes
 
         }
     }
@@ -208,7 +262,13 @@ void lecturaLabels(char *archivo,Label rotulos[],int *cantRotulos,int *error){
         *error=1;
     }
     fclose(arch);
+<<<<<<< Updated upstream
 }
+=======
+
+ }
+
+>>>>>>> Stashed changes
 int busquedaLabel(Label rotulos[],char etiqueta[],int cantRotulos,int *error){ //Para buscar la posicion del rotulo
     int i=0;
     while(i<cantRotulos && strcmp(etiqueta,rotulos[i].etiqueta)!=0)
@@ -355,14 +415,26 @@ int anyToInt(char *s, char **out){
     return strtol(s, out, base);
 }
 int AEntero(char vop[]){
-    //Registros = {"DS","","","","","IP","","","CC","AC","A","B","C","D","E","F"};
+    //Registros = {"DS","SS","ES","CS","HP","IP","SP","BP","CC","AC","A","B","C","D","E","F"};
     int valor;
     for (int i = 0; i < strlen(vop); i++)
         vop[i] = toupper(vop[i]);
     if (strcmp(vop, "DS")==0)
         valor = 0x0;
+    else if (strcmp(vop, "SS")==0)
+        valor = 0x1;
+    else if (strcmp(vop, "ES")==0)
+        valor = 0x2;
+    else if (strcmp(vop, "CS")==0)
+        valor = 0x3;
+    else if (strcmp(vop, "HP")==0)
+        valor = 0x4;
     else if (strcmp(vop, "IP")==0)
-        valor = 0x5;
+        valor = 0x5 | (0x3 << 4);
+    else if (strcmp(vop, "SP")==0)
+        valor = 0x6 | (0x3 << 4);
+    else if (strcmp(vop, "BP")==0)
+        valor = 0x7 | (0x3 << 4);
     else if (strcmp(vop, "CC")==0)
         valor = 0x8;
     else if (strcmp(vop, "AC")==0)
