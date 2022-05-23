@@ -251,61 +251,108 @@ void SWAP(Memoria *memoria, OperandosYFlags op)
             if (op.operandoA[2] == 0)
             {
                 //Si el operando A es de 4 bytes
-                aux = op.operandoA[0];
                 memoria->VectorDeRegistros[op.operandoA[3]] = op.operandoB[0];
-                if (op.operandoB[2] == 2)
+
+                if (op.operandoB[2] == 0) //4 bytes
+                    memoria->VectorDeRegistros[op.operandoB[3]] = op.operandoA[0];
+                else if (op.operandoB[2] == 1) //4to byte
+                {
+                    memoria->VectorDeRegistros[op.operandoB[3]]&= 0xFFFFFF00;
+                    memoria->VectorDeRegistros[op.operandoB[3]]+= op.operandoA[0] & 0xFF;
+                }
+                else if (op.operandoB[2] == 2) //3er byte
                 {
                     memoria->VectorDeRegistros[op.operandoB[3]]&= 0xFFFF00FF;
-                    memoria->VectorDeRegistros[op.operandoB[3]]+= ((aux * 0x100) & 0xFF00);
+                    memoria->VectorDeRegistros[op.operandoB[3]]+= ((op.operandoA[0] * 0x100) & 0xFF00);
                 }
-                else
-                    memoria->VectorDeRegistros[op.operandoB[3]] = aux;
+                else if (op.operandoB[2] == 3) //Ultimos 2 bytes
+                {
+                    memoria->VectorDeRegistros[op.operandoB[3]]&= 0xFFFF0000;
+                    memoria->VectorDeRegistros[op.operandoB[3]]+= op.operandoA[0] & 0xFFFF;
+                }
             }
             else if (op.operandoA[2] == 1)
             {
                 //Si utilizamos el 4to byte del operando A
-                aux = (op.operandoA[0] & 0xFF);
+                aux = op.operandoA[0] & 0xFF;
                 memoria->VectorDeRegistros[op.operandoA[3]] = (memoria->VectorDeRegistros[op.operandoA[3]] & 0xFFFFFF00) + (op.operandoB[0] & 0xFF);
-                if (op.operandoB[2] == 2)
+
+                if (op.operandoB[2] == 0) //4 bytes
+                    memoria->VectorDeRegistros[op.operandoB[3]] = aux;
+                else if (op.operandoB[2] == 1) //4to byte
+                {
+                    memoria->VectorDeRegistros[op.operandoB[3]]&= 0xFFFFFF00;
+                    memoria->VectorDeRegistros[op.operandoB[3]]+= aux;
+                }
+                else if (op.operandoB[2] == 2) //3er byte
                 {
                     memoria->VectorDeRegistros[op.operandoB[3]]&= 0xFFFF00FF;
                     memoria->VectorDeRegistros[op.operandoB[3]]+= ((aux * 0x100) & 0xFF00);
                 }
-                else
-                    memoria->VectorDeRegistros[op.operandoB[3]] = (memoria->VectorDeRegistros[op.operandoB[3]] & 0xFFFFFF00) + aux;
+                else if (op.operandoB[2] == 3) //Ultimos 2 bytes
+                {
+                    memoria->VectorDeRegistros[op.operandoB[3]]&= 0xFFFF0000;
+                    memoria->VectorDeRegistros[op.operandoB[3]]+= op.operandoA[0] & 0xFFFF;
+                }
             }
             else if (op.operandoA[2] == 2)
             {
                 //Si utilizamos el 3er byte del operando A
-                aux = (op.operandoA[0] & 0xFF00);
+                aux = op.operandoA[0] & 0xFF00;
                 memoria->VectorDeRegistros[op.operandoA[3]] = (memoria->VectorDeRegistros[op.operandoA[3]] & 0xFFFF00FF) + ((op.operandoB[0] * 0x100 ) & 0xFF00);
-                if (op.operandoB[2] == 2)
+
+                if (op.operandoB[2] == 0) //4 bytes
+                    memoria->VectorDeRegistros[op.operandoB[3]] = aux / 0x100;
+                else if (op.operandoB[2] == 1) //4to byte
+                {
+                    memoria->VectorDeRegistros[op.operandoB[3]]&= 0xFFFFFF00;
+                    memoria->VectorDeRegistros[op.operandoB[3]]+= (aux / 0x100);
+                }
+                else if (op.operandoB[2] == 2) //3er byte
                 {
                     memoria->VectorDeRegistros[op.operandoB[3]]&= 0xFFFF00FF;
-                    memoria->VectorDeRegistros[op.operandoB[3]]+= aux;
+                    memoria->VectorDeRegistros[op.operandoB[3]]+= (aux & 0xFF00);
                 }
-                else
-                    memoria->VectorDeRegistros[op.operandoB[3]] = (aux / 0x100);
+                else if (op.operandoB[2] == 3) //Ultimos 2 bytes
+                {
+                    memoria->VectorDeRegistros[op.operandoB[3]]&= 0xFFFF0000;
+                    memoria->VectorDeRegistros[op.operandoB[3]]+= (aux / 0x100) & 0xFFFF;
+                }
             }
             else if (op.operandoA[2] == 3)
             {
                 //Si utilizamos los 2 ultimos bytes del operando A
-                aux = (op.operandoA[0] & 0xFFFF);
+                aux = op.operandoA[0] & 0xFFFF;
                 memoria->VectorDeRegistros[op.operandoA[3]] = (memoria->VectorDeRegistros[op.operandoA[3]] & 0xFFFF0000) + (op.operandoB[0] & 0xFFFF);
-                if (op.operandoB[2] == 2)
+
+                if (op.operandoB[2] == 0) //4 bytes
+                    memoria->VectorDeRegistros[op.operandoB[3]] = aux;
+                else if (op.operandoB[2] == 1) //4to byte
+                {
+                    memoria->VectorDeRegistros[op.operandoB[3]]&= 0xFFFFFF00;
+                    memoria->VectorDeRegistros[op.operandoB[3]]+= (aux & 0xFF);
+                }
+                else if (op.operandoB[2] == 2) //3er byte
                 {
                     memoria->VectorDeRegistros[op.operandoB[3]]&= 0xFFFF00FF;
-                    memoria->VectorDeRegistros[op.operandoB[3]]+= ((aux * 0x100) & 0xFF00);
+                    memoria->VectorDeRegistros[op.operandoB[3]]+= ((aux&0xFF) * 0x100);
                 }
-                else
-                    memoria->VectorDeRegistros[op.operandoB[3]] = (memoria->VectorDeRegistros[op.operandoB[3]] & 0xFFFF0000) + aux;
+                else if (op.operandoB[2] == 3) //Ultimos 2 bytes
+                {
+                    memoria->VectorDeRegistros[op.operandoB[3]]&= 0xFFFF0000;
+                    memoria->VectorDeRegistros[op.operandoB[3]]+= aux;
+                }
             }
         }
         else if ((op.operandoA[1] == 2) && (op.operandoB[1] == 2)) //Ambos son de tipo Directo
         {
-            aux = memoria->RAM[op.operandoA[4] + memoria->VectorDeRegistros[0]];
-            memoria->RAM[op.operandoA[4] + memoria->VectorDeRegistros[0]] = memoria->RAM[op.operandoB[4] + memoria->VectorDeRegistros[0]];
-            memoria->RAM[op.operandoB[4] + memoria->VectorDeRegistros[0]] = aux;
+            memoria->RAM[op.operandoA[4] + op.segmento.ds] = op.operandoB[0];
+            memoria->RAM[op.operandoB[4] + op.segmento.ds] = op.operandoA[0];
+        }
+        else if ((op.operandoA[1] == 3) && (op.operandoB[1] == 3)) //Ambos son de tipo indirecto
+        {
+            memoria->RAM[op.operandoA[4] + op.segmento.actualA] = op.operandoB[0];
+            memoria->RAM[op.operandoB[4] + op.segmento.actualB] = op.operandoA[0];
         }
         else if ((op.operandoA[1] == 1) && (op.operandoB[1] == 2)) //A tipo de registro y B tipo directo
         {
@@ -313,47 +360,120 @@ void SWAP(Memoria *memoria, OperandosYFlags op)
             if (op.operandoA[2] == 0)
             {
                 //Si el operando A es de 4 bytes
-                aux = op.operandoA[0];
-                memoria->VectorDeRegistros[op.operandoA[3]] = memoria->RAM[op.operandoB[4]+memoria->VectorDeRegistros[0]];
-                memoria->RAM[op.operandoB[4] + memoria->VectorDeRegistros[0]] = aux;
+                memoria->VectorDeRegistros[op.operandoA[3]] = op.operandoB[0];
+                memoria->RAM[op.operandoB[4] + op.segmento.ds] = op.operandoA[0];
             }
             else if (op.operandoA[2] == 1)
             {
                 //Si utilizamos el 4to byte del operando A
-                aux = (op.operandoA[0] & 0xFF);
-                memoria->VectorDeRegistros[op.operandoA[3]]&=0xFFFFFF00;
-                memoria->VectorDeRegistros[op.operandoA[3]]+=memoria->RAM[op.operandoB[4]+memoria->VectorDeRegistros[0]] & 0xFF;
-                memoria->RAM[op.operandoB[4] + memoria->VectorDeRegistros[0]] = aux;
+
+                memoria->VectorDeRegistros[op.operandoA[3]]&= 0xFFFFFF00;
+                memoria->VectorDeRegistros[op.operandoA[3]]+= op.operandoB[0] & 0xFF;
+                memoria->RAM[op.operandoB[4] + op.segmento.ds] = op.operandoA[0] & 0xFF;
             }
             else if (op.operandoA[2] == 2)
             {
                 //Si utilizamos el 3er byte del operando A
-                aux = ( op.operandoA[0] & 0xFF00) / 0x100;
+
                 memoria->VectorDeRegistros[op.operandoA[3]] &= 0xFFFF00FF;
-                memoria->VectorDeRegistros[op.operandoA[3]] += (memoria->RAM[op.operandoB[4]+memoria->VectorDeRegistros[0]] & 0xFF) * 0x100;
-                memoria->RAM[op.operandoB[4] + memoria->VectorDeRegistros[0]] = aux;
+                memoria->VectorDeRegistros[op.operandoA[3]] += (op.operandoB[0] & 0xFF) * 0x100;
+                memoria->RAM[op.operandoB[4] + op.segmento.ds] = ( op.operandoA[0] & 0xFF00) / 0x100;
             }
             else if (op.operandoA[2] == 3)
             {
                 //Si utilizamos los 2 ultimos bytes del operando A
 
-                aux = (op.operandoA[0] & 0xFFFF);
                 memoria->VectorDeRegistros[op.operandoA[3]] &= 0xFFFF0000;
-                memoria->VectorDeRegistros[op.operandoA[3]] += memoria->RAM[op.operandoB[4]+memoria->VectorDeRegistros[0]] & 0xFFFF;
-                memoria->RAM[op.operandoB[4] + memoria->VectorDeRegistros[0]] = aux;
+                memoria->VectorDeRegistros[op.operandoA[3]] += op.operandoB[0] & 0xFFFF;
+                memoria->RAM[op.operandoB[4] + op.segmento.ds] = op.operandoA[0] & 0xFFFF;
             }
         }
-        else //A tipo directo y B tipo de registro
+        else if ((op.operandoA[1] == 1) && (op.operandoB[1] == 3)) //A tipo registro y B indirecto
         {
-            aux = memoria->RAM[op.operandoA[4] + memoria->VectorDeRegistros[0]];
-            memoria->RAM[op.operandoA[4] + memoria->VectorDeRegistros[0]] = op.operandoB[0];
-            if (op.operandoB[2] == 2)
+            if (op.operandoA[2] == 0)
+            {
+                //Si el operando A es de 4 bytes
+                memoria->VectorDeRegistros[op.operandoA[3]] = op.operandoB[0];
+                memoria->RAM[op.operandoB[4] + op.segmento.actualB] = op.operandoA[0];
+            }
+            else if (op.operandoA[2] == 1)
+            {
+                //Si utilizamos el 4to byte del operando A
+
+                memoria->VectorDeRegistros[op.operandoA[3]]&= 0xFFFFFF00;
+                memoria->VectorDeRegistros[op.operandoA[3]]+= op.operandoB[0] & 0xFF;
+                memoria->RAM[op.operandoB[4] + op.segmento.actualB] = op.operandoA[0] & 0xFF;
+            }
+            else if (op.operandoA[2] == 2)
+            {
+                //Si utilizamos el 3er byte del operando A
+
+                memoria->VectorDeRegistros[op.operandoA[3]] &= 0xFFFF00FF;
+                memoria->VectorDeRegistros[op.operandoA[3]] += (op.operandoB[0] & 0xFF) * 0x100;
+                memoria->RAM[op.operandoB[4] + op.segmento.actualB] = ( op.operandoA[0] & 0xFF00) / 0x100;
+            }
+            else if (op.operandoA[2] == 3)
+            {
+                //Si utilizamos los 2 ultimos bytes del operando A
+
+                memoria->VectorDeRegistros[op.operandoA[3]] &= 0xFFFF0000;
+                memoria->VectorDeRegistros[op.operandoA[3]] += op.operandoB[0] & 0xFFFF;
+                memoria->RAM[op.operandoB[4] + op.segmento.actualB] = op.operandoA[0] & 0xFFFF;
+            }
+        }
+        else if ((op.operandoA[1] == 2) && (op.operandoB[1] == 1))//A tipo directo y B tipo de registro
+        {
+            memoria->RAM[op.operandoA[4] + op.segmento.ds] = op.operandoB[0];
+
+            if (op.operandoB[2] == 0) //4 bytes
+                memoria->VectorDeRegistros[op.operandoB[3]] = op.operandoA[0];
+            else if (op.operandoB[2] == 1) //4to byte
+            {
+                memoria->VectorDeRegistros[op.operandoB[3]]&= 0xFFFFFF00;
+                memoria->VectorDeRegistros[op.operandoB[3]]+= op.operandoA[0] & 0xFF;
+            }
+            else if (op.operandoB[2] == 2) //3er byte
             {
                 memoria->VectorDeRegistros[op.operandoB[3]]&= 0xFFFF00FF;
-                memoria->VectorDeRegistros[op.operandoB[3]]+= ((aux * 0x100) & 0xFF00);
+                memoria->VectorDeRegistros[op.operandoB[3]]+= ((op.operandoA[0] * 0x100) & 0xFF00);
             }
-            else
-                memoria->VectorDeRegistros[op.operandoB[3]] = aux;
+            else if (op.operandoB[2] == 3) //Ultimos 2 bytes
+            {
+                memoria->VectorDeRegistros[op.operandoB[3]]&= 0xFFFF0000;
+                memoria->VectorDeRegistros[op.operandoB[3]]+= op.operandoA[0] & 0xFFFF;
+            }
+        }
+        else if ((op.operandoA[1] == 3) && (op.operandoB[1] == 1))//A tipo indirecto y B tipo de registro
+        {
+            memoria->RAM[op.operandoA[4] + op.segmento.actualA] = op.operandoB[0];
+
+            if (op.operandoB[2] == 0) //4 bytes
+                memoria->VectorDeRegistros[op.operandoB[3]] = op.operandoA[0];
+            else if (op.operandoB[2] == 1) //4to byte
+            {
+                memoria->VectorDeRegistros[op.operandoB[3]]&= 0xFFFFFF00;
+                memoria->VectorDeRegistros[op.operandoB[3]]+= op.operandoA[0] & 0xFF;
+            }
+            else if (op.operandoB[2] == 2) //3er byte
+            {
+                memoria->VectorDeRegistros[op.operandoB[3]]&= 0xFFFF00FF;
+                memoria->VectorDeRegistros[op.operandoB[3]]+= ((op.operandoA[0] * 0x100) & 0xFF00);
+            }
+            else if (op.operandoB[2] == 3) //Ultimos 2 bytes
+            {
+                memoria->VectorDeRegistros[op.operandoB[3]]&= 0xFFFF0000;
+                memoria->VectorDeRegistros[op.operandoB[3]]+= op.operandoA[0] & 0xFFFF;
+            }
+        }
+        else if ((op.operandoA[1] == 2) && (op.operandoB[1] == 3))//A tipo directo y B tipo indirecto
+        {
+            memoria->RAM[op.operandoA[4] + op.segmento.ds] = op.operandoB[0];
+            memoria->RAM[op.operandoB[4] + op.segmento.actualB] = op.operandoA[0];
+        }
+        else if ((op.operandoA[1] == 3) && (op.operandoB[1] == 2))//A tipo indirecto y B tipo directo
+        {
+            memoria->RAM[op.operandoA[4] + op.segmento.actualA] = op.operandoB[0];
+            memoria->RAM[op.operandoB[4] + op.segmento.ds] = op.operandoA[0];
         }
     }
 }
@@ -2223,12 +2343,19 @@ void inicializaDisco(int nro, OperandosYFlags *op)
     strcat(nombreDisco,".vdd");
 
     arch = fopen(nombreDisco,"r+");
-    if (arch!=NULL)
-        op->discos.arch[nro] = arch;
+    if (arch!=NULL){
+        op->discos.info[nro].arch = arch;
+        op->discos.info[nro].nroUnidad = nro;
+        fseek(arch,33, SEEK_SET);
+        fread(&op->discos.info[nro].cantCilindros,sizeof(unsigned char),1,arch);
+        fread(&op->discos.info[nro].cantCabezas,sizeof(unsigned char),1,arch);
+        fread(&op->discos.info[nro].cantSectores,sizeof(unsigned char),1,arch);
+        fread(&op->discos.info[nro].tamSector,sizeof(unsigned int),1,arch);
+    }
     else
     {
-        op->discos.arch[nro] = fopen(nombreDisco,"w+");
-        if (op->discos.arch[nro]!=NULL)
+        op->discos.info[nro].arch = fopen(nombreDisco,"w+");
+        if (op->discos.info[nro].arch!=NULL)
         {
             header.idTipo = 0x56444430;
 
@@ -2260,7 +2387,12 @@ void inicializaDisco(int nro, OperandosYFlags *op)
             for (int i=0; i<118; i++)
                 header.relleno[i]=0;
 
-            fwrite(&header,sizeof(DiskHead),1,op->discos.arch[nro]);
+            fwrite(&header,sizeof(DiskHead),1,op->discos.info[nro].arch);
+            op->discos.info[nro].nroUnidad = nro;
+            op->discos.info[nro].cantCilindros = header.cantCilindros;
+            op->discos.info[nro].cantCabezas = header.cantCabezas;
+            op->discos.info[nro].cantSectores = header.cantSectores;
+            op->discos.info[nro].tamSector = header.tamSector;
         }
     }
 }
@@ -2268,9 +2400,8 @@ void inicializaDisco(int nro, OperandosYFlags *op)
 void inicializaFlagsYDiscos(OperandosYFlags *op,int argc,char *argv[])
 {
     op->discos.cant=0;
-
     for (int i=0; i<255; i++)
-        op->discos.arch[i] = NULL;
+        op->discos.info[i].arch = NULL;
 
     for(int i=0; i<3; i++)
         op->flags[i]=0;

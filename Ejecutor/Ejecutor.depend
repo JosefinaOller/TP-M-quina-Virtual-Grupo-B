@@ -18,16 +18,17 @@
 	"memoria.h"
 	"funciones.h"
 
-1653170985 source:c:\lucho\dev\projects\c\mv arquitectura de computadoras\tp-maquina-virtual-grupob\ejecutor\funciones.c
+1653344578 source:c:\lucho\dev\projects\c\mv arquitectura de computadoras\tp-maquina-virtual-grupob\ejecutor\funciones.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
+	<time.h>
 	"memoria.h"
 	"funciones.h"
 
 1652469462 c:\lucho\dev\projects\c\mv arquitectura de computadoras\tp-maquina-virtual-grupob\ejecutor\memoria.h
 
-1653174182 c:\lucho\dev\projects\c\mv arquitectura de computadoras\tp-maquina-virtual-grupob\ejecutor\funciones.h
+1653344435 c:\lucho\dev\projects\c\mv arquitectura de computadoras\tp-maquina-virtual-grupob\ejecutor\funciones.h
 
 1653167979 source:c:\lucho\dev\projects\c\mv arquitectura de computadoras\tp-maquina-virtual-grupob\ejecutor\main.c
 	<stdio.h>

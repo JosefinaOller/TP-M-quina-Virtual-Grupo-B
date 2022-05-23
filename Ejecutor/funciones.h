@@ -23,10 +23,26 @@ typedef struct{
     int relleno[118];
 } DiskHead;
 
+
+typedef struct{
+    FILE *arch;
+    int nroUnidad;
+    unsigned char cantCilindros;
+    unsigned char cantCabezas;
+    unsigned char cantSectores;
+    unsigned int tamSector;
+} DatosDisco;
+
+typedef struct{
+    int cant;
+    DatosDisco info[255];
+} Disco;
+
+/*
 typedef struct{
     int cant;
     FILE *arch[255];
-} Disco;
+}Disco;*/
 
 typedef struct{
     //operando[0]: Valor del operando
