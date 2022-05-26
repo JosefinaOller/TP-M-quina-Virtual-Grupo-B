@@ -7,9 +7,9 @@
 
 void cargaVecMnem(Mnemonico[]);
 void traduce(char[], Mnemonico[], int, char[]);
-void estructuraASM(char[], Linea[], int*, char[][100], int*, int[]);
-void procesarLinea(char[], char[], char[], char[], char[], char[]);
-void lecturaLabels(char*, Label[], int*, int*);
+void estructuraASM(char[], Linea[], int*, char[][100], int*, int[],int*,int*,int*);
+void procesarLinea(char[], char[], char[], char[], char[], char[], char[], char[]);
+void lecturaLabels(char*, Label[], int*, int*,char[],int *);
 int busquedaLabel(Label[], char[], int, int*);
 int codificaInstruccion(Linea, Mnemonico[], Label[], int, int*, int*, int*);
 int tipoOperando(char[]);
@@ -18,6 +18,8 @@ int anyToInt(char*, char**);
 int AEntero(char[]);
 void truncamiento(int, int*, int*);
 void salida(Linea, int, int, int, int);
+void mayuscula(char[]);
+void tratamiento_especial(char [],Label[],int,int *,char[]);
 
 
 int main(int argc, const char *argv[]){
@@ -25,6 +27,9 @@ int main(int argc, const char *argv[]){
     int o=1,i;
     Mnemonico vecMnem[MNEMAX];
     cargaVecMnem(vecMnem); //Carga todos los mnemonicos con sus datos.
+    argc=2;
+    argv[0]="1.asm";
+    argv[1]="1.bin";
     for(i=1;i<argc;i++){
         if(strstr(argv[i],".asm"))
             strcpy(asmar,argv[i]);
@@ -97,7 +102,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
     Label rotulos[100];
     Linea codigo[500];
     int i,cantRotulos=0,error=0,conLin=0,nComentarios=0,indicelinea[100],inst, wrgA, wrgB,kcom=0,nroLinea,data=1024,extra=1024,stack=1024;
-    lecturaLabels(nombAsm,rotulos,&cantRotulos,&error,&nroLinea); //para guardar los rotulos y su posicion, tambien para guardar las constantes.
+    lecturaLabels(nombAsm,rotulos,&cantRotulos,&error,strings,&nroLinea); //para guardar los rotulos y su posicion, tambien para guardar las constantes.
     if(error)
         printf("Error de archivo\n");
     else{
@@ -227,78 +232,77 @@ void lecturaLabels(char *archivo,Label rotulos[],int *cantRotulos,int *error,cha
            strcpy(mnem,parsed[1] ? parsed[1] : ""); //Mnemonico, es para ver si existe para sumar la cantidad de lineas
            freeline(parsed);
            if(strcmp(rotulo,"")!=0){ //Hay rotulo
+                mayuscula(rotulo);
                 strcpy(rotulos[*cantRotulos].etiqueta,rotulo);
-                rotulos[*cantRotulos].codigo=*nrolinea;
+                rotulos[*cantRotulos].codigo=*nroLinea;
                 (*cantRotulos)++;
-                (*nrolinea)++;
+                (*nroLinea)++;
            }
            else{
             if(strcmp(mnem,"")!=0)
-                (*nrolinea)++;
+                (*nroLinea)++;
            }
-
-    }
-
-    /*else{
-        printf("Error de archivo\n");
-        *error=1;
-    }
-    fclose(arch);*/
+        } //while
+    fclose(arch);
     while(fgets(linea,500,arch)!=NULL){ //vuelvo a leer para las constantes
 
            char **parsed = parseline(linea);
            strcpy(constante,parsed[7] ? parsed[7] : ""); //Constante
-           strcpy(const_valor,parsed[8] ? parsed[8] : ""); //Valor del constante
+           strcpy(constante_valor,parsed[8] ? parsed[8] : ""); //Valor del constante
            freeline(parsed);
 
-           if(strcmp(constante,"")!=0){{ //Hay constante,no se cuenta como linea, decimal,octal,hexadecimal
-                strcpy(rotulos[*cantRotulos].etiqueta,constante); //tengo que analizar si hay uno duplicado
-                switch(constante_valor[0]){
-                    case '#':
-                        sscanf(constante_valor+1,"%d",&(rotulos[*cantRotulos].codigo));
-                        break;
-                    case '@':
-                        sscanf(constante_valor+1,"%o",&(rotulos[*cantRotulos].codigo));
-                        break;
-                    case '%':
-                        sscanf(constante_valor+1,"%x",&(rotulos[*cantRotulos].codigo));
-                        break;
-                    case '0' ... '9':
-                        rotulos[*cantRotulos].codigo=atoi(constante_valor);
-                        break;
-                    case '-': //VER
-                        rotulos[*cantRotulos].codigo=atoi(constante_valor);
-                        break;
-                    case '\'': //VER
-                        sscanf(constante_valor+1,"%d",&(rotulos[*cantRotulos].codigo));
-                        break;
-                    case '"': //Tratamiento especial
-                        int i=1;
-                        while(constante_valor[i]!='"'){
-                            rotulos[*cantRotulos].codigo=(*nroLinea);
-                            strings[i-1]=constante_valor[i];
-                            (*nroLinea)++;
-                            i++;
-                        }
-                        strings[i-1]='\0';
-                        (*nroLinea);
-                        break;
-                }
-                (*cantRotulos)++;
+           if(strcmp(constante,"")!=0){ //Hay constante
+                mayuscula(constante);
+                if(busquedaLabel(rotulos,constante,*cantRotulos,error)==-1){ //No hau duplicado
+                        strcpy(rotulos[*cantRotulos].etiqueta,constante);
+                        switch(constante_valor[0]){
+                        case '#':
+                            sscanf(constante_valor+1,"%d",&(rotulos[*cantRotulos].codigo));
+                            break;
+                        case '@':
+                            sscanf(constante_valor+1,"%o",&(rotulos[*cantRotulos].codigo));
+                            break;
+                        case '%':
+                            sscanf(constante_valor+1,"%x",&(rotulos[*cantRotulos].codigo));
+                            break;
+                        case '0' ... '9':
+                            rotulos[*cantRotulos].codigo=atoi(constante_valor);
+                            break;
+                        case '-': //VER
+                            rotulos[*cantRotulos].codigo=atoi(constante_valor);
+                            break;
+                        case '\'': //VER
+                            sscanf(constante_valor+1,"%d",&(rotulos[*cantRotulos].codigo));
+                            break;
+                        case '"': //Tratamiento especial
+                            tratamiento_especial(constante_valor,rotulos,*cantRotulos,&(*nroLinea),strings);
+                            break;
+                    }
+                    (*cantRotulos)++;
+             } //if no hay duplicado
+             else{
+                printf("Símbolo duplicado\n");
+                *error=1;
+             }
            }
-
-
         }
-    }
+    } //el archivo es null
     else{
         printf("Error de archivo\n");
         *error=1;
     }
     fclose(arch);
 
- }
-
-
+} //fin
+void tratamiento_especial(char constante_valor[],Label rotulos[],int cantRotulos,int *nroLinea,char strings[]){
+    int i=1;
+    while(constante_valor[i]!='"'){
+        rotulos[cantRotulos].codigo=(*nroLinea);
+        strings[i-1]=constante_valor[i];
+        (*nroLinea)++;
+        i++;
+    }
+    strings[i-1]='\0';
 }
 int busquedaLabel(Label rotulos[],char etiqueta[],int cantRotulos,int *error){ //Para buscar la posicion del rotulo
     int i=0;
@@ -348,7 +352,7 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                         eliminaCorchetes(codigo.argA);
                         vopA = (codigo.argA[0] == '\'')? codigo.argA[1]: anyToInt(codigo.argA, &out);
                         break;
-                    case 3:
+                    case 3: //indirecto
                         eliminaCorchetes(codigo.argA);
                         vopA = AEntero(codigo.argA);
                         break;
@@ -364,6 +368,10 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                     case 2:
                         eliminaCorchetes(codigo.argB);
                         vopB = (codigo.argB[0] == '\'')? codigo.argB[1]: anyToInt(codigo.argB, &out);
+                        break;
+                    case 3:
+                        eliminaCorchetes(codigo.argB);
+
                         break;
                     }
                     inst = (mnem.codigo << 28) | ((topA << 26) & 0x0C000000) | ((topB << 24) & 0x03000000) | ((vopA << 12) & 0x00FFF000) | (vopB & 0x00000FFF);
@@ -405,6 +413,10 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                             eliminaCorchetes(codigo.argA);
                             vop = (codigo.argA[0] == '\'')? codigo.argA[1]: anyToInt(codigo.argA, &out);
                             inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x00C00000) | (vop & 0x0000FFFF);
+                            break;
+
+                        case 3:
+                            eliminaCorchetes(codigo.argA);
                             break;
                         }
                     }
@@ -450,6 +462,55 @@ void operandoIndirecto(char vop[], int* vopA){
         (valor << 4)  & 0x00000FFF | *vopA;
         *vopA = valor;
     }
+}
+void operandoIndirectoJose(char vop[], int* vOp,Label rotulos[],int cantRotulos,int *error){
+    int valor = 0;
+    char aux[20] = {'\0'};
+    char aux2[20] = {'\0'};
+    char *mas,*menos;
+    mas=NULL;
+    menos=NULL;
+    mas=strchr(vop,'+'); //analiza si esta el +
+    menos=strchr(vop,'-'); //analiza si esta el -
+
+
+
+
+    if(mas!=NULL || menos!=NULL){ //esta el mas o el menos
+        int i=0;
+        while(vop[i]!='+' || vop[i]!='-'){
+            aux[i]=vop[i];
+            i++;
+        }
+        i++;
+        int j=0;
+        for(i;i<strlen(vop);i++){
+            aux2[j]=vop[i];
+            j++;
+            i++;
+        }
+        //Puede haber [ <registro> {+ / - <valor decimal>/<símbolo>}]
+
+        //registro con valor decimal
+        if(isadigit(aux2[0])){ //pregunto si la primera posicion de la segunda parte es numero
+            int valorRegistro = AEntero(aux);
+            //hay que armar registro + valor decimal
+        }
+        else{ //registro con simbolo, busco el valor inmediato del simbolo
+            int valorSimbolo = busquedaLabel(rotulos,aux2,cantRotulos,&(*error));
+            if(valorSimbolo!=-1){ //encontre
+                int valorRegisto = AEntero(aux);
+                //hay que armar registro + valor del simbolo
+            }
+        }
+
+
+    }
+    else{ //registro solo
+        *vOp = AEntero(aux);
+    }
+
+
 }
 void eliminaCorchetes(char vop[]){
     char aux[20] = {'\0'};
@@ -601,4 +662,9 @@ void salida(Linea codigo, int i, int inst, int wrgA, int wrgB){
         printf("Warning: Línea %d Argumento A truncado\n", i);
     if (wrgB)
         printf("Warning: Línea %d Argumento B truncado\n", i);
+}
+void mayuscula(char x[]){
+    int i;
+    for (i=0;i<=strlen(x);i++)
+        x[i]=toupper(x[i]);
 }
