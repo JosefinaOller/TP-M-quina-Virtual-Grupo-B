@@ -445,7 +445,7 @@ int tipoOperando(char vop[]){
     else
         return 2;//directo
 }
-void operandoIndirecto(char vop[], int* vopA){
+/*void operandoIndirecto(char vop[], int* vopA){
     int valor = 0;
     char aux[20] = {'\0'};
     char aux2[20] = {'\0'};
@@ -459,22 +459,18 @@ void operandoIndirecto(char vop[], int* vopA){
                 aux[i-4] = vop[i-2];
         }
         valor = anyToInt(aux, aux2);
-        (valor << 4)  & 0x00000FFF | *vopA;
+        //(valor << 4) & 0x00000FFF | *vopA;
         *vopA = valor;
     }
-}
+}*/
 void operandoIndirectoJose(char vop[], int* vOp,Label rotulos[],int cantRotulos,int *error){
     int valor = 0;
     char aux[20] = {'\0'};
     char aux2[20] = {'\0'};
+    char aux3[20] = {'\0'};//Para anyToInt
     char *mas,*menos;
-    mas=NULL;
-    menos=NULL;
     mas=strchr(vop,'+'); //analiza si esta el +
     menos=strchr(vop,'-'); //analiza si esta el -
-
-
-
 
     if(mas!=NULL || menos!=NULL){ //esta el mas o el menos
         int i=0;
@@ -482,35 +478,33 @@ void operandoIndirectoJose(char vop[], int* vOp,Label rotulos[],int cantRotulos,
             aux[i]=vop[i];
             i++;
         }
-        i++;
+        if (vop[i] == '+')//Si hay un '-' no avanza, sino que suma un número negativo
+            i++;
         int j=0;
         for(i;i<strlen(vop);i++){
             aux2[j]=vop[i];
             j++;
-            i++;
         }
         //Puede haber [ <registro> {+ / - <valor decimal>/<símbolo>}]
 
         //registro con valor decimal
-        if(isadigit(aux2[0])){ //pregunto si la primera posicion de la segunda parte es numero
-            int valorRegistro = AEntero(aux);
+        if(isadigit(aux2[0]) || aux2[0]!='-'){ //pregunto si la primera posicion de la segunda parte es numero
+            int valorRegistro = anyToInt(aux2, &aux3); //AEntero(aux);
+            valor = (valorRegistro << 4) & 0x00000FFF | *vOp;
             //hay que armar registro + valor decimal
         }
         else{ //registro con simbolo, busco el valor inmediato del simbolo
             int valorSimbolo = busquedaLabel(rotulos,aux2,cantRotulos,&(*error));
             if(valorSimbolo!=-1){ //encontre
-                int valorRegisto = AEntero(aux);
+                int valorRegistro = AEntero(aux);
                 //hay que armar registro + valor del simbolo
+                valor = (valorRegistro << 4) & 0x00000FFF | *vOp;
             }
         }
-
-
     }
     else{ //registro solo
-        *vOp = AEntero(aux);
+        *vOp = AEntero(vop);
     }
-
-
 }
 void eliminaCorchetes(char vop[]){
     char aux[20] = {'\0'};
