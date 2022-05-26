@@ -316,7 +316,7 @@ int busquedaLabel(Label rotulos[],char etiqueta[],int cantRotulos,int *error){ /
     }
 }
 int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int cantRotulos, int *error, int *wrgA, int *wrgB){
-    int i, inst = 0;//Inicializo instrucción
+    int i,valorReg,off,inst = 0;//Inicializo instrucción
     size_t length;
     Mnemonico mnem;
     char *out = NULL;
@@ -353,8 +353,10 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                         vopA = (codigo.argA[0] == '\'')? codigo.argA[1]: anyToInt(codigo.argA, &out);
                         break;
                     case 3: //indirecto
+                        valorReg=0;off=0;
                         eliminaCorchetes(codigo.argA);
-                        vopA = AEntero(codigo.argA);
+                        operandoIndirecto(codigo.argA,&valorReg,&off,rotulos,cantRotulos,&error);
+                        vopA= valorReg | (off<<16);
                         break;
                     }
                     switch (topB){
@@ -370,8 +372,10 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                         vopB = (codigo.argB[0] == '\'')? codigo.argB[1]: anyToInt(codigo.argB, &out);
                         break;
                     case 3:
+                        valorReg=0;off=0;
                         eliminaCorchetes(codigo.argB);
-
+                        operandoIndirecto(codigo.argB,&valorReg,&off,rotulos,cantRotulos,&error);
+                        vopB= valorReg | (off<<4);
                         break;
                     }
                     inst = (mnem.codigo << 28) | ((topA << 26) & 0x0C000000) | ((topB << 24) & 0x03000000) | ((vopA << 12) & 0x00FFF000) | (vopB & 0x00000FFF);
@@ -416,7 +420,10 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                             break;
 
                         case 3:
+                            valorReg=0;off=0;
                             eliminaCorchetes(codigo.argA);
+                            operandoIndirecto(codigo.argA,&valorReg,&off,rotulos,cantRotulos,&error);
+                            vop= valorReg | (off<<4);
                             break;
                         }
                     }
@@ -463,48 +470,40 @@ int tipoOperando(char vop[]){
         *vopA = valor;
     }
 }*/
-void operandoIndirectoJose(char vop[], int* vOp,Label rotulos[],int cantRotulos,int *error){
-    int valor = 0;
-    char aux[20] = {'\0'};
-    char aux2[20] = {'\0'};
-    char aux3[20] = {'\0'};//Para anyToInt
-    char *mas,*menos;
-    mas=strchr(vop,'+'); //analiza si esta el +
-    menos=strchr(vop,'-'); //analiza si esta el -
+void operandoIndirecto(char vop[], int* valorReg,int *off,Label rotulos[],int cantRotulos,int *error){
+    char reg[3];
+    reg[0]=vop[0]; //Puede ser EAX o AX
+    reg[1]=vop[1];
+    reg[2] = (vop[2]=='+' || vop[2]=='-') ? '\0': vop[2];
+    *valorReg=AEntero(reg); //no se si hay que hacerle desplazamiento
 
-    if(mas!=NULL || menos!=NULL){ //esta el mas o el menos
-        int i=0;
-        while(vop[i]!='+' || vop[i]!='-'){
-            aux[i]=vop[i];
-            i++;
+    if(vop[2]=='-')
+        *off=((-1)*valorOpDirecto(vop+3,rotulos,cantRotulos,&(*error)))&0xFF;
+    else if (vop[3]=='-')
+        *off=((-1)*valorOpDirecto(vop+4,rotulos,cantRotulos,&(*error)))&0xFF;
+    else if (vop[2]=='+')
+        *off=(valorOpDirecto(vop+3,rotulos,cantRotulos,&(*error)))&0xFF;
+    else if (vop[3]=='+')
+        *off=(valorOpDirecto(vop+4,rotulos,cantRotulos,&(*error)))&0xFF;
+}
+int valorOpDirecto(char *s,Label rotulos[],int cantRotulos,int *error){
+    int i;
+    if(s[0]=='\'')
+        return s[1];
+    else if(s[0]=='@'|| s[0]=='#' || s[0]=='%' || (s[0]>='0' && s[0]<='9') || s[0]=='-')
+        return anyToInt(s,NULL);
+    else if(strlen(s)>2) {
+        i= busquedaLabel(rotulos,s,cantRotulos,&(*error));
+        if(i!=-1){
+            return i; //Faltaria el desplazamiento de CS
         }
-        if (vop[i] == '+')//Si hay un '-' no avanza, sino que suma un número negativo
-            i++;
-        int j=0;
-        for(i;i<strlen(vop);i++){
-            aux2[j]=vop[i];
-            j++;
-        }
-        //Puede haber [ <registro> {+ / - <valor decimal>/<símbolo>}]
-
-        //registro con valor decimal
-        if(isadigit(aux2[0]) || aux2[0]!='-'){ //pregunto si la primera posicion de la segunda parte es numero
-            int valorRegistro = anyToInt(aux2, &aux3); //AEntero(aux);
-            valor = (valorRegistro << 4) & 0x00000FFF | *vOp;
-            //hay que armar registro + valor decimal
-        }
-        else{ //registro con simbolo, busco el valor inmediato del simbolo
-            int valorSimbolo = busquedaLabel(rotulos,aux2,cantRotulos,&(*error));
-            if(valorSimbolo!=-1){ //encontre
-                int valorRegistro = AEntero(aux);
-                //hay que armar registro + valor del simbolo
-                valor = (valorRegistro << 4) & 0x00000FFF | *vOp;
-            }
+        else{
+            printf("Rotulo indefinido\n");
         }
     }
-    else{ //registro solo
-        *vOp = AEntero(vop);
-    }
+    else
+        return -99999;
+
 }
 void eliminaCorchetes(char vop[]){
     char aux[20] = {'\0'};
