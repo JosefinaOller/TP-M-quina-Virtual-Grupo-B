@@ -27,9 +27,9 @@ int main(int argc, const char *argv[]){
     int o=1,i;
     Mnemonico vecMnem[MNEMAX];
     cargaVecMnem(vecMnem); //Carga todos los mnemonicos con sus datos.
-    argc=2;
-    argv[0]="1.asm";
-    argv[1]="1.bin";
+    argc=3;
+    argv[1]="1.asm";
+    argv[2]="1.mv2";
     for(i=1;i<argc;i++){
         if(strstr(argv[i],".asm"))
             strcpy(asmar,argv[i]);
@@ -228,9 +228,12 @@ void lecturaLabels(char *archivo,Label rotulos[],int *cantRotulos,int *error,cha
     if(arch!=NULL){
         while(fgets(linea,500,arch)!=NULL){
            char **parsed = parseline(linea);
+
            strcpy(rotulo,parsed[0] ? parsed[0] : ""); //Rotulo
            strcpy(mnem,parsed[1] ? parsed[1] : ""); //Mnemonico, es para ver si existe para sumar la cantidad de lineas
+
            freeline(parsed);
+
            if(strcmp(rotulo,"")!=0){ //Hay rotulo
                 mayuscula(rotulo);
                 strcpy(rotulos[*cantRotulos].etiqueta,rotulo);
@@ -238,18 +241,17 @@ void lecturaLabels(char *archivo,Label rotulos[],int *cantRotulos,int *error,cha
                 (*cantRotulos)++;
                 (*nroLinea)++;
            }
-           else{
-            if(strcmp(mnem,"")!=0)
+           else if(strcmp(mnem,"")!=0)
                 (*nroLinea)++;
-           }
-        } //while
-    fclose(arch);
-    while(fgets(linea,500,arch)!=NULL){ //vuelvo a leer para las constantes
+        }
+        fclose(arch);
+        FILE *arch=fopen(archivo,"rt");
+        while(fgets(linea,500,arch)!=NULL){
+             char **parsed = parseline(linea);
+             strcpy(constante,parsed[7] ? parsed[7] : ""); //Constante
+             strcpy(constante_valor,parsed[8] ? parsed[8] : ""); //Valor del constante
+             freeline(parsed);
 
-           char **parsed = parseline(linea);
-           strcpy(constante,parsed[7] ? parsed[7] : ""); //Constante
-           strcpy(constante_valor,parsed[8] ? parsed[8] : ""); //Valor del constante
-           freeline(parsed);
 
            if(strcmp(constante,"")!=0){ //Hay constante
                 mayuscula(constante);
@@ -285,13 +287,13 @@ void lecturaLabels(char *archivo,Label rotulos[],int *cantRotulos,int *error,cha
                 *error=1;
              }
            }
-        }
+         }
+         fclose(arch);
     } //el archivo es null
     else{
         printf("Error de archivo\n");
         *error=1;
     }
-    fclose(arch);
 
 } //fin
 void tratamiento_especial(char constante_valor[],Label rotulos[],int cantRotulos,int *nroLinea,char strings[]){

@@ -29,15 +29,15 @@
 
 1653327794 shed changes
 
-1653236054 source:c:\users\ollers\documents\github\tp-maquina-virtual-grupob\traductor\parser.c
+1653615079 source:c:\users\ollers\documents\github\tp-maquina-virtual-grupob\traductor\parser.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
 	"parser.h"
 
-1653236055 c:\users\ollers\documents\github\tp-maquina-virtual-grupob\traductor\parser.h
+1653615113 c:\users\ollers\documents\github\tp-maquina-virtual-grupob\traductor\parser.h
 
-1653591040 source:c:\users\ollers\documents\github\tp-maquina-virtual-grupob\traductor\main.c
+1653616059 source:c:\users\ollers\documents\github\tp-maquina-virtual-grupob\traductor\main.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
