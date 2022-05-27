@@ -154,8 +154,8 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
             error=1;
             printf("Falta de memoria\n");
         }
+        fclose(archESCRITURA);
     }
-    fclose(archESCRITURA);
     if(error){ //Si hay error de traduccion, borro el archivo binario
         printf("Error de traduccion\n");
         remove(binario);
