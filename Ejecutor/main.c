@@ -51,6 +51,7 @@ int main(int argc, char *argv[])
     decodificaOperandos(memoria,cod,inst,&op);
     //printf("Cod: %X\n",cod);
     //printf("OPb[0]: %d | OPa[0]: %d\n",op.operandoB[0],op.operandoA[0]);
+
     vecF[cod](&memoria,op);
     printf("ADD? : %d\n",memoria.RAM[210]);
 
@@ -62,7 +63,8 @@ int main(int argc, char *argv[])
     OperandosYFlags op;
     int ip, cod;
 
-    inicializaFlagsYDiscos(&op,argc,argv);
+    inicializaFlags(&op,argc,argv);
+    inicializaDiscos(&memoria,argc,argv);
 
     if (op.flags[1] == 1)
         system("cls");

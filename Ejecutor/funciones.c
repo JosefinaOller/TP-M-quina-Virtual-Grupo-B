@@ -1612,8 +1612,140 @@ void SYS7(Memoria *memoria, OperandosYFlags op)
 
 void SYSD(Memoria *memoria, OperandosYFlags op)
 {
-    //DISCOOOOO TE ODIOOOO
-    //DISCOOOOO TE ODIOOOO DENUEVO
+    int ah = (memoria->VectorDeRegistros[10] & 0xFF00) / 0x100;
+    int al = memoria->VectorDeRegistros[10] & 0xFF;
+    int ch = (memoria->VectorDeRegistros[12] & 0xFF00) / 0x100;
+    int cl = memoria->VectorDeRegistros[12] & 0xFF;
+    int dh = (memoria->VectorDeRegistros[13] & 0xFF00) / 0x100;
+    int dl = memoria->VectorDeRegistros[12] & 0xFF;
+    //int ebx = memoria->VectorDeRegistros[11];
+    int seg = memoria->VectorDeRegistros[11] / 0x10000;
+    int offset = memoria->VectorDeRegistros[11] & 0xFFFF;
+    int buffer[128];
+
+
+    unsigned char cantCilindros = memoria->discos.info[dl].cantCilindros;
+    unsigned char cantSectores = memoria->discos.info[dl].cantSectores;
+    unsigned char cantCabezas = memoria->discos.info[dl].cantCabezas;
+    unsigned int tamSector = memoria->discos.info[dl].tamSector;
+
+    int pos = 512 + (ch * cantCilindros * cantSectores * tamSector) + (cl * cantSectores * tamSector) + (dh * tamSector);
+    int posMax = cantCabezas * cantCilindros * cantSectores * 512;
+    int posSegAct;
+    int tamReal;
+    int tamRealFinal = pos + (al * 512);
+
+
+    if ( !(ah==0 || ah==0x02 || ah==0x03 || ah==0x08) ){ //Función Inválida
+        memoria->VectorDeRegistros[10] = (memoria->VectorDeRegistros[10] & 0xFFFF00FF) + 0x0100;
+        memoria->discos.info[dl].ultimoEstado = 0x01;
+    }
+    else { //Función válida
+        if (dl >= memoria->discos.cant){ //No existe el disco
+            memoria->VectorDeRegistros[10] = (memoria->VectorDeRegistros[10] & 0xFFFF00FF) + 0x3100;
+            memoria->discos.info[dl].ultimoEstado = 0x31;
+        }
+        else{ //Existe el disco
+            if ( ah == 0 ){ //Consulta ultimo estado
+                memoria->VectorDeRegistros[10] = (memoria->VectorDeRegistros[10] & 0xFFFF00FF) + (memoria->discos.info[dl].ultimoEstado * 0x100);
+            }
+            else if ( ah == 0x08 ){ //Obtener parámetros del disco
+                memoria->VectorDeRegistros[10] = memoria->VectorDeRegistros[10] & 0xFFFF00FF; // AH = 00
+                memoria->VectorDeRegistros[12] = (memoria->VectorDeRegistros[12] & 0xFFFF0000) + (cantCilindros * 0x100) +  cantCabezas; // CH Y CL
+                memoria->VectorDeRegistros[12] = (memoria->VectorDeRegistros[13] & 0xFFFF00FF) + (cantSectores * 0x100); // DH
+            }
+            else if (cl > cantCabezas){ //Numero invalido de cabezas
+                memoria->VectorDeRegistros[10] = (memoria->VectorDeRegistros[10] & 0xFFFF00FF) + 0x00000C00;
+            }
+            else if (ch > cantCilindros){ //Numero invalido de cilindros
+                memoria->VectorDeRegistros[10] = (memoria->VectorDeRegistros[10] & 0xFFFF00FF) + 0x00000B00;
+            }
+            else if (dh > cantSectores){ //Numero invalido de sectores
+                memoria->VectorDeRegistros[10] = (memoria->VectorDeRegistros[10] & 0xFFFF00FF) + 0x00000D00;
+            }
+            else if ( ah == 0x02 ){ //Leer del disco
+                if ((seg == 0) && (((offset+op.segmento.ds) + al*512)>op.segmento.es)){ //Error de lectura
+                    memoria->VectorDeRegistros[10] = (memoria->VectorDeRegistros[10] & 0xFFFF00FF) + 0x00000400;
+                }
+                else if ((seg == 2) && (((offset+op.segmento.es) + al*512)>op.segmento.ss)){ //Error de lectura
+                    memoria->VectorDeRegistros[10] = (memoria->VectorDeRegistros[10] & 0xFFFF00FF) + 0x00000400;
+                }
+                else{ //No es error de lectura -> Operación exitosa
+                    int cero = 0;
+                    int transferidos = 0;
+
+                    //Primero se valida que haya datos en disco, sino se rellena con 0's
+
+                    fseek(memoria->discos.info[dl].arch,0,SEEK_END);
+                    tamReal = ftell(memoria->discos.info[dl].arch);
+
+                    while (tamReal < tamRealFinal){
+                        fwrite(&cero,sizeof(int),1,memoria->discos.info[dl].arch);
+                        tamReal++;
+                    }
+
+                    //Se lee hasta el final del disco o la cantidad de sectores indicados
+                    //También se cuentan la cantidad de sectores leídos/transferidos
+
+                    fseek(memoria->discos.info[dl].arch,pos,SEEK_SET);
+                    if (seg==0)
+                        posSegAct = op.segmento.ds + offset;
+                    else if (seg==2)
+                        posSegAct = op.segmento.es + offset;
+
+                    pos+=sizeof(buffer);
+
+                    while (pos<posMax && pos<tamRealFinal){
+                        fread(&buffer,sizeof(buffer),1,memoria->discos.info[dl].arch);
+
+                        for (int i=0; i<128; i++){
+                            memoria->RAM[posSegAct] = buffer[i];
+                            posSegAct++;
+                        }
+                        transferidos+=1; //Se transfirió un sector
+                        pos+=sizeof(buffer);
+                    }
+
+                    if (pos>=posMax)
+                        memoria->VectorDeRegistros[10] = (memoria->VectorDeRegistros[10] & 0xFFFFFF00) + (transferidos & 0xFF);
+                    memoria->VectorDeRegistros[10] =  memoria->VectorDeRegistros[10] & 0xFFFF00FF;
+                }
+            }
+            else if ( ah == 0x03 ){ //Escribir en disco
+                if ((seg == 0) && (((offset+op.segmento.ds) + al*512)>op.segmento.es)){ //Error de escritura
+                    memoria->VectorDeRegistros[10] = (memoria->VectorDeRegistros[10] & 0xFFFF00FF) + 0x0000CC00;
+                }
+                else if ((seg == 2) && (((offset+op.segmento.es) + al*512)>op.segmento.ss)){ //Error de escritura
+                    memoria->VectorDeRegistros[10] = (memoria->VectorDeRegistros[10] & 0xFFFF00FF) + 0x0000CC00;
+                }
+                else if (tamRealFinal > posMax){ //Falla en la operación
+                    memoria->VectorDeRegistros[10] = (memoria->VectorDeRegistros[10] & 0xFFFF00FF) + 0x0000FF00;
+                }
+                else{ // Procede a escribir -> Operación exitosa
+
+                    fseek(memoria->discos.info[dl].arch,pos,SEEK_SET);
+
+                    if (seg==0)
+                        posSegAct = op.segmento.ds + offset;
+                    else if (seg==2)
+                        posSegAct = op.segmento.es + offset;
+
+                    pos+=sizeof(buffer);
+
+                    while (pos<tamRealFinal){
+                        for (int i=0; i<128; i++){
+                            buffer[i] = memoria->RAM[posSegAct];
+                            posSegAct++;
+                        }
+                        fwrite(&buffer,sizeof(buffer),1,memoria->discos.info[dl].arch);
+                        pos+=sizeof(buffer);
+                    }
+
+                    memoria->VectorDeRegistros[10] =  memoria->VectorDeRegistros[10] & 0xFFFF00FF;
+                }
+            }
+        }
+    }
 }
 
 void SYSF(Memoria *memoria, OperandosYFlags op)
@@ -2326,6 +2458,7 @@ void disassembler(Memoria memoria, OperandosYFlags op)
     imprimeEstadoRegistros(memoria.VectorDeRegistros);
 }
 
+/*
 void inicializaDisco(int nro, OperandosYFlags *op)
 {
     char nombreDisco[20];
@@ -2395,13 +2528,101 @@ void inicializaDisco(int nro, OperandosYFlags *op)
             op->discos.info[nro].tamSector = header.tamSector;
         }
     }
+}*/
+
+void setDisco(int nro, Memoria *memoria)
+{
+    char nombreDisco[20];
+    char aux[20];
+    FILE *arch;
+    DiskHead header;
+    int r1, r2;
+    time_t hora;
+    struct tm *t;
+    char strHora[80];
+
+    itoa(nro,aux,10);
+    strcpy(nombreDisco,"disco");
+    strcat(nombreDisco,aux);
+    strcat(nombreDisco,".vdd");
+
+    arch = fopen(nombreDisco,"r+");
+    if (arch!=NULL){
+        memoria->discos.info[nro].arch = arch;
+        memoria->discos.info[nro].nroUnidad = nro;
+        fseek(arch,33, SEEK_SET);
+        fread(&memoria->discos.info[nro].cantCilindros,sizeof(unsigned char),1,arch);
+        fread(&memoria->discos.info[nro].cantCabezas,sizeof(unsigned char),1,arch);
+        fread(&memoria->discos.info[nro].cantSectores,sizeof(unsigned char),1,arch);
+        fread(&memoria->discos.info[nro].tamSector,sizeof(unsigned int),1,arch);
+    }
+    else
+    {
+        memoria->discos.info[nro].arch = fopen(nombreDisco,"w+");
+        if (memoria->discos.info[nro].arch!=NULL)
+        {
+            header.idTipo = 0x56444430;
+
+            header.version = 1;
+
+            r1 = rand() % RAND_MAX;
+            r2 = rand() % RAND_MAX;
+            header.GUID1 = (r1*0x10000) + r2;
+            r1 = rand() % RAND_MAX;
+            r2 = rand() % RAND_MAX;
+            header.GUID2 = (r1*0x10000) + r2;
+
+            hora = time(0);
+            t = localtime(&hora);
+            strftime(strHora, sizeof(strHora), "%Y%m%d%H%M%S", t);
+            header.fechaCreacion = (strHora[0]&0xF)<<28 | (strHora[1]&0xF)<<24 |
+                (strHora[2]&0xF)<<20 | (strHora[3]&0xF)<<16 | (strHora[4]&0xF)<<12 |
+                (strHora[5]&0xF)<<8 | (strHora[6]&0xF)<<4 | (strHora[7]&0xF);
+            header.horaCreacion = (strHora[8]&0xF)<<28 | (strHora[9]&0xF)<<24 |
+                (strHora[10]&0xF)<<20 | (strHora[11]&0xF)<<16 | (strHora[12]&0xF)<<12 |
+                (strHora[13]&0xF)<<8 | (strHora[14]&0xF)<<4 | (strHora[15]&0xF);
+
+            header.tipo = 1;
+            header.cantCilindros = 128;
+            header.cantCabezas = 128;
+            header.cantSectores = 128;
+            header.tamSector = 512;
+
+            for (int i=0; i<118; i++)
+                header.relleno[i]=0;
+
+            fwrite(&header,sizeof(DiskHead),1,memoria->discos.info[nro].arch);
+            memoria->discos.info[nro].nroUnidad = nro;
+            memoria->discos.info[nro].cantCilindros = header.cantCilindros;
+            memoria->discos.info[nro].cantCabezas = header.cantCabezas;
+            memoria->discos.info[nro].cantSectores = header.cantSectores;
+            memoria->discos.info[nro].tamSector = header.tamSector;
+        }
+    }
 }
 
+void inicializaDiscos(Memoria *memoria, int argc,char *argv[]){
+    memoria->discos.cant=0;
+    for (int i=0; i<255; i++){
+        memoria->discos.info[i].arch = NULL;
+        memoria->discos.info[i].ultimoEstado = 0;
+    }
+
+    for(int i=2; i<argc; i++){
+        if( strstr(argv[i],"vdd") != NULL){
+            setDisco(memoria->discos.cant,memoria);
+            memoria->discos.cant++;
+        }
+    }
+}
+/*
 void inicializaFlagsYDiscos(OperandosYFlags *op,int argc,char *argv[])
 {
     op->discos.cant=0;
     for (int i=0; i<255; i++)
         op->discos.info[i].arch = NULL;
+    op->discos.ultimoEstado = 0;
+    strcpy(op->discos.ultimoEstadoDetalle,"Operacion exitosa");
 
     for(int i=0; i<3; i++)
         op->flags[i]=0;
@@ -2416,6 +2637,22 @@ void inicializaFlagsYDiscos(OperandosYFlags *op,int argc,char *argv[])
             op->flags[2]=1;
         else if( strstr(argv[i],"vdd") != NULL)
             inicializaDisco((op->discos.cant)++,op);
+    }
+    op->error = 0;
+}*/
+
+void inicializaFlags(OperandosYFlags *op,int argc,char *argv[]){
+    for(int i=0; i<3; i++)
+        op->flags[i]=0;
+
+    for(int i=2; i<argc; i++)
+    {
+        if(!strcmp(argv[i],"-b"))
+            op->flags[0]=1;
+        else if(!strcmp(argv[i],"-c"))
+            op->flags[1]=1;
+        else if(!strcmp(argv[i],"-d"))
+            op->flags[2]=1;
     }
     op->error = 0;
 }
