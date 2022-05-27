@@ -20,7 +20,8 @@ void truncamiento(int, int*, int*);
 void salida(Linea, int, int, int, int);
 void mayuscula(char[]);
 void tratamiento_especial(char [],Label[],int,int *,char[],int *);
-
+void operandoIndirecto(char[], int*, int*, Label[], int, int*);
+int valorOpDirecto(char*, Label[], int, int*);
 
 int main(int argc, const char *argv[]){
     char asmar[20],binario[20];
@@ -164,7 +165,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
 void estructuraASM(char nombAsm[],Linea codigo[],int *conLin,char listaComentarios[][100],int *nComentarios,int indicelinea[]){
 
     FILE *arch;
-    char linea[500],rotulo[10],mnem[5],argA[16],argB[16],com[100],seg[5],size[4];
+    char linea[500],rotulo[10],mnem[5],argA[16],argB[16],com[100],seg[6],size[4];
     arch=fopen(nombAsm,"rt");
     if(arch!=NULL){
         *conLin=0;
@@ -201,7 +202,7 @@ void procesarLinea(char linea[],char rotulo[],char mnem[],char argA[],char argB[
 void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int *error,char strings[],int *nroLinea,int *cantStrings,int *data,int *extra,int *stack,char lista[][100],int *nLista,int indiceLinea[]){
 
     FILE *arch=fopen(archivo,"rt");
-    char linea[500],rotulo[16],mnem[5],constante[10],constante_valor[50],seg[5],size[5];
+    char linea[500],rotulo[16],mnem[5],constante[10],constante_valor[50],seg[6],size[5];
     *nLista=0; //Para imprimir las directivas y equ
     int numeroLinea=0;
     if(arch!=NULL){
@@ -336,7 +337,7 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
     Mnemonico mnem;
     char *out = NULL;
     if (vecMnem!=NULL)
-        length = 25;//(sizeof(vecMnem)/sizeof(vecMnem[0]));
+        length = 31;//(sizeof(vecMnem)/sizeof(vecMnem[0]));
     if (strcmp(codigo.mnem, "") != 0){
         for (i = 0; i < strlen(codigo.mnem); i++)
             codigo.mnem[i] = toupper(codigo.mnem[i]);
@@ -368,10 +369,10 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                         vopA = (codigo.argA[0] == '\'')? codigo.argA[1]: anyToInt(codigo.argA, &out);
                         break;
                     case 3: //indirecto
-                        valorReg=0;off=0;
+                        valorReg=0; off=0;
                         eliminaCorchetes(codigo.argA);
-                        operandoIndirecto(codigo.argA,&valorReg,&off,rotulos,cantRotulos,&error);
-                        vopA= valorReg | (off<<16);
+                        operandoIndirecto(codigo.argA,&valorReg,&off,rotulos,cantRotulos, error);
+                        vopA = (valorReg & 0xF) | (off << 4);
                         break;
                     }
                     switch (topB){
@@ -387,10 +388,10 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                         vopB = (codigo.argB[0] == '\'')? codigo.argB[1]: anyToInt(codigo.argB, &out);
                         break;
                     case 3:
-                        valorReg=0;off=0;
+                        valorReg=0; off=0;
                         eliminaCorchetes(codigo.argB);
-                        operandoIndirecto(codigo.argB,&valorReg,&off,rotulos,cantRotulos,&error);
-                        vopB= valorReg | (off<<4);
+                        operandoIndirecto(codigo.argB,&valorReg,&off,rotulos,cantRotulos, error);
+                        vopB = (valorReg & 0xF) | (off << 4);
                         break;
                     }
                     inst = (mnem.codigo << 28) | ((topA << 26) & 0x0C000000) | ((topB << 24) & 0x03000000) | ((vopA << 12) & 0x00FFF000) | (vopB & 0x00000FFF);
@@ -437,8 +438,8 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                         case 3:
                             valorReg=0;off=0;
                             eliminaCorchetes(codigo.argA);
-                            operandoIndirecto(codigo.argA,&valorReg,&off,rotulos,cantRotulos,&error);
-                            vop= valorReg | (off<<4);
+                            operandoIndirecto(codigo.argA,&valorReg,&off,rotulos,cantRotulos, error);
+                            vop= (valorReg & 0xF) | (off << 4);
                             break;
                         }
                     }
@@ -448,7 +449,7 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                     inst = 0xFFFFFFFF;
                 }
             }else
-                inst = 0xFF100000;
+                inst = 0xFF000000 | ((mnem.codigo << 20) & 0x00F00000);
         }
     }else{
         printf("Error de sintaxis\n");
@@ -467,39 +468,20 @@ int tipoOperando(char vop[]){
     else
         return 2;//directo
 }
-/*void operandoIndirecto(char vop[], int* vopA){
-    int valor = 0;
-    char aux[20] = {'\0'};
-    char aux2[20] = {'\0'};
-    if (vop[2]=='+' || vop[2]=='-' || vop[3]=='+' || vop[3]=='-'){
-        for (int i = 4; i < strlen(vop); i++){
-            if (vop[i-1]=='+')
-                aux[i-4] = vop[i];
-            else if (vop[i-2]=='+' || vop[i-1]=='-')
-                aux[i-4] = vop[i-1];
-            else if (vop[i-2]=='-')
-                aux[i-4] = vop[i-2];
-        }
-        valor = anyToInt(aux, aux2);
-        //(valor << 4) & 0x00000FFF | *vopA;
-        *vopA = valor;
-    }
-}*/
 void operandoIndirecto(char vop[], int* valorReg,int *off,Label rotulos[],int cantRotulos,int *error){
     char reg[3];
-    reg[0]=vop[0]; //Puede ser EAX o AX
-    reg[1]=vop[1];
+    reg[0] = vop[0]; //Puede ser EAX o AX
+    reg[1] = vop[1];
     reg[2] = (vop[2]=='+' || vop[2]=='-') ? '\0': vop[2];
-    *valorReg=AEntero(reg); //no se si hay que hacerle desplazamiento
-
-    if(vop[2]=='-')
-        *off=((-1)*valorOpDirecto(vop+3,rotulos,cantRotulos,&(*error)))&0xFF;
+    *valorReg = AEntero(reg);
+    if(vop[2] == '-')
+        *off = ((-1)*valorOpDirecto(vop+3,rotulos,cantRotulos,&(*error)))&0xFF;
     else if (vop[3]=='-')
-        *off=((-1)*valorOpDirecto(vop+4,rotulos,cantRotulos,&(*error)))&0xFF;
+        *off = ((-1)*valorOpDirecto(vop+4,rotulos,cantRotulos,&(*error)))&0xFF;
     else if (vop[2]=='+')
-        *off=(valorOpDirecto(vop+3,rotulos,cantRotulos,&(*error)))&0xFF;
+        *off = (valorOpDirecto(vop+3,rotulos,cantRotulos,&(*error)))&0xFF;
     else if (vop[3]=='+')
-        *off=(valorOpDirecto(vop+4,rotulos,cantRotulos,&(*error)))&0xFF;
+        *off = (valorOpDirecto(vop+4,rotulos,cantRotulos,&(*error)))&0xFF;
 }
 int valorOpDirecto(char *s,Label rotulos[],int cantRotulos,int *error){
     int i;
@@ -515,6 +497,7 @@ int valorOpDirecto(char *s,Label rotulos[],int cantRotulos,int *error){
         else{
             printf("Rotulo indefinido\n");
             *error=1;
+            return -1;
         }
     }
     else
