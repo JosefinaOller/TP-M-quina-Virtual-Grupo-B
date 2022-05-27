@@ -10,7 +10,7 @@ void traduce(char[], Mnemonico[], int, char[]);
 void estructuraASM(char[], Linea[], int*, char[][100], int*, int[],int*,int*,int*);
 void procesarLinea(char[], char[], char[], char[], char[], char[], char[], char[]);
 void lecturaLabels(char*, Label[], int*, int*,char[],int *);
-int busquedaLabel(Label[], char[], int, int*);
+int busquedaLabel(Label[], char[], int);
 int codificaInstruccion(Linea, Mnemonico[], Label[], int, int*, int*, int*);
 int tipoOperando(char[]);
 void eliminaCorchetes(char[]);
@@ -98,7 +98,8 @@ void cargaVecMnem(Mnemonico vecMnem[]){ //Carga datos de mnenomicos
 void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcion que procesa las instrucciones,las imprime y genera el archivo binario
 
     FILE *archESCRITURA; //para el archivo binario
-    char listaComentarios[100][100],strings[100];
+    char listaComentarios[100][100],*strings;
+    strings=NULL;
     Label rotulos[100];
     Linea codigo[500];
     int i,cantRotulos=0,error=0,conLin=0,nComentarios=0,indicelinea[100],inst, wrgA, wrgB,kcom=0,nroLinea,data=1024,extra=1024,stack=1024;
@@ -141,7 +142,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
                     } //Si el flag de ocultamiento esta desactivado, muestro lineas
 
                 }
-                int cantStrings = nroLinea - conLin; //CONTROLAR
+                int cantStrings = sizeof(strings); //CONTROLAR!!!!!!!!!!!!!!!!!!!
                 for(i=0;i<cantStrings;i++){
                     fwrite(&strings[i],sizeof(int),1,archESCRITURA);
                 }
@@ -154,8 +155,9 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
             error=1;
             printf("Falta de memoria\n");
         }
+        fclose(archESCRITURA);
     }
-    fclose(archESCRITURA);
+
     if(error){ //Si hay error de traduccion, borro el archivo binario
         printf("Error de traduccion\n");
         remove(binario);
@@ -174,30 +176,30 @@ void estructuraASM(char nombAsm[],Linea codigo[],int *conLin,char listaComentari
             strcpy(rotulo,"");strcpy(mnem,"");strcpy(argA,"");strcpy(argB,"");strcpy(com,""); //los inicializo
             strcpy(seg,"");strcpy(size,"");
             procesarLinea(linea,rotulo,mnem,argA,argB,com,seg,size);
-            if(strcpy(seg,"")!=0){ //hay segmento
-                if(strcpy(seg,"DATA")){
-                    *data=atoi(size);
+            if(seg[1]=='A'){ //D"A"TA
+                *data=atoi(size);
+            }
+            else{
+                if(seg[1]=='X'){ //E"X"TRA
+                    *extra=atoi(size);
                 }
                 else{
-                    if(strcpy(seg,"EXTRA")){
-                        *extra=atoi(size);
+                    if(seg[1]=='T'){ //S"T"ACK
+                        *stack=atoi(size);
                     }
                     else{
-                        if(strcpy(seg,"STACK")){
-                            *stack=atoi(size);
+                        cargaLinea(rotulo,mnem,argA,argB,com,&codigo[*conLin]);
+                        if(strcmp(com,"")!=0 && strcmp(rotulo,"")==0  && strcmp(mnem,"")==0 && strcmp(argA,"")==0 && strcmp(argB,"")==0){
+                            strcpy(listaComentarios[*nComentarios],linea);
+                            indicelinea[(*nComentarios)++]=*conLin;
                         }
+                        if(strcmp(rotulo,"")!=0  || strcmp(mnem,"")!=0 || strcmp(argA,"")!=0 || strcmp(argB,"")!=0)
+                            (*conLin)++;
                     }
                 }
             }
-            else{
-                cargaLinea(rotulo,mnem,argA,argB,com,&codigo[*conLin]);
-                if(strcmp(com,"")!=0 && strcmp(rotulo,"")==0  && strcmp(mnem,"")==0 && strcmp(argA,"")==0 && strcmp(argB,"")==0){
-                    strcpy(listaComentarios[*nComentarios],linea);
-                    indicelinea[(*nComentarios)++]=*conLin;
-                }
-                if(strcmp(rotulo,"")!=0  || strcmp(mnem,"")!=0 || strcmp(argA,"")!=0 || strcmp(argB,"")!=0)
-                    (*conLin)++;
-                }
+
+
 
         } //while archivo
     }
@@ -255,7 +257,7 @@ void lecturaLabels(char *archivo,Label rotulos[],int *cantRotulos,int *error,cha
 
            if(strcmp(constante,"")!=0){ //Hay constante
                 mayuscula(constante);
-                if(busquedaLabel(rotulos,constante,*cantRotulos,error)==-1){ //No hau duplicado
+                if(busquedaLabel(rotulos,constante,*cantRotulos)==-1){ //No hau duplicado
                         strcpy(rotulos[*cantRotulos].etiqueta,constante);
                         switch(constante_valor[0]){
                         case '#':
@@ -306,14 +308,13 @@ void tratamiento_especial(char constante_valor[],Label rotulos[],int cantRotulos
     }
     strings[i-1]='\0';
 }
-int busquedaLabel(Label rotulos[],char etiqueta[],int cantRotulos,int *error){ //Para buscar la posicion del rotulo
+int busquedaLabel(Label rotulos[],char etiqueta[],int cantRotulos){ //Para buscar la posicion del rotulo
     int i=0;
     while(i<cantRotulos && strcmp(etiqueta,rotulos[i].etiqueta)!=0)
         i++;
     if (i<cantRotulos)
         return rotulos[i].codigo;
     else{
-        *error = 1;
         return -1;
     }
 }
@@ -495,12 +496,13 @@ int valorOpDirecto(char *s,Label rotulos[],int cantRotulos,int *error){
     else if(s[0]=='@'|| s[0]=='#' || s[0]=='%' || (s[0]>='0' && s[0]<='9') || s[0]=='-')
         return anyToInt(s,NULL);
     else if(strlen(s)>2) {
-        i= busquedaLabel(rotulos,s,cantRotulos,&(*error));
+        i= busquedaLabel(rotulos,s,cantRotulos);
         if(i!=-1){
             return i; //Faltaria el desplazamiento de CS
         }
         else{
             printf("Rotulo indefinido\n");
+            *error=1;
         }
     }
     else
