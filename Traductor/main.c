@@ -9,7 +9,7 @@ void cargaVecMnem(Mnemonico[]);
 void traduce(char[], Mnemonico[], int, char[]);
 void estructuraASM(char[], Linea[], int*, char[][100], int*, int[]);
 void procesarLinea(char[], char[], char[], char[], char[], char[]);
-void lecturaLabelsYSegmentos(char*, Label[], int*, int*,char[],int *,int *,int*,int*,int*);
+void lecturaLabelsYSegmentos(char*, Label[], int*, int*,char[],int *,int *,int*,int*,int*,char[][100],int *,int[]);
 int busquedaLabel(Label[], char[], int);
 int codificaInstruccion(Linea, Mnemonico[], Label[], int, int*, int*, int*);
 int tipoOperando(char[]);
@@ -98,20 +98,19 @@ void cargaVecMnem(Mnemonico vecMnem[]){ //Carga datos de mnenomicos
 void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcion que procesa las instrucciones,las imprime y genera el archivo binario
 
     FILE *archESCRITURA; //para el archivo binario
-    char listaComentarios[100][100],strings[100];
+    char lista[100][100],strings[100]; //lista incluye a las directivas,constantes y los comentarios
     Label rotulos[100];
     Linea codigo[500];
-    int i,cantRotulos=0,error=0,conLin=0,nComentarios=0,indicelinea[100],inst, wrgA, wrgB,kcom=0,nroLinea,data=1024,extra=1024,stack=1024,cantStrings=0;
-    lecturaLabelsYSegmentos(nombAsm,rotulos,&cantRotulos,&error,strings,&nroLinea,&cantStrings,&data,&extra,&stack); //para guardar los rotulos y su posicion, tambien para guardar las constantes.
+    int i,cantRotulos=0,error=0,conLin=0,nLista=0,indicelinea[100],inst, wrgA, wrgB,kcom=0,nroLinea,data=1024,extra=1024,stack=1024,cantStrings=0;
+    for(i=0;i<100;i++)
+            strcpy(lista[i],"");
+    lecturaLabelsYSegmentos(nombAsm,rotulos,&cantRotulos,&error,strings,&nroLinea,&cantStrings,&data,&extra,&stack,lista,&nLista,indicelinea); //para guardar los rotulos y su posicion, tambien para guardar las constantes.
     if(error)
         printf("Error de archivo\n");
     else{
-        for(i=0;i<100;i++)
-            strcpy(listaComentarios[i],"");
-
-        estructuraASM(nombAsm,codigo,&conLin,listaComentarios,&nComentarios,indicelinea); //procesa las instrucciones asm
+        estructuraASM(nombAsm,codigo,&conLin,lista,&nLista,indicelinea); //procesa las instrucciones asm
         if((data+extra+stack) <= (8192 - nroLinea)){ //Calculo de memoria
-            if(conLin>=0 || nComentarios>=0){
+            if(conLin>=0 || nLista>=0){
                 //empiezo a generar el archivo binario
                 archESCRITURA=fopen(binario,"wb");
                 //la cabecera
@@ -135,8 +134,8 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
                             fwrite(&inst,sizeof(int),1,archESCRITURA);
                     }
                     if(o){
-                       while(i==indicelinea[kcom] && strcmp(listaComentarios[kcom],"")!=0){
-                            printf("%3s\n",strtok(listaComentarios[kcom++],"\n"));
+                       while(i==indicelinea[kcom] && strcmp(lista[kcom],"")!=0){
+                            printf("%3s\n",strtok(lista[kcom++],"\n"));
                        }
                        salida(codigo[i], i, inst, wrgA, wrgB);
                     } //Si el flag de ocultamiento esta desactivado, muestro lineas
@@ -145,8 +144,8 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
                for(i=0;i<=cantStrings;i++){
                    fwrite(&strings[i],sizeof(int),1,archESCRITURA);
                 }
-                while(i==indicelinea[kcom] && strcmp(listaComentarios[kcom],"")!=0){
-                    printf("%3s\n",strtok(listaComentarios[kcom++],"\n"));
+                while(i==indicelinea[kcom] && strcmp(lista[kcom],"")!=0){
+                    printf("%3s\n",strtok(lista[kcom++],"\n"));
                 }
             }
         }
@@ -156,10 +155,6 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
         }
         fclose(archESCRITURA);
     }
-<<<<<<< HEAD
-
-=======
->>>>>>> e7d1158a73abbfc963180fb30365b965869cfce6
     if(error){ //Si hay error de traduccion, borro el archivo binario
         printf("Error de traduccion\n");
         remove(binario);
@@ -173,7 +168,6 @@ void estructuraASM(char nombAsm[],Linea codigo[],int *conLin,char listaComentari
     arch=fopen(nombAsm,"rt");
     if(arch!=NULL){
         *conLin=0;
-        *nComentarios=0;
         while(fgets(linea,500,arch)!=NULL){
             strcpy(rotulo,"");strcpy(mnem,"");strcpy(argA,"");strcpy(argB,"");strcpy(com,""); //los inicializo
             strcpy(seg,"");strcpy(size,"");
@@ -204,10 +198,12 @@ void procesarLinea(char linea[],char rotulo[],char mnem[],char argA[],char argB[
     strcpy(com,parsed[4] ? parsed[4] : "");
     freeline(parsed);
 }
-void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int *error,char strings[],int *nroLinea,int *cantStrings,int *data,int *extra,int *stack){
+void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int *error,char strings[],int *nroLinea,int *cantStrings,int *data,int *extra,int *stack,char lista[][100],int *nLista,int indiceLinea[]){
 
     FILE *arch=fopen(archivo,"rt");
     char linea[500],rotulo[16],mnem[5],constante[10],constante_valor[50],seg[5],size[5];
+    *nLista=0; //Para imprimir las directivas y equ
+    int numeroLinea=0;
     if(arch!=NULL){
         while(fgets(linea,500,arch)!=NULL){
            char **parsed = parseline(linea);
@@ -229,29 +225,46 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
                 (*nroLinea)++;
            if(strcmp(seg,"DATA")==0){
                 *data=atoi(size);
+                char *cadena;
+                strcpy(cadena,"\\DATA ");
+                strcat(cadena,size);
+                strcpy(lista[*nLista],cadena);
+                indiceLinea[(*nLista)++]=numeroLinea;
            }
            else{
             if(strcmp(seg,"EXTRA")==0){
                 *extra=atoi(size);
+                char *cadena;
+                strcpy(cadena,"\\EXTRA ");
+                strcat(cadena,size);
+                strcpy(lista[*nLista],cadena);
+                indiceLinea[(*nLista)++]=numeroLinea;
             }
             else{
-                if(strcmp(seg,"STACK")==0)
+                if(strcmp(seg,"STACK")==0){
                     *stack=atoi(size);
+                     char *cadena;
+                    strcpy(cadena,"\\STACK ");
+                    strcat(cadena,size);
+                    strcpy(lista[*nLista],cadena);
+                    indiceLinea[(*nLista)++]=numeroLinea;
+                }
+
             }
            }
+           numeroLinea++;
         }
         fclose(arch);
+        numeroLinea=0;
         FILE *arch=fopen(archivo,"rt");
         while(fgets(linea,500,arch)!=NULL){
              char **parsed = parseline(linea);
              strcpy(constante,parsed[7] ? parsed[7] : ""); //Constante
              strcpy(constante_valor,parsed[8] ? parsed[8] : ""); //Valor del constante
              freeline(parsed);
-
-
            if(strcmp(constante,"")!=0){ //Hay constante
                 mayuscula(constante);
-                if(busquedaLabel(rotulos,constante,*cantRotulos)==-1){ //No hau duplicado
+                if(busquedaLabel(rotulos,constante,*cantRotulos)==-1){ //No hay duplicado
                         strcpy(rotulos[*cantRotulos].etiqueta,constante);
                         switch(constante_valor[0]){
                         case '#':
@@ -276,6 +289,10 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
                             tratamiento_especial(constante_valor,rotulos,*cantRotulos,&(*nroLinea),strings,&(*cantStrings));
                             break;
                     }
+                    strcat(constante," EQU ");
+                    strcat(constante,constante_valor);
+                    strcpy(lista[*nLista],constante);
+                    indiceLinea[(*nLista)++]=numeroLinea;
                     (*cantRotulos)++;
              } //if no hay duplicado
              else{
@@ -283,6 +300,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
                 *error=1;
              }
            }
+           numeroLinea++;
          }
          fclose(arch);
     } //el archivo es null
