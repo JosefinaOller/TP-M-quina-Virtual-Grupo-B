@@ -145,7 +145,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
                    fwrite(&strings[j],sizeof(int),1,archESCRITURA);
                 }
                 while(i==indicelinea[kcom] && strcmp(lista[kcom],"")!=0){
-                    printf("%s\n",strtok(lista[kcom++],"\n"));
+                    printf("%3s\n",strtok(lista[kcom++],"\n"));
                 }
             }
         }
@@ -226,7 +226,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
            if(strcmp(seg,"DATA")==0){
                 *data=atoi(size);
                 char cadena[50];
-                strcpy(cadena,"\\DATA ");
+                strcpy(cadena,"\\\\DATA ");
                 strcat(cadena,size);
                 strcpy(lista[*nLista],cadena);
                 indiceLinea[(*nLista)++]=numeroLinea;
@@ -235,7 +235,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
             if(strcmp(seg,"EXTRA")==0){
                 *extra=atoi(size);
                 char cadena[50];
-                strcpy(cadena,"\\EXTRA ");
+                strcpy(cadena,"\\\\EXTRA ");
                 strcat(cadena,size);
                 strcpy(lista[*nLista],cadena);
                 indiceLinea[(*nLista)++]=numeroLinea;
@@ -244,7 +244,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
                 if(strcmp(seg,"STACK")==0){
                     *stack=atoi(size);
                      char cadena[50];
-                    strcpy(cadena,"\\STACK ");
+                    strcpy(cadena,"\\\\STACK ");
                     strcat(cadena,size);
                     strcpy(lista[*nLista],cadena);
                     indiceLinea[(*nLista)++]=numeroLinea;
