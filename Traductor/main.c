@@ -141,11 +141,11 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
                     } //Si el flag de ocultamiento esta desactivado, muestro lineas
 
                 }
-               for(i=0;i<=cantStrings;i++){
-                   fwrite(&strings[i],sizeof(int),1,archESCRITURA);
+               for(int j=0;j<=cantStrings;j++){
+                   fwrite(&strings[j],sizeof(int),1,archESCRITURA);
                 }
                 while(i==indicelinea[kcom] && strcmp(lista[kcom],"")!=0){
-                    printf("%3s\n",strtok(lista[kcom++],"\n"));
+                    printf("%s\n",strtok(lista[kcom++],"\n"));
                 }
             }
         }
@@ -225,7 +225,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
                 (*nroLinea)++;
            if(strcmp(seg,"DATA")==0){
                 *data=atoi(size);
-                char *cadena;
+                char cadena[50];
                 strcpy(cadena,"\\DATA ");
                 strcat(cadena,size);
                 strcpy(lista[*nLista],cadena);
@@ -234,7 +234,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
            else{
             if(strcmp(seg,"EXTRA")==0){
                 *extra=atoi(size);
-                char *cadena;
+                char cadena[50];
                 strcpy(cadena,"\\EXTRA ");
                 strcat(cadena,size);
                 strcpy(lista[*nLista],cadena);
@@ -243,7 +243,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
             else{
                 if(strcmp(seg,"STACK")==0){
                     *stack=atoi(size);
-                     char *cadena;
+                     char cadena[50];
                     strcpy(cadena,"\\STACK ");
                     strcat(cadena,size);
                     strcpy(lista[*nLista],cadena);
