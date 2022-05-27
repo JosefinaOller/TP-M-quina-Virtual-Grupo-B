@@ -57,7 +57,6 @@ void MOV(Memoria *memoria, OperandosYFlags op)
         {
             memoria->RAM[op.segmento.ss + op.operandoA[4]] = op.operandoB[0];
         }
-
     }
 
 }
@@ -351,8 +350,8 @@ void SWAP(Memoria *memoria, OperandosYFlags op)
         }
         else if ((op.operandoA[1] == 3) && (op.operandoB[1] == 3)) //Ambos son de tipo indirecto
         {
-            memoria->RAM[op.operandoA[4] + op.segmento.actualA] = op.operandoB[0];
-            memoria->RAM[op.operandoB[4] + op.segmento.actualB] = op.operandoA[0];
+            memoria->RAM[op.operandoA[4] + (memoria->VectorDeRegistros[op.segmento.actualA] & 0xFFFF)] = op.operandoB[0];
+            memoria->RAM[op.operandoB[4] + (memoria->VectorDeRegistros[op.segmento.actualB] & 0xFFFF)] = op.operandoA[0];
         }
         else if ((op.operandoA[1] == 1) && (op.operandoB[1] == 2)) //A tipo de registro y B tipo directo
         {
@@ -394,7 +393,7 @@ void SWAP(Memoria *memoria, OperandosYFlags op)
             {
                 //Si el operando A es de 4 bytes
                 memoria->VectorDeRegistros[op.operandoA[3]] = op.operandoB[0];
-                memoria->RAM[op.operandoB[4] + op.segmento.actualB] = op.operandoA[0];
+                memoria->RAM[op.operandoB[4] + (memoria->VectorDeRegistros[op.segmento.actualB] & 0xFFFF)] = op.operandoA[0];
             }
             else if (op.operandoA[2] == 1)
             {
@@ -402,7 +401,7 @@ void SWAP(Memoria *memoria, OperandosYFlags op)
 
                 memoria->VectorDeRegistros[op.operandoA[3]]&= 0xFFFFFF00;
                 memoria->VectorDeRegistros[op.operandoA[3]]+= op.operandoB[0] & 0xFF;
-                memoria->RAM[op.operandoB[4] + op.segmento.actualB] = op.operandoA[0] & 0xFF;
+                memoria->RAM[op.operandoB[4] + (memoria->VectorDeRegistros[op.segmento.actualB] & 0xFFFF)] = op.operandoA[0] & 0xFF;
             }
             else if (op.operandoA[2] == 2)
             {
@@ -410,7 +409,7 @@ void SWAP(Memoria *memoria, OperandosYFlags op)
 
                 memoria->VectorDeRegistros[op.operandoA[3]] &= 0xFFFF00FF;
                 memoria->VectorDeRegistros[op.operandoA[3]] += (op.operandoB[0] & 0xFF) * 0x100;
-                memoria->RAM[op.operandoB[4] + op.segmento.actualB] = ( op.operandoA[0] & 0xFF00) / 0x100;
+                memoria->RAM[op.operandoB[4] + (memoria->VectorDeRegistros[op.segmento.actualB] & 0xFFFF)] = ( op.operandoA[0] & 0xFF00) / 0x100;
             }
             else if (op.operandoA[2] == 3)
             {
@@ -418,7 +417,7 @@ void SWAP(Memoria *memoria, OperandosYFlags op)
 
                 memoria->VectorDeRegistros[op.operandoA[3]] &= 0xFFFF0000;
                 memoria->VectorDeRegistros[op.operandoA[3]] += op.operandoB[0] & 0xFFFF;
-                memoria->RAM[op.operandoB[4] + op.segmento.actualB] = op.operandoA[0] & 0xFFFF;
+                memoria->RAM[op.operandoB[4] + (memoria->VectorDeRegistros[op.segmento.actualB] & 0xFFFF)] = op.operandoA[0] & 0xFFFF;
             }
         }
         else if ((op.operandoA[1] == 2) && (op.operandoB[1] == 1))//A tipo directo y B tipo de registro
@@ -445,7 +444,7 @@ void SWAP(Memoria *memoria, OperandosYFlags op)
         }
         else if ((op.operandoA[1] == 3) && (op.operandoB[1] == 1))//A tipo indirecto y B tipo de registro
         {
-            memoria->RAM[op.operandoA[4] + op.segmento.actualA] = op.operandoB[0];
+            memoria->RAM[op.operandoA[4] + (memoria->VectorDeRegistros[op.segmento.actualA] & 0xFFFF)] = op.operandoB[0];
 
             if (op.operandoB[2] == 0) //4 bytes
                 memoria->VectorDeRegistros[op.operandoB[3]] = op.operandoA[0];
@@ -468,11 +467,11 @@ void SWAP(Memoria *memoria, OperandosYFlags op)
         else if ((op.operandoA[1] == 2) && (op.operandoB[1] == 3))//A tipo directo y B tipo indirecto
         {
             memoria->RAM[op.operandoA[4] + op.segmento.ds] = op.operandoB[0];
-            memoria->RAM[op.operandoB[4] + op.segmento.actualB] = op.operandoA[0];
+            memoria->RAM[op.operandoB[4] + (memoria->VectorDeRegistros[op.segmento.actualB] & 0xFFFF)] = op.operandoA[0];
         }
         else if ((op.operandoA[1] == 3) && (op.operandoB[1] == 2))//A tipo indirecto y B tipo directo
         {
-            memoria->RAM[op.operandoA[4] + op.segmento.actualA] = op.operandoB[0];
+            memoria->RAM[op.operandoA[4] + (memoria->VectorDeRegistros[op.segmento.actualA] & 0xFFFF)] = op.operandoB[0];
             memoria->RAM[op.operandoB[4] + op.segmento.ds] = op.operandoA[0];
         }
     }
@@ -1214,12 +1213,12 @@ void SLEN(Memoria *memoria, OperandosYFlags op)
     if (!(op.operandoA[1]==0 || op.operandoB[1]==0 || op.operandoB[1]==1))
     {
         //Primero se calcula la longitud del string
-        aux = memoria->RAM[op.segmento.actualB + op.operandoB[4]];
+        aux = memoria->RAM[(memoria->VectorDeRegistros[op.segmento.actualB] & 0xFFFF) + op.operandoB[4]];
         while (aux!=0)
         {
             length++;
             op.operandoB[4]++;
-            aux = memoria->RAM[op.segmento.actualB + op.operandoB[4]];
+            aux = memoria->RAM[(memoria->VectorDeRegistros[op.segmento.actualB] & 0xFFFF) + op.operandoB[4]];
         }
 
         //Luego se almacena la longitud
@@ -1258,6 +1257,7 @@ void SLEN(Memoria *memoria, OperandosYFlags op)
         }
         else if (op.operandoA[1] == 3)
         {
+            //Si A es indirecto
             if (op.segmento.actualA == 0)  //DS
             {
                 memoria->RAM[op.segmento.ds + op.operandoA[4]] = length;
@@ -1280,15 +1280,15 @@ void SMOV(Memoria *memoria, OperandosYFlags op)
 
     if (!(op.operandoA[1]==0 || op.operandoA[1]==1 || op.operandoB[1]==0 || op.operandoB[1]==1))
     {
-        aux = memoria->RAM[op.segmento.actualB + op.operandoB[4]];
+        aux = memoria->RAM[(memoria->VectorDeRegistros[op.segmento.actualB] & 0xFFFF) + op.operandoB[4]];
         while (aux!=0)
         {
-            memoria->RAM[op.segmento.actualA + op.operandoA[4]] = aux;
+            memoria->RAM[(memoria->VectorDeRegistros[op.segmento.actualA] & 0xFFFF) + op.operandoA[4]] = aux;
             op.operandoB[4]++;
             op.operandoA[4]++;
-            aux = memoria->RAM[op.segmento.actualB + op.operandoB[4]];
+            aux = memoria->RAM[(memoria->VectorDeRegistros[op.segmento.actualB] & 0xFFFF) + op.operandoB[4]];
         }
-        memoria->RAM[op.segmento.actualA + op.operandoA[4]] = 0;
+        memoria->RAM[(memoria->VectorDeRegistros[op.segmento.actualA] & 0xFFFF) + op.operandoA[4]] = 0;
     }
 
 }
@@ -1301,7 +1301,9 @@ void SCMP(Memoria *memoria, OperandosYFlags op)
     {
         while (cc==0)
         {
-            aux = memoria->RAM[op.segmento.actualA + op.operandoA[4]] - memoria->RAM[op.segmento.actualB + op.operandoB[4]];
+            aux = memoria->RAM[(memoria->VectorDeRegistros[op.segmento.actualA] & 0xFFFF) + op.operandoA[4]]
+            - memoria->RAM[(memoria->VectorDeRegistros[op.segmento.actualB] & 0xFFFF) + op.operandoB[4]];
+
             if (aux<0)
                 cc = -1;
             else if (aux>0)
@@ -1370,6 +1372,7 @@ void SYS1(Memoria *memoria, OperandosYFlags op)
     int seg, finSeg;
     int i,j;
     int aux;
+    int tope;
 
     aux = memoria->VectorDeRegistros[13] / 0x10000;
     if (aux == 0)
@@ -1394,6 +1397,8 @@ void SYS1(Memoria *memoria, OperandosYFlags op)
     }
 
     i = edx + seg;
+    tope = i+cx;
+
 
     if (inputMode == 1)
     {
@@ -1404,10 +1409,8 @@ void SYS1(Memoria *memoria, OperandosYFlags op)
         if (prompt == 0)
             printf("[%04d]: ", i);
 
-        fgets(sAux,cx,stdin);
-        //scanf("%[^\n]%*c",sAux); ELIMINAR SI ANDA LO ANTERIOR
-
-        while ((i<finSeg) && (j<strlen(sAux)) && (i <= (i + cx)))
+        fgets(sAux,cx+1,stdin);
+        while ((i<finSeg) && (j<strlen(sAux)) && (i <= tope))
         {
             memoria->RAM[i] = sAux[j];
             i++;
@@ -1418,19 +1421,12 @@ void SYS1(Memoria *memoria, OperandosYFlags op)
             op.error=1;
             printf("Segmentation Fault");
         }
-        else if (j == strlen(sAux))
-        {
-            memoria->RAM[i] = 0;
-        }
-        else
-            memoria->RAM[i-1] = 0;
-
     }
     else
     {
         tipoDato = (ax & 0xF);
 
-        while ((i<finSeg) && (i < (i + cx)))
+        while ((i<finSeg) && (i < tope))
         {
             if (prompt == 0)
                 printf("[%04d]: ", i);
@@ -1467,6 +1463,7 @@ void SYS2(Memoria *memoria, OperandosYFlags op)
     int i;
     int aux;
     int seg;
+    int tope;
 
     aux = memoria->VectorDeRegistros[13] / 0x10000;
     if (aux == 0)
@@ -1479,8 +1476,9 @@ void SYS2(Memoria *memoria, OperandosYFlags op)
         seg = op.segmento.cs;
 
     i = edx + seg;
+    tope = i+cx;
 
-    while (i<i+cx)
+    while (i<tope)
     {
         if (prompt == 0)
             printf("[%04d]: ",i);
@@ -1500,8 +1498,6 @@ void SYS2(Memoria *memoria, OperandosYFlags op)
             printf("%d ",memoria->RAM[i]);
         if ( endline == 0 )
             printf("\n");
-        else if (endline == 1)
-            prompt = 1;
 
         i++;
     }
@@ -1548,8 +1544,8 @@ void SYS3(Memoria *memoria, OperandosYFlags op)
 
 
     if ((ax && 0x800) == 0)
-        printf("[%d]: ",i);
-    strcpy(cad,fgets(cad,cx,stdin));
+        printf("[%04d]: ",i);
+    strcpy(cad,fgets(cad,cx+1,stdin));
     cadLength = strlen(cad);
 
     while ( (i<finSeg) && (i<(edx + seg + cx)) && (j<cadLength) )
@@ -1594,13 +1590,13 @@ void SYS4(Memoria *memoria, OperandosYFlags op)
 
     i = edx + seg; //Me muevo por ram
 
-    if ((ax && 0x800) == 0)
-        printf("[%d]: ",i);
+    if ((ax & 0x800) == 0)
+        printf("[%04d]: ",i);
 
     while ( memoria->RAM[i] != 0 )
         printf("%c",memoria->RAM[i++]);
 
-    if ( (ax && 0x100) == 0 )
+    if ( (ax & 0x100) == 0 )
         printf("\n");
 
 }
@@ -1776,7 +1772,7 @@ void SYSF(Memoria *memoria, OperandosYFlags op)
         if (op.flags[2]==1)
             disassembler(*memoria, op);
 
-        printf("[%04d]: ",memoria->VectorDeRegistros[5] - 1);
+        printf("[%04d] cmd: ",memoria->VectorDeRegistros[5] - 1);
 
         scanf("%[^\n]s%*c",sAux);
 
@@ -1820,7 +1816,7 @@ void SYSF(Memoria *memoria, OperandosYFlags op)
                     dirMemoria++;
                 }
             }
-            printf("[%04d]: ",memoria->VectorDeRegistros[5] - 1);
+            printf("[%04d] cmd: ",memoria->VectorDeRegistros[5] - 1);
             fflush(stdin);
             scanf("%[^\n]%*c",sAux);
         }
@@ -2137,6 +2133,15 @@ void imprimeMnemonico(int cod)
     case 0x0B:
         strcpy(aux,"XOR");
         break;
+    case 0x0C:
+        strcpy(aux,"SLEN");
+        break;
+    case 0x0D:
+        strcpy(aux,"SMOV");
+        break;
+    case 0x0E:
+        strcpy(aux,"SCMP");
+        break;
     case 0xF0:
         strcpy(aux,"SYS");
         break;
@@ -2173,6 +2178,18 @@ void imprimeMnemonico(int cod)
     case 0xFB:
         strcpy(aux,"NOT");
         break;
+    case 0xFC:
+        strcpy(aux,"PUSH");
+        break;
+    case 0xFD:
+        strcpy(aux,"POP");
+        break;
+    case 0xFE:
+        strcpy(aux,"CALL");
+        break;
+    case 0xFF0:
+        strcpy(aux,"RET");
+        break;
     case 0xFF1:
         strcpy(aux,"STOP");
         break;
@@ -2189,8 +2206,26 @@ void stringRegistro(int op[],char aux[])
         case 0:
             strcpy(aux,"DS");
             break;
+        case 1:
+            strcpy(aux,"SS");
+            break;
+        case 2:
+            strcpy(aux,"ES");
+            break;
+        case 3:
+            strcpy(aux,"CS");
+            break;
+        case 4:
+            strcpy(aux,"HP");
+            break;
         case 5:
             strcpy(aux,"IP");
+            break;
+        case 6:
+            strcpy(aux,"SP");
+            break;
+        case 7:
+            strcpy(aux,"BP");
             break;
         case 8:
             strcpy(aux,"CC");
@@ -2315,7 +2350,7 @@ void stringRegistro(int op[],char aux[])
 
 void imprimeOperandos(OperandosYFlags op,int cod,int instruccion)
 {
-    char aux[6];
+    char aux[10], offset[10];
     int dir;
 
     if (cod<0xF)  //2 operandos
@@ -2338,6 +2373,15 @@ void imprimeOperandos(OperandosYFlags op,int cod,int instruccion)
             dir = (instruccion & 0xFFF000)/0x1000;
             printf("%10c%d], ",'[',dir);
         }
+        else if (op.operandoA[1]==3)
+        {
+            //Indirecto
+            stringRegistro(op.operandoA,aux);
+            strcat(aux, "+");
+            itoa(op.operandoA[5], offset, 10);
+            strcat(aux, offset);
+            printf("%10c%s], ",'[',aux);
+        }
 
         //Segundo operando
         if (op.operandoB[1]==0)
@@ -2356,6 +2400,15 @@ void imprimeOperandos(OperandosYFlags op,int cod,int instruccion)
             //Directo
             dir = (instruccion & 0xFFF);
             printf("[%d]",dir);
+        }
+        else if (op.operandoB[1]==3)
+        {
+            //Indirecto
+            stringRegistro(op.operandoB,aux);
+            strcat(aux, "+");
+            itoa(op.operandoB[5], offset, 10);
+            strcat(aux, offset);
+            printf("[%s]",aux);
         }
 
     }
@@ -2379,14 +2432,23 @@ void imprimeOperandos(OperandosYFlags op,int cod,int instruccion)
             dir = (instruccion & 0xFFFF);
             printf("%10c%d]",'[',dir);
         }
+        else if (op.operandoA[1]==3)
+        {
+            //Indirecto
+            stringRegistro(op.operandoA,aux);
+            strcat(aux, "+");
+            itoa(op.operandoA[5], offset, 10);
+            strcat(aux, offset);
+            printf("[%10s]",aux);
+        }
 
     } //No imprime nada con 0 operandos
 }
 
 void imprimeEstadoRegistros(int vecR[])
 {
-    printf(" DS:%12d | %15c | %15c | %15c |\n",vecR[0],' ',' ',' ');
-    printf(" %15c | IP:%12d | %15c | %15c |\n",' ',vecR[5]-1,' ',' ');
+    printf(" DS:%12d | SS:%12d | ES:%12d | CS:%12d |\n",vecR[0],vecR[1], vecR[2], vecR[3]);
+    printf(" HP:%12d | IP:%12d | SP:%12d | BP:%12d |\n",vecR[4],vecR[5]-1,vecR[6],vecR[7]);
     printf(" CC:%12d | AC:%12d |EAX:%12d |EBX:%12d |\n",vecR[8],vecR[9],vecR[10],vecR[11]);
     printf("ECX:%12d |EDX:%12d |EEX:%12d |EFX:%12d |\n",vecR[12],vecR[13],vecR[14],vecR[15]);
 }

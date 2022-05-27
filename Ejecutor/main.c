@@ -26,34 +26,53 @@ int main(int argc, char *argv[])
 
     inicializaRegistros(&memoria,op);
 
-    memoria.VectorDeRegistros[3] = 0x00C80000;//CS
-    memoria.VectorDeRegistros[0] = 0x00C800C8;//DS
-    memoria.VectorDeRegistros[2] = 0x00C80190;//ES
-    memoria.VectorDeRegistros[1] = 0x00C80258;//SS
-    memoria.VectorDeRegistros[6] = 0x00010000 + ((op.segmento.finSS+1) & 0xFFFF); //SP
+    /*
+    MOV BH, 2
+    MOV BL, 5
+    MOV [EAX+5], [EBX+5]
+    */
+
+    memoria.VectorDeRegistros[3] = 0x00C80000;//CS 0
+    memoria.VectorDeRegistros[0] = 0x00C800C8;//DS 200
+    memoria.VectorDeRegistros[2] = 0x00C80190;//ES 400
+    memoria.VectorDeRegistros[1] = 0x00C80258;//SS 600
 
     op.segmento.ds = memoria.VectorDeRegistros[0]&0xFFFF;
     op.segmento.es = memoria.VectorDeRegistros[2]&0xFFFF;
     op.segmento.ss = memoria.VectorDeRegistros[1]&0xFFFF;
     op.segmento.finSS = (memoria.VectorDeRegistros[1]&0xFFFF) + (memoria.VectorDeRegistros[1]/0x10000);
+    memoria.VectorDeRegistros[6] = 0x00010000 + ((op.segmento.finSS+1) & 0xFFFF); //SP
 
-    memoria.VectorDeRegistros[10] = 0x00000005;
+    memoria.VectorDeRegistros[10] = 0x00000005; //EAX
+    memoria.VectorDeRegistros[11] = 0x00020005; //EBX
 
-    memoria.RAM[201] = 150;
-    memoria.RAM[202] = 100;
-    memoria.RAM[210] = 999;
-    memoria.RAM[410] = 198;
-    memoria.RAM[610] = 100;
+    memoria.RAM[210] = 97;
+    memoria.RAM[211] = 98;
+    memoria.RAM[212] = 99;
+    memoria.RAM[213] = 100;
+    memoria.RAM[214] = 0;
 
-    int inst = 0x1C05A801;
+    memoria.RAM[410] = 98;
+    memoria.RAM[411] = 99;
+    memoria.RAM[412] = 67;
+    memoria.RAM[413] = 68;
+    memoria.RAM[414] = 0;
+
+    int inst = 0xEF05A05B;
+    //int inst = 0xCC05A05B;
 
     cod = decodificaCodigo(inst);
     decodificaOperandos(memoria,cod,inst,&op);
+    vecF[cod](&memoria,op);
     //printf("Cod: %X\n",cod);
     //printf("OPb[0]: %d | OPa[0]: %d\n",op.operandoB[0],op.operandoA[0]);
-
-    vecF[cod](&memoria,op);
-    printf("ADD? : %d\n",memoria.RAM[210]);
+    printf("cc: %d",memoria.VectorDeRegistros[8]);
+    /*printf("smov : %c\n",memoria.RAM[210]);
+    printf("smov : %c\n",memoria.RAM[211]);
+    printf("smov : %c\n",memoria.RAM[212]);
+    printf("smov : %c\n",memoria.RAM[213]);
+    printf("smov : %d\n",memoria.RAM[214]);*/
+    //printf("JMP: %d\n",memoria.VectorDeRegistros[5]);
 
     //-----------------------------------------
     /*
