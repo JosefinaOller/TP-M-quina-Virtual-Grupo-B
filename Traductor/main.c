@@ -7,10 +7,10 @@
 
 void cargaVecMnem(Mnemonico[]);
 void traduce(char[], Mnemonico[], int, char[]);
-void estructuraASM(char[], Linea[], int*, char[][100], int*, int[],int*,int*,int*);
-void procesarLinea(char[], char[], char[], char[], char[], char[], char[], char[]);
-void lecturaLabels(char*, Label[], int*, int*,char[],int *);
-int busquedaLabel(Label[], char[], int, int*);
+void estructuraASM(char[], Linea[], int*, char[][100], int*, int[]);
+void procesarLinea(char[], char[], char[], char[], char[], char[]);
+void lecturaLabelsYSegmentos(char*, Label[], int*, int*,char[],int *,int *,int*,int*,int*);
+int busquedaLabel(Label[], char[], int);
 int codificaInstruccion(Linea, Mnemonico[], Label[], int, int*, int*, int*);
 int tipoOperando(char[]);
 void eliminaCorchetes(char[]);
@@ -19,7 +19,7 @@ int AEntero(char[]);
 void truncamiento(int, int*, int*);
 void salida(Linea, int, int, int, int);
 void mayuscula(char[]);
-void tratamiento_especial(char [],Label[],int,int *,char[]);
+void tratamiento_especial(char [],Label[],int,int *,char[],int *);
 
 
 int main(int argc, const char *argv[]){
@@ -101,15 +101,15 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
     char listaComentarios[100][100],strings[100];
     Label rotulos[100];
     Linea codigo[500];
-    int i,cantRotulos=0,error=0,conLin=0,nComentarios=0,indicelinea[100],inst, wrgA, wrgB,kcom=0,nroLinea,data=1024,extra=1024,stack=1024;
-    lecturaLabels(nombAsm,rotulos,&cantRotulos,&error,strings,&nroLinea); //para guardar los rotulos y su posicion, tambien para guardar las constantes.
+    int i,cantRotulos=0,error=0,conLin=0,nComentarios=0,indicelinea[100],inst, wrgA, wrgB,kcom=0,nroLinea,data=1024,extra=1024,stack=1024,cantStrings=0;
+    lecturaLabelsYSegmentos(nombAsm,rotulos,&cantRotulos,&error,strings,&nroLinea,&cantStrings,&data,&extra,&stack); //para guardar los rotulos y su posicion, tambien para guardar las constantes.
     if(error)
         printf("Error de archivo\n");
     else{
         for(i=0;i<100;i++)
             strcpy(listaComentarios[i],"");
 
-        estructuraASM(nombAsm,codigo,&conLin,listaComentarios,&nComentarios,indicelinea,&data,&extra,&stack); //procesa las instrucciones asm
+        estructuraASM(nombAsm,codigo,&conLin,listaComentarios,&nComentarios,indicelinea); //procesa las instrucciones asm
         if((data+extra+stack) <= (8192 - nroLinea)){ //Calculo de memoria
             if(conLin>=0 || nComentarios>=0){
                 //empiezo a generar el archivo binario
@@ -120,7 +120,8 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
                 fwrite(&data,sizeof(int),1,archESCRITURA); //DS
                 fwrite(&stack,sizeof(int),1,archESCRITURA); //SS
                 fwrite(&extra,sizeof(int),1,archESCRITURA); //ES
-                fwrite(&nroLinea,sizeof(int),1,archESCRITURA); //CS
+                int cs = nroLinea + cantStrings;
+                fwrite(&cs,sizeof(int),1,archESCRITURA); //CS
                 header=0x562E3232;
                 fwrite(&header,sizeof(int),1,archESCRITURA); //V.22
 
@@ -141,9 +142,8 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
                     } //Si el flag de ocultamiento esta desactivado, muestro lineas
 
                 }
-                int cantStrings = nroLinea - conLin; //CONTROLAR
-                for(i=0;i<cantStrings;i++){
-                    fwrite(&strings[i],sizeof(int),1,archESCRITURA);
+               for(i=0;i<=cantStrings;i++){
+                   fwrite(&strings[i],sizeof(int),1,archESCRITURA);
                 }
                 while(i==indicelinea[kcom] && strcmp(listaComentarios[kcom],"")!=0){
                     printf("%3s\n",strtok(listaComentarios[kcom++],"\n"));
@@ -156,13 +156,17 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
         }
         fclose(archESCRITURA);
     }
+<<<<<<< HEAD
+
+=======
+>>>>>>> e7d1158a73abbfc963180fb30365b965869cfce6
     if(error){ //Si hay error de traduccion, borro el archivo binario
         printf("Error de traduccion\n");
         remove(binario);
     }
 }
 
-void estructuraASM(char nombAsm[],Linea codigo[],int *conLin,char listaComentarios[][100],int *nComentarios,int indicelinea[],int *data,int *extra,int *stack){
+void estructuraASM(char nombAsm[],Linea codigo[],int *conLin,char listaComentarios[][100],int *nComentarios,int indicelinea[]){
 
     FILE *arch;
     char linea[500],rotulo[10],mnem[5],argA[16],argB[16],com[100],seg[5],size[4];
@@ -173,39 +177,21 @@ void estructuraASM(char nombAsm[],Linea codigo[],int *conLin,char listaComentari
         while(fgets(linea,500,arch)!=NULL){
             strcpy(rotulo,"");strcpy(mnem,"");strcpy(argA,"");strcpy(argB,"");strcpy(com,""); //los inicializo
             strcpy(seg,"");strcpy(size,"");
-            procesarLinea(linea,rotulo,mnem,argA,argB,com,seg,size);
-            if(strcpy(seg,"")!=0){ //hay segmento
-                if(strcpy(seg,"DATA")){
-                    *data=atoi(size);
-                }
-                else{
-                    if(strcpy(seg,"EXTRA")){
-                        *extra=atoi(size);
-                    }
-                    else{
-                        if(strcpy(seg,"STACK")){
-                            *stack=atoi(size);
-                        }
-                    }
-                }
-            }
-            else{
-                cargaLinea(rotulo,mnem,argA,argB,com,&codigo[*conLin]);
-                if(strcmp(com,"")!=0 && strcmp(rotulo,"")==0  && strcmp(mnem,"")==0 && strcmp(argA,"")==0 && strcmp(argB,"")==0){
+            procesarLinea(linea,rotulo,mnem,argA,argB,com);
+            cargaLinea(rotulo,mnem,argA,argB,com,&codigo[*conLin]);
+            if(strcmp(com,"")!=0 && strcmp(rotulo,"")==0  && strcmp(mnem,"")==0 && strcmp(argA,"")==0 && strcmp(argB,"")==0){
                     strcpy(listaComentarios[*nComentarios],linea);
                     indicelinea[(*nComentarios)++]=*conLin;
-                }
-                if(strcmp(rotulo,"")!=0  || strcmp(mnem,"")!=0 || strcmp(argA,"")!=0 || strcmp(argB,"")!=0)
-                    (*conLin)++;
-                }
-
+            }
+            if(strcmp(rotulo,"")!=0  || strcmp(mnem,"")!=0 || strcmp(argA,"")!=0 || strcmp(argB,"")!=0)
+                (*conLin)++;
         } //while archivo
     }
     else
         printf("%s","ERROR DE ARCHIVO");
     fclose(arch);
 }
-void procesarLinea(char linea[],char rotulo[],char mnem[],char argA[],char argB[],char com[],char seg[],char size[]){ //Separa todos los terminos de la instruccion
+void procesarLinea(char linea[],char rotulo[],char mnem[],char argA[],char argB[],char com[]){ //Separa todos los terminos de la instruccion
 
     //Utilizamos el parser de Franco, gracias por tanto crack!!
 
@@ -216,22 +202,20 @@ void procesarLinea(char linea[],char rotulo[],char mnem[],char argA[],char argB[
     strcpy(argA,parsed[2] ? parsed[2] : "");
     strcpy(argB,parsed[3] ? parsed[3] : "");
     strcpy(com,parsed[4] ? parsed[4] : "");
-    strcpy(seg,parsed[5] ? parsed[5] : "");
-    strcpy(size,parsed[6] ? parsed[6] : "");
-
     freeline(parsed);
 }
-void lecturaLabels(char *archivo,Label rotulos[],int *cantRotulos,int *error,char strings[],int *nroLinea){
+void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int *error,char strings[],int *nroLinea,int *cantStrings,int *data,int *extra,int *stack){
 
     FILE *arch=fopen(archivo,"rt");
-    char linea[500],rotulo[16],mnem[5],constante[10],constante_valor[50];
+    char linea[500],rotulo[16],mnem[5],constante[10],constante_valor[50],seg[5],size[5];
     if(arch!=NULL){
         while(fgets(linea,500,arch)!=NULL){
            char **parsed = parseline(linea);
 
            strcpy(rotulo,parsed[0] ? parsed[0] : ""); //Rotulo
            strcpy(mnem,parsed[1] ? parsed[1] : ""); //Mnemonico, es para ver si existe para sumar la cantidad de lineas
-
+           strcpy(seg,parsed[5] ? parsed[5] : ""); //seg
+           strcpy(size,parsed[6] ? parsed[6] : ""); //size
            freeline(parsed);
 
            if(strcmp(rotulo,"")!=0){ //Hay rotulo
@@ -243,6 +227,18 @@ void lecturaLabels(char *archivo,Label rotulos[],int *cantRotulos,int *error,cha
            }
            else if(strcmp(mnem,"")!=0)
                 (*nroLinea)++;
+           if(strcmp(seg,"DATA")==0){
+                *data=atoi(size);
+           }
+           else{
+            if(strcmp(seg,"EXTRA")==0){
+                *extra=atoi(size);
+            }
+            else{
+                if(strcmp(seg,"STACK")==0)
+                    *stack=atoi(size);
+            }
+           }
         }
         fclose(arch);
         FILE *arch=fopen(archivo,"rt");
@@ -255,7 +251,7 @@ void lecturaLabels(char *archivo,Label rotulos[],int *cantRotulos,int *error,cha
 
            if(strcmp(constante,"")!=0){ //Hay constante
                 mayuscula(constante);
-                if(busquedaLabel(rotulos,constante,*cantRotulos,error)==-1){ //No hau duplicado
+                if(busquedaLabel(rotulos,constante,*cantRotulos)==-1){ //No hau duplicado
                         strcpy(rotulos[*cantRotulos].etiqueta,constante);
                         switch(constante_valor[0]){
                         case '#':
@@ -277,7 +273,7 @@ void lecturaLabels(char *archivo,Label rotulos[],int *cantRotulos,int *error,cha
                             sscanf(constante_valor+1,"%d",&(rotulos[*cantRotulos].codigo));
                             break;
                         case '"': //Tratamiento especial
-                            tratamiento_especial(constante_valor,rotulos,*cantRotulos,&(*nroLinea),strings);
+                            tratamiento_especial(constante_valor,rotulos,*cantRotulos,&(*nroLinea),strings,&(*cantStrings));
                             break;
                     }
                     (*cantRotulos)++;
@@ -296,24 +292,23 @@ void lecturaLabels(char *archivo,Label rotulos[],int *cantRotulos,int *error,cha
     }
 
 } //fin
-void tratamiento_especial(char constante_valor[],Label rotulos[],int cantRotulos,int *nroLinea,char strings[]){
+void tratamiento_especial(char constante_valor[],Label rotulos[],int cantRotulos,int *nroLinea,char strings[],int *cantStrings){
     int i=1;
+    rotulos[cantRotulos].codigo=++(*nroLinea);
     while(constante_valor[i]!='"'){
-        rotulos[cantRotulos].codigo=(*nroLinea);
         strings[i-1]=constante_valor[i];
-        (*nroLinea)++;
+        (*cantStrings)++;
         i++;
     }
     strings[i-1]='\0';
 }
-int busquedaLabel(Label rotulos[],char etiqueta[],int cantRotulos,int *error){ //Para buscar la posicion del rotulo
+int busquedaLabel(Label rotulos[],char etiqueta[],int cantRotulos){ //Para buscar la posicion del rotulo
     int i=0;
     while(i<cantRotulos && strcmp(etiqueta,rotulos[i].etiqueta)!=0)
         i++;
     if (i<cantRotulos)
         return rotulos[i].codigo;
     else{
-        *error = 1;
         return -1;
     }
 }
@@ -495,12 +490,13 @@ int valorOpDirecto(char *s,Label rotulos[],int cantRotulos,int *error){
     else if(s[0]=='@'|| s[0]=='#' || s[0]=='%' || (s[0]>='0' && s[0]<='9') || s[0]=='-')
         return anyToInt(s,NULL);
     else if(strlen(s)>2) {
-        i= busquedaLabel(rotulos,s,cantRotulos,&(*error));
+        i= busquedaLabel(rotulos,s,cantRotulos);
         if(i!=-1){
             return i; //Faltaria el desplazamiento de CS
         }
         else{
             printf("Rotulo indefinido\n");
+            *error=1;
         }
     }
     else
