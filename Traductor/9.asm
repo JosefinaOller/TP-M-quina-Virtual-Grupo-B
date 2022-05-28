@@ -1,3 +1,4 @@
+\\DATA 5000
 ;Inicializa HEAP
         mov     [EBX], 1
 ;Escribe mensaje al usuario
@@ -8,7 +9,7 @@ msg     equ     "Escriba palabras seguidas de ENTER (en blanco para terminar)"
         mov     Edx, msg
         sys     %4 
         mov     Ecx, 1 
-;Lee una palabra en DS:0
+;Lee una palabra en DS
 ini:    mov     Eax, %110
         mov     Ebx, 2
         mov     Ecx, -1
@@ -20,7 +21,6 @@ ini:    mov     Eax, %110
         mov     Edx, [EBX]      ;Sino, muevo el HEAP a DX        
         add     [BX], cx      ;Incremento el HEAP para reservar la memoria 
         add     [BX], 1       ;Uno más por el \0
-        smov    [EBX+EDX], [EDX] ;Agrega la palabra en el ES 
         jmp     ini
 finlee: mov dx, 1               ;Inicializa 1 para comenzar el recorrido 
         mov cx, [EBX]          

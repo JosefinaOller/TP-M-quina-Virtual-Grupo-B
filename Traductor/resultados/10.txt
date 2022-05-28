@@ -1,0 +1,30 @@
+;DIRECCIONAMIENTO INDIRECTO
+\\ASM DATA=100 EXTRA=0 STACK=0
+ant             EQU     -1
+sig             EQU             1
+texto           EQU "HOLA"
+;inicializo los registros
+[0000]: 04 00 A0 01      1:     MOV         ax,          1
+[0001]: 04 00 B0 05      2:     MOV         bx,          5
+[0002]: 04 00 C0 02      3:     MOV         cx,          2
+[0003]: 04 00 E0 15      4:     MOV         ex,      texto
+;relleno la memoria de 1 a 10
+[0004]: 64 00 A0 07    otro     CMP         ax,          7
+[0005]: F2 00 00 09      6:      JZ      sigue
+[0006]: 0D 00 A0 0A      7:     MOV       [ax],         ax
+[0007]: 14 00 A0 01      8:     ADD         ax,          1
+[0008]: F1 00 00 04      9:     JMP       otro
+;recupero registros y multiplico x10
+[0009]: 4C FF C0 0A   sigue     MUL   [CX+ant],         10
+[0010]: 4C 00 C0 0A     11:     MUL       [Cx],         10
+[0011]: 4C 01 C0 0A     12:     MUL   [cx+sig],         10
+[0012]: 4C FF B0 0A     13:     MUL     [bx-1],         10
+[0013]: 4C 00 B0 0A     14:     MUL       [Bx],         10
+[0014]: 4C 01 B0 0A     15:     MUL     [BX+1],         10
+[0015]: 0F 02 BF FC     16:     MOV     [BX+2],   [cx-sig]
+;imprime todo
+[0016]: 04 00 A0 01     17:     MOV         ax,          1
+[0017]: 04 00 D0 01     18:     MOV         dx,          1
+[0018]: 04 00 C0 07     19:     MOV         cx,          7
+[0019]: F0 00 00 02     20:     SYS         %2
+[0020]: FF 10 00 00     21:    STOP

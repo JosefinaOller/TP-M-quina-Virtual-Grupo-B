@@ -30,8 +30,8 @@ int main(int argc, const char *argv[]){
     Mnemonico vecMnem[MNEMAX];
     cargaVecMnem(vecMnem); //Carga todos los mnemonicos con sus datos.
     argc=3;
-    argv[1]="11.asm";
-    argv[2]="11.mv2";
+    argv[1]="10.asm";
+    argv[2]="10.mv2";
     for(i=1;i<argc;i++){
         if(strstr(argv[i],".asm"))
             strcpy(asmar,argv[i]);
@@ -214,6 +214,8 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
            strcpy(com,parsed[4] ? parsed[4] : "");
            strcpy(seg,parsed[5] ? parsed[5] : ""); //seg
            strcpy(size,parsed[6] ? parsed[6] : ""); //size
+           strcpy(constante,parsed[7] ? parsed[7] : ""); //Constante
+           strcpy(constante_valor,parsed[8] ? parsed[8] : ""); //Valor del constante
            freeline(parsed);
 
            if(strcmp(rotulo,"")!=0){ //Hay rotulo
@@ -225,45 +227,33 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
            }
            else if(strcmp(mnem,"")!=0)
                 (*nroLinea)++;
-          /*if(strcmp(com,"")!=0 && strcmp(rotulo,"")==0  && strcmp(mnem,"")==0 && strcmp(argA,"")==0 && strcmp(argB,"")==0){
-                    char cadena[80];
-                     //for(int i=0;i<80;i++)
-                     //   strcpy(cadena[i],"");
-                    strcat(cadena,";");
-                    strcat(cadena,com);
-                    strcpy(lista[*nLista],cadena);
+          if(strcmp(com,"")!=0 && strcmp(rotulo,"")==0  && strcmp(mnem,"")==0 && strcmp(argA,"")==0 && strcmp(argB,"")==0){
+                    strcpy(lista[*nLista],linea);
                     indiceLinea[(*nLista)++]=*nroLinea;
-            }*/
+            }
            if(strcmp(seg,"DATA")==0){
                 *data=atoi(size);
-                char cadena[50];
-                strcpy(cadena,"\\\\DATA ");
-                strcat(cadena,size);
-                strcpy(lista[*nLista],cadena);
+                strcpy(lista[*nLista],linea);
                 indiceLinea[(*nLista)++]=*nroLinea;
            }
            else{
             if(strcmp(seg,"EXTRA")==0){
                 *extra=atoi(size);
-                char cadena[50];
-                strcpy(cadena,"\\\\EXTRA ");
-                strcat(cadena,size);
-                strcpy(lista[*nLista],cadena);
+                strcpy(lista[*nLista],linea);
                 indiceLinea[(*nLista)++]=*nroLinea;
             }
             else{
                 if(strcmp(seg,"STACK")==0){
                     *stack=atoi(size);
-                     char cadena[50];
-                    strcpy(cadena,"\\\\STACK ");
-                    strcat(cadena,size);
-                    strcpy(lista[*nLista],cadena);
+                    strcpy(lista[*nLista],linea);
                     indiceLinea[(*nLista)++]=*nroLinea;
                 }
-
+            }
+            if(strcmp(constante,"")!=0){
+               strcpy(lista[*nLista],linea);
+               indiceLinea[(*nLista)++]=*nroLinea;
             }
            }
-           //numeroLinea++;
         }
         fclose(arch);
         FILE *arch=fopen(archivo,"rt");
@@ -308,10 +298,8 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
                             tratamiento_especial(constante_valor,rotulos,*cantRotulos,&(*nroLinea),strings,&(*cantStrings));
                             break;
                     }
-                    strcat(constante," EQU ");
-                    strcat(constante,constante_valor);
-                    strcpy(lista[*nLista],constante);
-                    indiceLinea[(*nLista)++]=nLinea;
+                    //strcpy(lista[*nLista],linea);
+                    //indiceLinea[(*nLista)++]=nLinea;
                     (*cantRotulos)++;
              } //if no hay duplicado
              else{
@@ -551,7 +539,7 @@ int valorOpDirecto(char *s,Label rotulos[],int cantRotulos,int *error){
     else if(strlen(s)>2) {
         i= busquedaLabel(rotulos,s,cantRotulos);
         if(i!=-99999){
-            return i; //Faltaria el desplazamiento de CS
+            return i;
         }
         else{
             printf("Rotulo indefinido\n");
