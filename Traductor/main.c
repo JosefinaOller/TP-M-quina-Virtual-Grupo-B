@@ -7,7 +7,7 @@
 
 void cargaVecMnem(Mnemonico[]);
 void traduce(char[], Mnemonico[], int, char[]);
-void estructuraASM(char[], Linea[], int*, char[][100], int*, int[]);
+void estructuraASM(char[], Linea[], int*);
 void procesarLinea(char[], char[], char[], char[], char[], char[]);
 void lecturaLabelsYSegmentos(char*, Label[], int*, int*,char[],int *,int *,int*,int*,int*,char[][100],int *,int[]);
 int busquedaLabel(Label[], char[], int);
@@ -29,8 +29,8 @@ int main(int argc, const char *argv[]){
     Mnemonico vecMnem[MNEMAX];
     cargaVecMnem(vecMnem); //Carga todos los mnemonicos con sus datos.
     argc=3;
-    argv[1]="7.asm";
-    argv[2]="7.mv2";
+    argv[1]="10.asm";
+    argv[2]="10.mv2";
     for(i=1;i<argc;i++){
         if(strstr(argv[i],".asm"))
             strcpy(asmar,argv[i]);
@@ -109,8 +109,9 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
     if(error)
         printf("Error de archivo\n");
     else{
-        estructuraASM(nombAsm,codigo,&conLin,lista,&nLista,indicelinea); //procesa las instrucciones asm
-        if((data+extra+stack) <= (8192 - nroLinea)){ //Calculo de memoria
+        estructuraASM(nombAsm,codigo,&conLin); //procesa las instrucciones asm
+        int cs = nroLinea + cantStrings;
+        if((data+extra+stack) <= (8192 - cs)){ //Calculo de memoria
             if(conLin>=0 || nLista>=0){
                 //empiezo a generar el archivo binario
                 archESCRITURA=fopen(binario,"wb");
@@ -120,7 +121,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
                 fwrite(&data,sizeof(int),1,archESCRITURA); //DS
                 fwrite(&stack,sizeof(int),1,archESCRITURA); //SS
                 fwrite(&extra,sizeof(int),1,archESCRITURA); //ES
-                int cs = nroLinea + cantStrings;
+
                 fwrite(&cs,sizeof(int),1,archESCRITURA); //CS
                 header=0x562E3232;
                 fwrite(&header,sizeof(int),1,archESCRITURA); //V.22
@@ -162,7 +163,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
     }
 }
 
-void estructuraASM(char nombAsm[],Linea codigo[],int *conLin,char listaComentarios[][100],int *nComentarios,int indicelinea[]){
+void estructuraASM(char nombAsm[],Linea codigo[],int *conLin){
 
     FILE *arch;
     char linea[500],rotulo[10],mnem[5],argA[16],argB[16],com[100],seg[6],size[4];
@@ -175,10 +176,6 @@ void estructuraASM(char nombAsm[],Linea codigo[],int *conLin,char listaComentari
             procesarLinea(linea,rotulo,mnem,argA,argB,com);
             mayuscula(rotulo); mayuscula(mnem); mayuscula(argA); mayuscula(argB);
             cargaLinea(rotulo,mnem,argA,argB,com,&codigo[*conLin]);
-            if(strcmp(com,"")!=0 && strcmp(rotulo,"")==0  && strcmp(mnem,"")==0 && strcmp(argA,"")==0 && strcmp(argB,"")==0){
-                    strcpy(listaComentarios[*nComentarios],linea);
-                    indicelinea[(*nComentarios)++]=*conLin;
-            }
             if(strcmp(rotulo,"")!=0  || strcmp(mnem,"")!=0 || strcmp(argA,"")!=0 || strcmp(argB,"")!=0)
                 (*conLin)++;
         } //while archivo
@@ -203,7 +200,7 @@ void procesarLinea(char linea[],char rotulo[],char mnem[],char argA[],char argB[
 void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int *error,char strings[],int *nroLinea,int *cantStrings,int *data,int *extra,int *stack,char lista[][100],int *nLista,int indiceLinea[]){
 
     FILE *arch=fopen(archivo,"rt");
-    char linea[500],rotulo[16],mnem[5],constante[10],constante_valor[50],seg[6],size[5];
+    char linea[500],rotulo[16],mnem[5],constante[10],constante_valor[100],seg[6],size[5],argA[15],argB[15],com[50];
     *nLista=0; //Para imprimir las directivas y equ
     if(arch!=NULL){
         while(fgets(linea,500,arch)!=NULL){
@@ -211,6 +208,9 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
 
            strcpy(rotulo,parsed[0] ? parsed[0] : ""); //Rotulo
            strcpy(mnem,parsed[1] ? parsed[1] : ""); //Mnemonico, es para ver si existe para sumar la cantidad de lineas
+           strcpy(argA,parsed[2] ? parsed[2] : "");
+           strcpy(argB,parsed[3] ? parsed[3] : "");
+           strcpy(com,parsed[4] ? parsed[4] : "");
            strcpy(seg,parsed[5] ? parsed[5] : ""); //seg
            strcpy(size,parsed[6] ? parsed[6] : ""); //size
            freeline(parsed);
@@ -224,6 +224,15 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
            }
            else if(strcmp(mnem,"")!=0)
                 (*nroLinea)++;
+          /*if(strcmp(com,"")!=0 && strcmp(rotulo,"")==0  && strcmp(mnem,"")==0 && strcmp(argA,"")==0 && strcmp(argB,"")==0){
+                    char cadena[80];
+                     //for(int i=0;i<80;i++)
+                     //   strcpy(cadena[i],"");
+                    strcat(cadena,";");
+                    strcat(cadena,com);
+                    strcpy(lista[*nLista],cadena);
+                    indiceLinea[(*nLista)++]=*nroLinea;
+            }*/
            if(strcmp(seg,"DATA")==0){
                 *data=atoi(size);
                 char cadena[50];
@@ -320,7 +329,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
 } //fin
 void tratamiento_especial(char constante_valor[],Label rotulos[],int cantRotulos,int *nroLinea,char strings[],int *cantStrings){
     int i=1;
-    rotulos[cantRotulos].codigo=++(*nroLinea);
+    rotulos[cantRotulos].codigo=(*nroLinea);
     while(constante_valor[i]!='"'){
         strings[i-1]=constante_valor[i];
         (*cantStrings)++;
@@ -504,15 +513,35 @@ void operandoIndirecto(char vop[], int* valorReg,int *off,Label rotulos[],int ca
     reg[0] = vop[0]; //Puede ser EAX o AX
     reg[1] = vop[1];
     reg[2] = (vop[2]=='+' || vop[2]=='-') ? '\0': vop[2];
-    *valorReg = AEntero(reg);
-    if(vop[2] == '-')
-        *off = ((-1)*valorOpDirecto(vop+3,rotulos,cantRotulos,&(*error)))&0xFF;
-    else if (vop[3]=='-')
-        *off = ((-1)*valorOpDirecto(vop+4,rotulos,cantRotulos,&(*error)))&0xFF;
-    else if (vop[2]=='+')
-        *off = (valorOpDirecto(vop+3,rotulos,cantRotulos,&(*error)))&0xFF;
-    else if (vop[3]=='+')
-        *off = (valorOpDirecto(vop+4,rotulos,cantRotulos,&(*error)))&0xFF;
+    *valorReg = 0;
+    if(reg[0]=='E'&& (reg[1]=='A' || reg[1]=='B' || reg[1]=='C' || reg[1]=='D'|| reg[1]=='E' || reg[1]=='F')  && reg[2]=='X'){
+        *valorReg = AEntero(reg);
+        if(vop[2] == '-')
+            *off = ((-1)*valorOpDirecto(vop+3,rotulos,cantRotulos,&(*error)))&0xFF;
+        else if (vop[3]=='-')
+            *off = ((-1)*valorOpDirecto(vop+4,rotulos,cantRotulos,&(*error)))&0xFF;
+        else if (vop[2]=='+')
+            *off = (valorOpDirecto(vop+3,rotulos,cantRotulos,&(*error)))&0xFF;
+        else if (vop[3]=='+')
+            *off = (valorOpDirecto(vop+4,rotulos,cantRotulos,&(*error)))&0xFF;
+    }
+    else{
+        if((reg[0]=='A' || reg[0]=='B' || reg[0]=='C' || reg[0]=='D'|| reg[0]=='E' || reg[0]=='F')  && reg[1]=='X'){
+            *valorReg = AEntero(reg);
+            if(vop[2] == '-')
+                *off = ((-1)*valorOpDirecto(vop+3,rotulos,cantRotulos,&(*error)))&0xFF;
+            else if (vop[3]=='-')
+                *off = ((-1)*valorOpDirecto(vop+4,rotulos,cantRotulos,&(*error)))&0xFF;
+            else if (vop[2]=='+')
+                *off = (valorOpDirecto(vop+3,rotulos,cantRotulos,&(*error)))&0xFF;
+            else if (vop[3]=='+')
+                *off = (valorOpDirecto(vop+4,rotulos,cantRotulos,&(*error)))&0xFF;
+        }
+        else
+            *off = (valorOpDirecto(vop,rotulos,cantRotulos,&(*error)))&0xFF;
+
+    }
+
 }
 int valorOpDirecto(char *s,Label rotulos[],int cantRotulos,int *error){
     int i;

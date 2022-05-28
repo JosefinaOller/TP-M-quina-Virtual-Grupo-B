@@ -1,0 +1,36 @@
+El 1.asm anda bien.
+
+El 7.asm anda bien.
+
+El 8.asm --> "unico error"
+[0028]: 0B 00 10 1B     29:     MOV     [dmax],  [BX+dmax] -->original
+[0028]: 0F 01 00 1B          29: MOV           [DMAX], [EBX+DMAX] --> nuestro
+No sé como resolverlo. 
+
+El 9.asm --> "errores"
+
+[0016]: 1D 00 B0 0C     17:     ADD       [BX],         cx --> original
+[0016]: 1D 00 B0 3C          17: ADD             [BX], CX  --> nuestro
+
+Da error en una instruccion (18) por la suma de registros, yo que vos preguntaria en el foro. 
+
+[0020]: 04 00 D0 01  finlee     MOV         dx,          1 --> original
+[0020]: 04 03 D0 01      FINLEE: MOV               DX, 1   --> nuestro
+
+[0023]: 65 00 D0 0C    next     CMP         dx,         cx --> original
+[0023]: 65 03 D0 3C        NEXT: CMP               DX, CX  --> nuestro
+
+[0029]: 14 00 D0 01     sig     ADD         dx,          1 --> original
+[0029]: 14 03 D0 01         SIG: ADD               DX, 1 --> nuestro
+¡¡¡¡¡Igual fijate si es correcto lo nuestro porque tengo la cabeza quemada para calcular la instruccion correspondiente!!! LA especificacion del año pasado no es tan igual a la especificacion de este año. 
+
+Ya no hace falta corregir lo de warning, anda bien.
+
+El 10.asm anda bien. 
+
+El 11.asm muchos errores por la incompleta funcion tipoDeOperando.  
+Hay que completar o corregir el tipoDeOperando porque a registros como SP,BP los reconoce como inmediatos y está mal, por eso en el ejercicio asm 11 salta muchos rotulos indefinidos.  
+
+Ahi subi los resultados (carpeta --> resultados) del año pasado, no son perfectos, recuerdo que el traductor del año pasado no tomaba en cuenta la direccion relativa de CS (error de un compa) y no se que mas, pero sirven para guiarnos.
+
+A mi me falta arreglar la impresion de comentarios. Pero eso lo arreglare mañana a la noche total no afecta a la ejecucion. 

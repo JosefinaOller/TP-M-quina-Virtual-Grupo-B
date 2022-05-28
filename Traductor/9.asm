@@ -8,7 +8,7 @@ msg     equ     "Escriba palabras seguidas de ENTER (en blanco para terminar)"
         mov     Edx, msg
         sys     %4 
         mov     Ecx, 1 
-;Lee una palabra en DS:0
+;Lee una palabra en DS
 ini:    mov     Eax, %110
         mov     Ebx, 2
         mov     Ecx, -1
