@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
             }
 
             //Ejecución del programa
-            while( (0 <= memoria.VectorDeRegistros[5]) && (memoria.VectorDeRegistros[5]<memoria.VectorDeRegistros[0]) && op.error==0){
+            while( (0 <= memoria.VectorDeRegistros[5]) && (memoria.VectorDeRegistros[5]<op.segmento.ds) && op.error==0){
                 ip = memoria.VectorDeRegistros[5]++;
                 cod = decodificaCodigo(memoria.RAM[ip]);
                 decodificaOperandos(memoria,cod,memoria.RAM[ip],&op);

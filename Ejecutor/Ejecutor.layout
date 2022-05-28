@@ -2,55 +2,72 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Debug" />
-	<File name="funciones.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="4" zoom_2="0">
+	<File name="funciones.c" open="1" top="1" tabpos="3" split="0" active="1" splitpos="0" zoom_1="5" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="465" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="main.c" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="4" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1838" topLine="56" />
-		</Cursor>
-	</File>
-	<File name="funciones.c" open="1" top="1" tabpos="3" split="0" active="1" splitpos="0" zoom_1="4" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="62755" topLine="243" />
+			<Cursor1 position="56518" topLine="84" />
 		</Cursor>
 		<Folding>
 			<Collapse line="10" />
-			<Collapse line="65" />
-			<Collapse line="154" />
-			<Collapse line="243" />
-			<Collapse line="249" />
-			<Collapse line="347" />
-			<Collapse line="352" />
-			<Collapse line="357" />
-			<Collapse line="391" />
-			<Collapse line="424" />
-			<Collapse line="446" />
-			<Collapse line="468" />
-			<Collapse line="473" />
-			<Collapse line="481" />
-			<Collapse line="572" />
-			<Collapse line="680" />
-			<Collapse line="748" />
-			<Collapse line="841" />
-			<Collapse line="934" />
-			<Collapse line="1026" />
-			<Collapse line="1118" />
-			<Collapse line="1210" />
+			<Collapse line="64" />
+			<Collapse line="153" />
+			<Collapse line="242" />
+			<Collapse line="248" />
+			<Collapse line="346" />
+			<Collapse line="356" />
+			<Collapse line="390" />
+			<Collapse line="423" />
+			<Collapse line="445" />
+			<Collapse line="467" />
+			<Collapse line="472" />
+			<Collapse line="480" />
+			<Collapse line="571" />
+			<Collapse line="679" />
+			<Collapse line="747" />
+			<Collapse line="840" />
+			<Collapse line="933" />
+			<Collapse line="1025" />
+			<Collapse line="1117" />
+			<Collapse line="1209" />
 			<Collapse line="1277" />
 			<Collapse line="1296" />
-			<Collapse line="1361" />
-			<Collapse line="1459" />
-			<Collapse line="1511" />
-			<Collapse line="1575" />
-			<Collapse line="1608" />
+			<Collapse line="1325" />
+			<Collapse line="1363" />
+			<Collapse line="1455" />
+			<Collapse line="1507" />
+			<Collapse line="1571" />
+			<Collapse line="1604" />
+			<Collapse line="1747" />
+			<Collapse line="1827" />
+			<Collapse line="1833" />
+			<Collapse line="1840" />
+			<Collapse line="1847" />
+			<Collapse line="1854" />
+			<Collapse line="1861" />
+			<Collapse line="1868" />
+			<Collapse line="1875" />
+			<Collapse line="1880" />
+			<Collapse line="1885" />
+			<Collapse line="1890" />
+			<Collapse line="1976" />
+			<Collapse line="1988" />
+			<Collapse line="2049" />
+			<Collapse line="2065" />
+			<Collapse line="2082" />
 		</Folding>
 	</File>
 	<File name="memoria.h" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="3" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="166" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="main.c" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="4" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1539" topLine="9" />
+		</Cursor>
+	</File>
+	<File name="funciones.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="4" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="884" topLine="30" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>
