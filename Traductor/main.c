@@ -28,9 +28,9 @@ int main(int argc, const char *argv[]){
     int o=1,i;
     Mnemonico vecMnem[MNEMAX];
     cargaVecMnem(vecMnem); //Carga todos los mnemonicos con sus datos.
-    //argc=3;
-    //argv[1]="1.asm";
-    //argv[2]="1.mv2";
+    argc=3;
+    argv[1]="7.asm";
+    argv[2]="7.mv2";
     for(i=1;i<argc;i++){
         if(strstr(argv[i],".asm"))
             strcpy(asmar,argv[i]);
@@ -364,8 +364,17 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                     int vopA, vopB;
                     switch (topA){
                     case 0:
-                        vopA = (codigo.argA[0] == '\'')? codigo.argA[1]: anyToInt(codigo.argA, &out);
-                        truncamiento(2, &vopA, wrgA);
+                        if(isalpha(codigo.argA[0])){
+                            int i=busquedaLabel(rotulos,codigo.argA,cantRotulos);
+                            if(i!=-1)
+                                vopA = rotulos[i].codigo;
+                            else
+                                printf("Rotulo indefinido\n");
+                        }
+                        else{
+                            vopA = (codigo.argA[0] == '\'')? codigo.argA[1]: anyToInt(codigo.argA, &out);
+                            truncamiento(2, &vopA, wrgA);
+                        }
                         break;
                     case 1:
                         vopA = AEntero(codigo.argA);
@@ -383,8 +392,17 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                     }
                     switch (topB){
                     case 0:
-                        vopB = (codigo.argB[0] == '\'')? codigo.argB[1]: anyToInt(codigo.argB, &out);
-                        truncamiento(2, &vopB, wrgB);
+                        if(isalpha(codigo.argB[0])){
+                            int i=busquedaLabel(rotulos,codigo.argB,cantRotulos);
+                            if(i!=-1)
+                                vopB = rotulos[i].codigo;
+                            else
+                                printf("Rotulo indefinido\n");
+                        }
+                        else{
+                            vopB = (codigo.argB[0] == '\'')? codigo.argB[1]: anyToInt(codigo.argB, &out);
+                            truncamiento(2, &vopB, wrgB);
+                        }
                         break;
                     case 1:
                         vopB = AEntero(codigo.argB);
@@ -467,12 +485,14 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
 int tipoOperando(char vop[]){
     if (isdigit(vop[0]) || vop[0]=='#' || vop[0]=='@' || vop[0]=='%' || vop[0]=='$' || vop[0]=='\'' || vop[0]=='-')
         return 0;//inmediato
-    else if (isalpha(vop[0]))
-        return 1;//de registro
-    else if (isalpha(vop[1]))
-        return 3;//indirecto
     else
-        return 2;//directo
+        if ((vop[0]=='E'&& vop[1]='A'..'F'&& vop[2]='X') || (vop[0]='A'..'F'&& vop[1]='X'))
+            return 1;//de registro
+        else
+            if (isalpha(vop[1]))
+                return 3;//indirecto
+        else
+            return 2;//directo
 }
 void operandoIndirecto(char vop[], int* valorReg,int *off,Label rotulos[],int cantRotulos,int *error){
     char reg[3];
