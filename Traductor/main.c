@@ -7,7 +7,7 @@
 
 void cargaVecMnem(Mnemonico[]);
 void traduce(char[], Mnemonico[], int, char[]);
-void estructuraASM(char[], Linea[], int*, char[][100], int*, int[]);
+void estructuraASM(char[], Linea[], int*);
 void procesarLinea(char[], char[], char[], char[], char[], char[]);
 void lecturaLabelsYSegmentos(char*, Label[], int*, int*,char[],int *,int *,int*,int*,int*,char[][100],int *,int[]);
 int busquedaLabel(Label[], char[], int);
@@ -22,6 +22,7 @@ void mayuscula(char[]);
 void tratamiento_especial(char [],Label[],int,int *,char[],int *);
 void operandoIndirecto(char[], int*, int*, Label[], int, int*);
 int valorOpDirecto(char*, Label[], int, int*);
+int esRegistro(char[]);
 
 int main(int argc, const char *argv[]){
     char asmar[20],binario[20];
@@ -29,8 +30,8 @@ int main(int argc, const char *argv[]){
     Mnemonico vecMnem[MNEMAX];
     cargaVecMnem(vecMnem); //Carga todos los mnemonicos con sus datos.
     argc=3;
-    argv[1]="7.asm";
-    argv[2]="7.mv2";
+    argv[1]="11.asm";
+    argv[2]="11.mv2";
     for(i=1;i<argc;i++){
         if(strstr(argv[i],".asm"))
             strcpy(asmar,argv[i]);
@@ -109,8 +110,9 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
     if(error)
         printf("Error de archivo\n");
     else{
-        estructuraASM(nombAsm,codigo,&conLin,lista,&nLista,indicelinea); //procesa las instrucciones asm
-        if((data+extra+stack) <= (8192 - nroLinea)){ //Calculo de memoria
+        estructuraASM(nombAsm,codigo,&conLin); //procesa las instrucciones asm
+        int cs = nroLinea + cantStrings;
+        if((data+extra+stack) <= (8192 - cs)){ //Calculo de memoria
             if(conLin>=0 || nLista>=0){
                 //empiezo a generar el archivo binario
                 archESCRITURA=fopen(binario,"wb");
@@ -120,7 +122,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
                 fwrite(&data,sizeof(int),1,archESCRITURA); //DS
                 fwrite(&stack,sizeof(int),1,archESCRITURA); //SS
                 fwrite(&extra,sizeof(int),1,archESCRITURA); //ES
-                int cs = nroLinea + cantStrings;
+
                 fwrite(&cs,sizeof(int),1,archESCRITURA); //CS
                 header=0x562E3232;
                 fwrite(&header,sizeof(int),1,archESCRITURA); //V.22
@@ -162,7 +164,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
     }
 }
 
-void estructuraASM(char nombAsm[],Linea codigo[],int *conLin,char listaComentarios[][100],int *nComentarios,int indicelinea[]){
+void estructuraASM(char nombAsm[],Linea codigo[],int *conLin){
 
     FILE *arch;
     char linea[500],rotulo[10],mnem[5],argA[16],argB[16],com[100],seg[6],size[4];
@@ -175,10 +177,6 @@ void estructuraASM(char nombAsm[],Linea codigo[],int *conLin,char listaComentari
             procesarLinea(linea,rotulo,mnem,argA,argB,com);
             mayuscula(rotulo); mayuscula(mnem); mayuscula(argA); mayuscula(argB);
             cargaLinea(rotulo,mnem,argA,argB,com,&codigo[*conLin]);
-            if(strcmp(com,"")!=0 && strcmp(rotulo,"")==0  && strcmp(mnem,"")==0 && strcmp(argA,"")==0 && strcmp(argB,"")==0){
-                    strcpy(listaComentarios[*nComentarios],linea);
-                    indicelinea[(*nComentarios)++]=*conLin;
-            }
             if(strcmp(rotulo,"")!=0  || strcmp(mnem,"")!=0 || strcmp(argA,"")!=0 || strcmp(argB,"")!=0)
                 (*conLin)++;
         } //while archivo
@@ -203,7 +201,7 @@ void procesarLinea(char linea[],char rotulo[],char mnem[],char argA[],char argB[
 void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int *error,char strings[],int *nroLinea,int *cantStrings,int *data,int *extra,int *stack,char lista[][100],int *nLista,int indiceLinea[]){
 
     FILE *arch=fopen(archivo,"rt");
-    char linea[500],rotulo[16],mnem[5],constante[10],constante_valor[50],seg[6],size[5];
+    char linea[500],rotulo[16],mnem[5],constante[10],constante_valor[100],seg[6],size[5],argA[15],argB[15],com[50];
     *nLista=0; //Para imprimir las directivas y equ
     if(arch!=NULL){
         while(fgets(linea,500,arch)!=NULL){
@@ -211,6 +209,9 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
 
            strcpy(rotulo,parsed[0] ? parsed[0] : ""); //Rotulo
            strcpy(mnem,parsed[1] ? parsed[1] : ""); //Mnemonico, es para ver si existe para sumar la cantidad de lineas
+           strcpy(argA,parsed[2] ? parsed[2] : "");
+           strcpy(argB,parsed[3] ? parsed[3] : "");
+           strcpy(com,parsed[4] ? parsed[4] : "");
            strcpy(seg,parsed[5] ? parsed[5] : ""); //seg
            strcpy(size,parsed[6] ? parsed[6] : ""); //size
            freeline(parsed);
@@ -224,6 +225,15 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
            }
            else if(strcmp(mnem,"")!=0)
                 (*nroLinea)++;
+          /*if(strcmp(com,"")!=0 && strcmp(rotulo,"")==0  && strcmp(mnem,"")==0 && strcmp(argA,"")==0 && strcmp(argB,"")==0){
+                    char cadena[80];
+                     //for(int i=0;i<80;i++)
+                     //   strcpy(cadena[i],"");
+                    strcat(cadena,";");
+                    strcat(cadena,com);
+                    strcpy(lista[*nLista],cadena);
+                    indiceLinea[(*nLista)++]=*nroLinea;
+            }*/
            if(strcmp(seg,"DATA")==0){
                 *data=atoi(size);
                 char cadena[50];
@@ -273,7 +283,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
                 nLinea++;
            if(strcmp(constante,"")!=0){ //Hay constante
                 mayuscula(constante);
-                if(busquedaLabel(rotulos,constante,*cantRotulos)==-1){ //No hay duplicado
+                if(busquedaLabel(rotulos,constante,*cantRotulos)==-99999){ //No hay duplicado
                         strcpy(rotulos[*cantRotulos].etiqueta,constante);
                         switch(constante_valor[0]){
                         case '#':
@@ -320,7 +330,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
 } //fin
 void tratamiento_especial(char constante_valor[],Label rotulos[],int cantRotulos,int *nroLinea,char strings[],int *cantStrings){
     int i=1;
-    rotulos[cantRotulos].codigo=++(*nroLinea);
+    rotulos[cantRotulos].codigo=(*nroLinea);
     while(constante_valor[i]!='"'){
         strings[i-1]=constante_valor[i];
         (*cantStrings)++;
@@ -335,7 +345,7 @@ int busquedaLabel(Label rotulos[],char etiqueta[],int cantRotulos){ //Para busca
     if (i<cantRotulos)
         return rotulos[i].codigo;
     else{
-        return -1;
+        return -99999;
     }
 }
 int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int cantRotulos, int *error, int *wrgA, int *wrgB){
@@ -360,85 +370,62 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
             mnem = vecMnem[i];
             if (mnem.cantOp == 2){
                 if (strcmp(codigo.argA, "") != 0 && strcmp(codigo.argB, "") != 0){
-                    int topA, topB, vopA, vopB, j = 0;
-                    mayuscula(codigo.argA);
-                    mayuscula(codigo.argB);
-                    while (j<cantRotulos && strcmp(codigo.argA, rotulos[j].etiqueta) != 0)
-                        j++;
-                    if (j<cantRotulos){
-                        topA = 0;//inmediato
-                        vopA = rotulos[j].codigo;
-                        truncamiento(2, &vopA, wrgA);
-                    }
-                    else{
-                        topA = tipoOperando(codigo.argA);
-                        switch (topA){
-                        case 0:
-                            if(isalpha(codigo.argA[0])){
-                                int i=busquedaLabel(rotulos,codigo.argA,cantRotulos);
-                                if(i!=-1)
-                                    vopA = rotulos[i].codigo;
-                                else
-                                    printf("Rotulo indefinido\n");
-                            }
-                            else{
-                                vopA = (codigo.argA[0] == '\'')? codigo.argA[1]: anyToInt(codigo.argA, &out);
-                                truncamiento(2, &vopA, wrgA);
-                            }
-                            break;
-                        case 1:
-                            vopA = AEntero(codigo.argA);
-                            break;
-                        case 2:
-                            eliminaCorchetes(codigo.argA);
+                    int topA = tipoOperando(codigo.argA);
+                    int topB = tipoOperando(codigo.argB);
+                    int vopA, vopB;
+                    switch (topA){
+                    case 0:
+                        if(isalpha(codigo.argA[0])){
+                            int i=busquedaLabel(rotulos,codigo.argA,cantRotulos);
+                            if(i!=-99999)
+                                vopA = i;
+                            else
+                                printf("Rotulo indefinido\n");
+                        }
+                        else
                             vopA = (codigo.argA[0] == '\'')? codigo.argA[1]: anyToInt(codigo.argA, &out);
-                            break;
-                        case 3: //indirecto
-                            valorReg=0; off=0;
-                            eliminaCorchetes(codigo.argA);
-                            operandoIndirecto(codigo.argA,&valorReg,&off,rotulos,cantRotulos, error);
-                            vopA = (valorReg & 0xF) | (off << 4);
-                            break;
+                        truncamiento(2, &vopA, wrgA);
+                        break;
+                    case 1:
+                        vopA = AEntero(codigo.argA);
+                        break;
+                    case 2:
+                        eliminaCorchetes(codigo.argA);
+                        vopA = (codigo.argA[0] == '\'')? codigo.argA[1]: anyToInt(codigo.argA, &out);
+                        break;
+                    case 3: //indirecto
+                        valorReg=0; off=0;
+                        eliminaCorchetes(codigo.argA);
+                        operandoIndirecto(codigo.argA,&valorReg,&off,rotulos,cantRotulos, error);
+                        vopA = (valorReg & 0xF) | (off << 4);
+                        break;
+                    }
+                    switch (topB){
+                    case 0:
+                        if(isalpha(codigo.argB[0])){
+                            int i=busquedaLabel(rotulos,codigo.argB,cantRotulos);
+                            if(i!=-99999)
+                                vopB = i;
+                            else
+                                printf("Rotulo indefinido\n");
                         }
-                    }
-                    j = 0;
-                    while (j<cantRotulos && strcmp(codigo.argB, rotulos[j].etiqueta) != 0)
-                        j++;
-                    if (j<cantRotulos){
-                        topB = 0;//inmediato
-                        vopB = rotulos[j].codigo;
-                        truncamiento(2, &vopB, wrgB);
-                    }
-                    else{
-                        topB = tipoOperando(codigo.argB);
-                        switch (topB){
-                        case 0:
-                            if(isalpha(codigo.argB[0])){
-                                int i=busquedaLabel(rotulos,codigo.argB,cantRotulos);
-                                if(i!=-1)
-                                    vopB = rotulos[i].codigo;
-                                else
-                                    printf("Rotulo indefinido\n");
-                            }
-                            else{
-                                vopB = (codigo.argB[0] == '\'')? codigo.argB[1]: anyToInt(codigo.argB, &out);
-                                truncamiento(2, &vopB, wrgB);
-                            }
-                            break;
-                        case 1:
-                            vopB = AEntero(codigo.argB);
-                            break;
-                        case 2:
-                            eliminaCorchetes(codigo.argB);
+                        else
                             vopB = (codigo.argB[0] == '\'')? codigo.argB[1]: anyToInt(codigo.argB, &out);
-                            break;
-                        case 3:
-                            valorReg=0; off=0;
-                            eliminaCorchetes(codigo.argB);
-                            operandoIndirecto(codigo.argB,&valorReg,&off,rotulos,cantRotulos, error);
-                            vopB = (valorReg & 0xF) | (off << 4);
-                            break;
-                        }
+                        truncamiento(2, &vopB, wrgB);
+                        break;
+                    case 1:
+                        vopB = AEntero(codigo.argB);
+                        break;
+                    case 2:
+                        eliminaCorchetes(codigo.argB);
+                        vopB = (codigo.argB[0] == '\'')? codigo.argB[1]: anyToInt(codigo.argB, &out);
+                        break;
+                    case 3:
+                        valorReg=0; off=0;
+                        eliminaCorchetes(codigo.argB);
+                        operandoIndirecto(codigo.argB,&valorReg,&off,rotulos,cantRotulos, error);
+                        vopB = (valorReg & 0xF) | (off << 4);
+                        break;
                     }
                     inst = (mnem.codigo << 28) | ((topA << 26) & 0x0C000000) | ((topB << 24) & 0x03000000) | ((vopA << 12) & 0x00FFF000) | (vopB & 0x00000FFF);
                 }else{
@@ -486,6 +473,7 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
                             eliminaCorchetes(codigo.argA);
                             operandoIndirecto(codigo.argA,&valorReg,&off,rotulos,cantRotulos, error);
                             vop= (valorReg & 0xF) | (off << 4);
+                            inst = 0xF0000000 | ((mnem.codigo << 24) & 0x0F000000) | ((top << 22) & 0x00C00000) | (vop & 0x0000FFFF);
                             break;
                         }
                     }
@@ -506,20 +494,32 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
 }
 int tipoOperando(char vop[]){
     if(isalpha(vop[0])){
-        if(vop[0]=='E'&& (vop[1]=='A' || vop[1]=='B' || vop[1]=='C' || vop[1]=='D'|| vop[1]=='E' || vop[1]=='F')  && vop[2]=='X')
+        if(esRegistro(vop))
             return 1; //de registro
         else
-            if ((vop[0]=='A' || vop[0]=='B' || vop[0]=='C' || vop[0]=='D'|| vop[0]=='E' || vop[0]=='F') && vop[1]=='X')
-                return 1; //de registro
-            else return 0; //inmediato
+            return 0; //inmediato
     }
     else{
         if (isdigit(vop[0]) || vop[0]=='#' || vop[0]=='@' || vop[0]=='%' || vop[0]=='$' || vop[0]=='\'' || vop[0]=='-')
         return 0;//inmediato
-        else if (isalpha(vop[1]))
+        else if (isalpha(vop[1]) && esRegistro(vop+1))
                 return 3;//indirecto
         else
             return 2;//directo
+    }
+}
+int esRegistro(char vop[]){
+    char vreg[10][3] = {"DS","SS","ES","CS","HP","IP","SP","BP","CC","AC"};//Sólo comtemplo los 10 primeros registros
+        if((vop[0]=='E' && vop[1]>='A' && vop[1]<='F' && vop[2]=='X') || (vop[0]>='A' && vop[0]<='F' && vop[1]=='X'))
+            return 1; //de registro
+        else{
+            int i = 0;
+            while (i < 10 && strncmp(vop, vreg[i], 2) != 0)
+                i++;
+            if (i < 10)
+                return i;
+            else
+                return 0; //inmediato
     }
 }
 void operandoIndirecto(char vop[], int* valorReg,int *off,Label rotulos[],int cantRotulos,int *error){
@@ -527,15 +527,20 @@ void operandoIndirecto(char vop[], int* valorReg,int *off,Label rotulos[],int ca
     reg[0] = vop[0]; //Puede ser EAX o AX
     reg[1] = vop[1];
     reg[2] = (vop[2]=='+' || vop[2]=='-') ? '\0': vop[2];
-    *valorReg = AEntero(reg);
-    if(vop[2] == '-')
-        *off = ((-1)*valorOpDirecto(vop+3,rotulos,cantRotulos,&(*error)))&0xFF;
-    else if (vop[3]=='-')
-        *off = ((-1)*valorOpDirecto(vop+4,rotulos,cantRotulos,&(*error)))&0xFF;
-    else if (vop[2]=='+')
-        *off = (valorOpDirecto(vop+3,rotulos,cantRotulos,&(*error)))&0xFF;
-    else if (vop[3]=='+')
-        *off = (valorOpDirecto(vop+4,rotulos,cantRotulos,&(*error)))&0xFF;
+    *valorReg = 0;
+    if(esRegistro(reg)){
+        *valorReg = AEntero(reg);
+        if(vop[2] == '-')
+            *off = ((-1)*valorOpDirecto(vop+3,rotulos,cantRotulos,&(*error)))&0xFF;
+        else if (vop[3]=='-')
+            *off = ((-1)*valorOpDirecto(vop+4,rotulos,cantRotulos,&(*error)))&0xFF;
+        else if (vop[2]=='+')
+            *off = (valorOpDirecto(vop+3,rotulos,cantRotulos,&(*error)))&0xFF;
+        else if (vop[3]=='+')
+            *off = (valorOpDirecto(vop+4,rotulos,cantRotulos,&(*error)))&0xFF;
+    }
+    else
+        *off = (valorOpDirecto(vop,rotulos,cantRotulos,&(*error)))&0xFF;
 }
 int valorOpDirecto(char *s,Label rotulos[],int cantRotulos,int *error){
     int i;
@@ -545,7 +550,7 @@ int valorOpDirecto(char *s,Label rotulos[],int cantRotulos,int *error){
         return anyToInt(s,NULL);
     else if(strlen(s)>2) {
         i= busquedaLabel(rotulos,s,cantRotulos);
-        if(i!=-1){
+        if(i!=-99999){
             return i; //Faltaria el desplazamiento de CS
         }
         else{
