@@ -29,9 +29,9 @@ int main(int argc, const char *argv[]){
     int o=1,i;
     Mnemonico vecMnem[MNEMAX];
     cargaVecMnem(vecMnem); //Carga todos los mnemonicos con sus datos.
-    argc=3;
-    argv[1]="10.asm";
-    argv[2]="10.mv2";
+    //argc=3;
+    //argv[1]="8.asm";
+    //argv[2]="8.mv2";
     for(i=1;i<argc;i++){
         if(strstr(argv[i],".asm"))
             strcpy(asmar,argv[i]);
@@ -325,6 +325,7 @@ void tratamiento_especial(char constante_valor[],Label rotulos[],int cantRotulos
         i++;
     }
     strings[i-1]='\0';
+    (*nroLinea) += (strlen(strings)+1);
 }
 int busquedaLabel(Label rotulos[],char etiqueta[],int cantRotulos){ //Para buscar la posicion del rotulo
     int i=0;
