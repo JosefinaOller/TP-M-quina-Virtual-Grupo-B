@@ -343,7 +343,7 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
     Mnemonico mnem;
     char *out = NULL;
     if (vecMnem!=NULL)
-        length = 31;//(sizeof(vecMnem)/sizeof(vecMnem[0]));
+        length = MNEMAX;//(sizeof(vecMnem)/sizeof(vecMnem[0]));//32
     if (strcmp(codigo.mnem, "") != 0){
         for (i = 0; i < strlen(codigo.mnem); i++)
             codigo.mnem[i] = toupper(codigo.mnem[i]);
