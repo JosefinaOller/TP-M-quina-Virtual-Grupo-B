@@ -173,6 +173,7 @@ void estructuraASM(char nombAsm[],Linea codigo[],int *conLin,char listaComentari
             strcpy(rotulo,"");strcpy(mnem,"");strcpy(argA,"");strcpy(argB,"");strcpy(com,""); //los inicializo
             strcpy(seg,"");strcpy(size,"");
             procesarLinea(linea,rotulo,mnem,argA,argB,com);
+            mayuscula(rotulo); mayuscula(mnem); mayuscula(argA); mayuscula(argB);
             cargaLinea(rotulo,mnem,argA,argB,com,&codigo[*conLin]);
             if(strcmp(com,"")!=0 && strcmp(rotulo,"")==0  && strcmp(mnem,"")==0 && strcmp(argA,"")==0 && strcmp(argB,"")==0){
                     strcpy(listaComentarios[*nComentarios],linea);
@@ -483,16 +484,22 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
     return inst;
 }
 int tipoOperando(char vop[]){
-    if (isdigit(vop[0]) || vop[0]=='#' || vop[0]=='@' || vop[0]=='%' || vop[0]=='$' || vop[0]=='\'' || vop[0]=='-')
-        return 0;//inmediato
-    else
-        if ((vop[0]=='E'&& vop[1]='A'..'F'&& vop[2]='X') || (vop[0]='A'..'F'&& vop[1]='X'))
-            return 1;//de registro
+    if(isalpha(vop[0])){
+        if(vop[0]=='E'&& (vop[1]=='A' || vop[1]=='B' || vop[1]=='C' || vop[1]=='D'|| vop[1]=='E' || vop[1]=='F')  && vop[2]=='X')
+            return 1; //de registro
         else
-            if (isalpha(vop[1]))
+            if ((vop[0]=='A' || vop[0]=='B' || vop[0]=='C' || vop[0]=='D'|| vop[0]=='E' || vop[0]=='F') && vop[1]=='X')
+                return 1; //de registro
+            else return 0; //inmediato
+    }
+    else{
+        if (isdigit(vop[0]) || vop[0]=='#' || vop[0]=='@' || vop[0]=='%' || vop[0]=='$' || vop[0]=='\'' || vop[0]=='-')
+        return 0;//inmediato
+        else if (isalpha(vop[1]))
                 return 3;//indirecto
         else
             return 2;//directo
+    }
 }
 void operandoIndirecto(char vop[], int* valorReg,int *off,Label rotulos[],int cantRotulos,int *error){
     char reg[3];
@@ -534,8 +541,8 @@ void eliminaCorchetes(char vop[]){
     char aux[20] = {'\0'};
     int n = strlen(vop)-1;
     if (vop[0]=='[' && vop[n]==']')
-        for (int i = 0; i < n; i++)
-            aux[i] = vop[i+1];
+        for (int i = 1; i < n; i++)
+            aux[i-1] = vop[i];
     strcpy(vop, aux);
 }
 int anyToInt(char *s, char **out){
