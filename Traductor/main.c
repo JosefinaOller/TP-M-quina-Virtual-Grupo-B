@@ -28,9 +28,9 @@ int main(int argc, const char *argv[]){
     int o=1,i;
     Mnemonico vecMnem[MNEMAX];
     cargaVecMnem(vecMnem); //Carga todos los mnemonicos con sus datos.
-    argc=3;
-    argv[1]="1.asm";
-    argv[2]="1.mv2";
+    //argc=3;
+    //argv[1]="1.asm";
+    //argv[2]="1.mv2";
     for(i=1;i<argc;i++){
         if(strstr(argv[i],".asm"))
             strcpy(asmar,argv[i]);
