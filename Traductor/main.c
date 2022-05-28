@@ -360,64 +360,85 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
             mnem = vecMnem[i];
             if (mnem.cantOp == 2){
                 if (strcmp(codigo.argA, "") != 0 && strcmp(codigo.argB, "") != 0){
-                    int topA = tipoOperando(codigo.argA);
-                    int topB = tipoOperando(codigo.argB);
-                    int vopA, vopB;
-                    switch (topA){
-                    case 0:
-                        if(isalpha(codigo.argA[0])){
-                            int i=busquedaLabel(rotulos,codigo.argA,cantRotulos);
-                            if(i!=-1)
-                                vopA = rotulos[i].codigo;
-                            else
-                                printf("Rotulo indefinido\n");
-                        }
-                        else{
-                            vopA = (codigo.argA[0] == '\'')? codigo.argA[1]: anyToInt(codigo.argA, &out);
-                            truncamiento(2, &vopA, wrgA);
-                        }
-                        break;
-                    case 1:
-                        vopA = AEntero(codigo.argA);
-                        break;
-                    case 2:
-                        eliminaCorchetes(codigo.argA);
-                        vopA = (codigo.argA[0] == '\'')? codigo.argA[1]: anyToInt(codigo.argA, &out);
-                        break;
-                    case 3: //indirecto
-                        valorReg=0; off=0;
-                        eliminaCorchetes(codigo.argA);
-                        operandoIndirecto(codigo.argA,&valorReg,&off,rotulos,cantRotulos, error);
-                        vopA = (valorReg & 0xF) | (off << 4);
-                        break;
+                    int topA, topB, vopA, vopB, j = 0;
+                    mayuscula(codigo.argA);
+                    mayuscula(codigo.argB);
+                    while (j<cantRotulos && strcmp(codigo.argA, rotulos[j].etiqueta) != 0)
+                        j++;
+                    if (j<cantRotulos){
+                        topA = 0;//inmediato
+                        vopA = rotulos[j].codigo;
+                        truncamiento(2, &vopA, wrgA);
                     }
-                    switch (topB){
-                    case 0:
-                        if(isalpha(codigo.argB[0])){
-                            int i=busquedaLabel(rotulos,codigo.argB,cantRotulos);
-                            if(i!=-1)
-                                vopB = rotulos[i].codigo;
-                            else
-                                printf("Rotulo indefinido\n");
+                    else{
+                        topA = tipoOperando(codigo.argA);
+                        switch (topA){
+                        case 0:
+                            if(isalpha(codigo.argA[0])){
+                                int i=busquedaLabel(rotulos,codigo.argA,cantRotulos);
+                                if(i!=-1)
+                                    vopA = rotulos[i].codigo;
+                                else
+                                    printf("Rotulo indefinido\n");
+                            }
+                            else{
+                                vopA = (codigo.argA[0] == '\'')? codigo.argA[1]: anyToInt(codigo.argA, &out);
+                                truncamiento(2, &vopA, wrgA);
+                            }
+                            break;
+                        case 1:
+                            vopA = AEntero(codigo.argA);
+                            break;
+                        case 2:
+                            eliminaCorchetes(codigo.argA);
+                            vopA = (codigo.argA[0] == '\'')? codigo.argA[1]: anyToInt(codigo.argA, &out);
+                            break;
+                        case 3: //indirecto
+                            valorReg=0; off=0;
+                            eliminaCorchetes(codigo.argA);
+                            operandoIndirecto(codigo.argA,&valorReg,&off,rotulos,cantRotulos, error);
+                            vopA = (valorReg & 0xF) | (off << 4);
+                            break;
                         }
-                        else{
+                    }
+                    j = 0;
+                    while (j<cantRotulos && strcmp(codigo.argB, rotulos[j].etiqueta) != 0)
+                        j++;
+                    if (j<cantRotulos){
+                        topB = 0;//inmediato
+                        vopB = rotulos[j].codigo;
+                        truncamiento(2, &vopB, wrgB);
+                    }
+                    else{
+                        topB = tipoOperando(codigo.argB);
+                        switch (topB){
+                        case 0:
+                            if(isalpha(codigo.argB[0])){
+                                int i=busquedaLabel(rotulos,codigo.argB,cantRotulos);
+                                if(i!=-1)
+                                    vopB = rotulos[i].codigo;
+                                else
+                                    printf("Rotulo indefinido\n");
+                            }
+                            else{
+                                vopB = (codigo.argB[0] == '\'')? codigo.argB[1]: anyToInt(codigo.argB, &out);
+                                truncamiento(2, &vopB, wrgB);
+                            }
+                            break;
+                        case 1:
+                            vopB = AEntero(codigo.argB);
+                            break;
+                        case 2:
+                            eliminaCorchetes(codigo.argB);
                             vopB = (codigo.argB[0] == '\'')? codigo.argB[1]: anyToInt(codigo.argB, &out);
-                            truncamiento(2, &vopB, wrgB);
+                            break;
+                        case 3:
+                            valorReg=0; off=0;
+                            eliminaCorchetes(codigo.argB);
+                            operandoIndirecto(codigo.argB,&valorReg,&off,rotulos,cantRotulos, error);
+                            vopB = (valorReg & 0xF) | (off << 4);
+                            break;
                         }
-                        break;
-                    case 1:
-                        vopB = AEntero(codigo.argB);
-                        break;
-                    case 2:
-                        eliminaCorchetes(codigo.argB);
-                        vopB = (codigo.argB[0] == '\'')? codigo.argB[1]: anyToInt(codigo.argB, &out);
-                        break;
-                    case 3:
-                        valorReg=0; off=0;
-                        eliminaCorchetes(codigo.argB);
-                        operandoIndirecto(codigo.argB,&valorReg,&off,rotulos,cantRotulos, error);
-                        vopB = (valorReg & 0xF) | (off << 4);
-                        break;
                     }
                     inst = (mnem.codigo << 28) | ((topA << 26) & 0x0C000000) | ((topB << 24) & 0x03000000) | ((vopA << 12) & 0x00FFF000) | (vopB & 0x00000FFF);
                 }else{
