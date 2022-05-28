@@ -204,7 +204,6 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
     FILE *arch=fopen(archivo,"rt");
     char linea[500],rotulo[16],mnem[5],constante[10],constante_valor[50],seg[6],size[5];
     *nLista=0; //Para imprimir las directivas y equ
-    int numeroLinea=0;
     if(arch!=NULL){
         while(fgets(linea,500,arch)!=NULL){
            char **parsed = parseline(linea);
@@ -230,7 +229,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
                 strcpy(cadena,"\\\\DATA ");
                 strcat(cadena,size);
                 strcpy(lista[*nLista],cadena);
-                indiceLinea[(*nLista)++]=numeroLinea;
+                indiceLinea[(*nLista)++]=*nroLinea;
            }
            else{
             if(strcmp(seg,"EXTRA")==0){
@@ -239,7 +238,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
                 strcpy(cadena,"\\\\EXTRA ");
                 strcat(cadena,size);
                 strcpy(lista[*nLista],cadena);
-                indiceLinea[(*nLista)++]=numeroLinea;
+                indiceLinea[(*nLista)++]=*nroLinea;
             }
             else{
                 if(strcmp(seg,"STACK")==0){
@@ -248,21 +247,29 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
                     strcpy(cadena,"\\\\STACK ");
                     strcat(cadena,size);
                     strcpy(lista[*nLista],cadena);
-                    indiceLinea[(*nLista)++]=numeroLinea;
+                    indiceLinea[(*nLista)++]=*nroLinea;
                 }
 
             }
            }
-           numeroLinea++;
+           //numeroLinea++;
         }
         fclose(arch);
-        numeroLinea=0;
         FILE *arch=fopen(archivo,"rt");
+        int nLinea=0;
         while(fgets(linea,500,arch)!=NULL){
              char **parsed = parseline(linea);
+             strcpy(rotulo,parsed[0] ? parsed[0] : ""); //Rotulo
+             strcpy(mnem,parsed[1] ? parsed[1] : ""); //Mnemonico, es para ver si existe para sumar la cantidad de lineas
              strcpy(constante,parsed[7] ? parsed[7] : ""); //Constante
              strcpy(constante_valor,parsed[8] ? parsed[8] : ""); //Valor del constante
              freeline(parsed);
+
+            if(strcmp(rotulo,"")!=0){ //Hay rotulo
+                nLinea++;
+           }
+           else if(strcmp(mnem,"")!=0)
+                nLinea++;
            if(strcmp(constante,"")!=0){ //Hay constante
                 mayuscula(constante);
                 if(busquedaLabel(rotulos,constante,*cantRotulos)==-1){ //No hay duplicado
@@ -293,7 +300,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
                     strcat(constante," EQU ");
                     strcat(constante,constante_valor);
                     strcpy(lista[*nLista],constante);
-                    indiceLinea[(*nLista)++]=numeroLinea;
+                    indiceLinea[(*nLista)++]=nLinea;
                     (*cantRotulos)++;
              } //if no hay duplicado
              else{
@@ -301,7 +308,6 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
                 *error=1;
              }
            }
-           numeroLinea++;
          }
          fclose(arch);
     } //el archivo es null
