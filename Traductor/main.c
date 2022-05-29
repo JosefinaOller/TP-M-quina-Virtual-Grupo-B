@@ -30,8 +30,8 @@ int main(int argc, const char *argv[]){
     Mnemonico vecMnem[MNEMAX];
     cargaVecMnem(vecMnem); //Carga todos los mnemonicos con sus datos.
     //argc=3;
-    //argv[1]="8.asm";
-    //argv[2]="8.mv2";
+    //argv[1]="11.asm";
+    //argv[2]="11.mv2";
     for(i=1;i<argc;i++){
         if(strstr(argv[i],".asm"))
             strcpy(asmar,argv[i]);
@@ -117,7 +117,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
                 //empiezo a generar el archivo binario
                 archESCRITURA=fopen(binario,"wb");
                 //la cabecera
-                int header=0x4D562D31;
+                int header=0x4D562D32;
                 fwrite(&header,sizeof(int),1,archESCRITURA); //MV-2
                 fwrite(&data,sizeof(int),1,archESCRITURA); //DS
                 fwrite(&stack,sizeof(int),1,archESCRITURA); //SS
