@@ -1,0 +1,69 @@
+# depslib dependency file v1.0
+1649444504 source:c:\maquina virtual\2022\mvc\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"prototipos.h"
+
+1649444545 c:\maquina virtual\2022\mvc\prototipos.h
+
+1649444569 source:c:\maquina virtual\2022\mvc\mnemonico.c
+	<string.h>
+	"prototipos.h"
+
+1649448214 source:c:\maquina virtual\2022\mvc\parser.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"parser.h"
+
+1649448179 c:\maquina virtual\2022\mvc\parser.h
+
+1653236052 source:c:\users\ollers\documents\github\tp-maquina-virtual-grupob\traductor\mnemonico.c
+	<string.h>
+	"prototipos.h"
+
+1649513634 ated upstream
+
+1653327794 c:\users\ollers\documents\github\tp-maquina-virtual-grupob\traductor\prototipos.h
+
+1653327794 shed changes
+
+1653615079 source:c:\users\ollers\documents\github\tp-maquina-virtual-grupob\traductor\parser.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"parser.h"
+
+1653615113 c:\users\ollers\documents\github\tp-maquina-virtual-grupob\traductor\parser.h
+
+1653844675 source:c:\users\ollers\documents\github\tp-maquina-virtual-grupob\traductor\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<ctype.h>
+	"prototipos.h"
+	"parser.h"
+
+1653773274 source:c:\users\win10\documents\github\tp-maquina-virtual-grupob\traductor\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<ctype.h>
+	"prototipos.h"
+	"parser.h"
+
+1653520495 c:\users\win10\documents\github\tp-maquina-virtual-grupob\traductor\prototipos.h
+
+1653709236 c:\users\win10\documents\github\tp-maquina-virtual-grupob\traductor\parser.h
+
+1650152496 source:c:\users\win10\documents\github\tp-maquina-virtual-grupob\traductor\mnemonico.c
+	<string.h>
+	"prototipos.h"
+
+1653709235 source:c:\users\win10\documents\github\tp-maquina-virtual-grupob\traductor\parser.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"parser.h"
+
