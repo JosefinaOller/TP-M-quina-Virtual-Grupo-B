@@ -1,8 +1,9 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "parser.h"
+
+#define PARSED_LENGTH 9
 
 #ifdef _WIN32
   #define PARSER ".\\parser.exe"
@@ -12,14 +13,14 @@
   #define TEMP "./parser.tmp"
 #endif
 
-void saveline(char *line, char *filename)
+void saveline(const char *line, const char *filename)
 {
   FILE *fp = fopen(filename, "w");
   fprintf(fp, "%s", line);
   fclose(fp);
 }
 
-char **parseline(char *line)
+char **parseline(const char *line)
 {
   FILE *file = NULL;
   char cmd[1024];
@@ -30,11 +31,11 @@ char **parseline(char *line)
 
   if (file == NULL) return NULL;
 
-  char **parsed = (char **) malloc(sizeof(char *) * 5);
+  char **parsed = (char **) malloc(sizeof(char *) * PARSED_LENGTH);
   char elem[256];
   int i = 0;
 
-  while (i < 5 && fgets(elem, 256, file))
+  while (i < PARSED_LENGTH && fgets(elem, 256, file))
   {
     size_t length = strlen(elem);
 
@@ -52,7 +53,7 @@ char **parseline(char *line)
     i++;
   }
 
-  for (; i < 5; i++)
+  for (; i < PARSED_LENGTH; i++)
     parsed[i] = NULL;
 
   pclose(file);
@@ -62,7 +63,7 @@ char **parseline(char *line)
 
 void freeline(char **parsed)
 {
-  for (int i = 0; i < 5; i++)
+  for (int i = 0; i < PARSED_LENGTH; i++)
     free(parsed[i]);
 
   free(parsed);
