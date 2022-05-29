@@ -29,9 +29,6 @@ int main(int argc, const char *argv[]){
     int o=1,i;
     Mnemonico vecMnem[MNEMAX];
     cargaVecMnem(vecMnem); //Carga todos los mnemonicos con sus datos.
-    //argc=3;
-    //argv[1]="11.asm";
-    //argv[2]="11.mv2";
     for(i=1;i<argc;i++){
         if(strstr(argv[i],".asm"))
             strcpy(asmar,argv[i]);
@@ -111,7 +108,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
         printf("Error de archivo\n");
     else{
         estructuraASM(nombAsm,codigo,&conLin); //procesa las instrucciones asm
-        int cs = nroLinea + cantStrings;
+        int cs = nroLinea;
         if((data+extra+stack) <= (8192 - cs)){ //Calculo de memoria
             if(conLin>=0 || nLista>=0){
                 //empiezo a generar el archivo binario
@@ -144,7 +141,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
                     } //Si el flag de ocultamiento esta desactivado, muestro lineas
 
                 }
-               for(int j=0;j<=cantStrings;j++){
+               for(int j=0;j<cantStrings;j++){
                    fwrite(&strings[j],sizeof(int),1,archESCRITURA);
                 }
                 while(i==indicelinea[kcom] && strcmp(lista[kcom],"")!=0){
@@ -164,7 +161,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
     }
 }
 
-void estructuraASM(char nombAsm[],Linea codigo[],int *conLin){
+void estructuraASM(char nombAsm[],Linea codigo[],int *conLin){ //Procesa las instrucciones
 
     FILE *arch;
     char linea[500],rotulo[10],mnem[5],argA[16],argB[16],com[100],seg[6],size[4];
@@ -199,6 +196,7 @@ void procesarLinea(char linea[],char rotulo[],char mnem[],char argA[],char argB[
     freeline(parsed);
 }
 void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int *error,char strings[],int *nroLinea,int *cantStrings,int *data,int *extra,int *stack,char lista[][100],int *nLista,int indiceLinea[]){
+//Lee los rotulos, constantes y segmentos.
 
     FILE *arch=fopen(archivo,"rt");
     char linea[500],rotulo[16],mnem[5],constante[10],constante_valor[100],seg[6],size[5],argA[15],argB[15],com[50];
@@ -256,6 +254,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
            }
         }
         fclose(arch);
+        //Vuelvo a leer el archivo para las constantes, por su desplazamiento con CS.
         FILE *arch=fopen(archivo,"rt");
         int nLinea=0;
         while(fgets(linea,500,arch)!=NULL){
@@ -298,8 +297,6 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
                             tratamiento_especial(constante_valor,rotulos,*cantRotulos,&(*nroLinea),strings,&(*cantStrings));
                             break;
                     }
-                    //strcpy(lista[*nLista],linea);
-                    //indiceLinea[(*nLista)++]=nLinea;
                     (*cantRotulos)++;
              } //if no hay duplicado
              else{
@@ -320,14 +317,14 @@ void tratamiento_especial(char constante_valor[],Label rotulos[],int cantRotulos
     int i=1;
     rotulos[cantRotulos].codigo=(*nroLinea);
     while(constante_valor[i]!='"'){
-        strings[i-1]=constante_valor[i];
-        (*cantStrings)++;
+        strings[(*cantStrings)++]=constante_valor[i];
+        (*nroLinea)++;
         i++;
     }
-    strings[i-1]='\0';
-    (*nroLinea) += (strlen(strings)+1);
+    strings[(*cantStrings)++]='\0';
+    (*nroLinea)++;
 }
-int busquedaLabel(Label rotulos[],char etiqueta[],int cantRotulos){ //Para buscar la posicion del rotulo
+int busquedaLabel(Label rotulos[],char etiqueta[],int cantRotulos){ //Para buscar la posicion del rotulo o constante
     int i=0;
     while(i<cantRotulos && strcmp(etiqueta,rotulos[i].etiqueta)!=0)
         i++;
@@ -531,7 +528,7 @@ void operandoIndirecto(char vop[], int* valorReg,int *off,Label rotulos[],int ca
     else
         *off = (valorOpDirecto(vop,rotulos,cantRotulos,&(*error)))&0xFF;
 }
-int valorOpDirecto(char *s,Label rotulos[],int cantRotulos,int *error){
+int valorOpDirecto(char *s,Label rotulos[],int cantRotulos,int *error){ //Para obtener un valor inmediato
     int i;
     if(s[0]=='\'')
         return s[1];
@@ -660,7 +657,7 @@ void truncamiento(int cantOperandos, int *valor, int *flag){//Sólo entra si el o
         (*valor) = (*valor) % (maxval+1);
     }
 }
-void salida(Linea codigo, int i, int inst, int wrgA, int wrgB){
+void salida(Linea codigo, int i, int inst, int wrgA, int wrgB){ //Impresion de las instrucciones
     printf("[%04d]: %02X %02X %02X %02X", i, (inst>>24)&0xFF, (inst>>16)&0xFF, (inst>>8)&0xFF, (inst>>0)&0xFF);
     if(strcmp(codigo.label, "") != 0)
         printf("%12s: %s ", codigo.label, codigo.mnem);
