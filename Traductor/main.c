@@ -479,7 +479,7 @@ int tipoOperando(char vop[]){
 }
 int esRegistro(char vop[]){
     char vreg[10][3] = {"DS","SS","ES","CS","HP","IP","SP","BP","CC","AC"};//Sólo comtemplo los 10 primeros registros
-        if((vop[0]=='E' && vop[1]>='A' && vop[1]<='F' && vop[2]=='X') || (vop[0]>='A' && vop[0]<='F' && vop[1]=='X'))
+        if((vop[0]=='E' && vop[1]>='A' && vop[1]<='F' && vop[2]=='X') || (vop[0]>='A' && vop[0]<='F' && (vop[1]=='X' || vop[1]=='H' || vop[1]=='L')))
             return 1; //de registro
         else{
             int i = 0;
