@@ -9,7 +9,7 @@ void cargaVecMnem(Mnemonico[]);
 void traduce(char[], Mnemonico[], int, char[]);
 void estructuraASM(char[], Linea[], int*);
 void procesarLinea(char[], char[], char[], char[], char[], char[], char[], char[], char[], char[]);
-void lecturaLabelsYSegmentos(char*, Label[], int*, int*,char[],int *,int *,int*,int*,int*,char[][100],int *,int[]);
+void lecturaLabelsYSegmentos(char*, Label[], int*, int*,int[],int *,int *,int*,int*,int*,char[][100],int *,int[]);
 int busquedaLabel(Label[], char[], int);
 int codificaInstruccion(Linea, Mnemonico[], Label[], int, int*, int*, int*);
 int tipoOperando(char[]);
@@ -19,7 +19,7 @@ int AEntero(char[]);
 void truncamiento(int, int*, int*);
 void salida(Linea, int, int, int, int);
 void mayuscula(char[]);
-void tratamiento_especial(char [],Label[],int,int *,char[],int *);
+void tratamiento_especial(char [],Label[],int,int *,int[],int *);
 void operandoIndirecto(char[], int*, int*, Label[], int, int*);
 int valorOpDirecto(char*, Label[], int, int*);
 int esRegistro(char[]);
@@ -97,14 +97,12 @@ void cargaVecMnem(Mnemonico vecMnem[]){ //Carga datos de mnenomicos
 void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcion que procesa las instrucciones,las imprime y genera el archivo binario
 
     FILE *archESCRITURA; //para el archivo binario
-    char lista[100][100],strings[100]; //lista incluye a las directivas,constantes y los comentarios
+    char lista[100][100];//lista incluye a las directivas,constantes y los comentarios
     Label rotulos[100];
     Linea codigo[500];
-    int i,cantRotulos=0,error=0,conLin=0,nLista=0,indicelinea[100],inst, wrgA, wrgB,kcom=0,nroLinea,data=1024,extra=1024,stack=1024,cantStrings=0;
-    for(i=0;i<100;i++){
+    int i,cantRotulos=0,error=0,conLin=0,nLista=0,indicelinea[100],inst, wrgA, wrgB,kcom=0,nroLinea,data=1024,extra=1024,stack=1024,cantStrings=0,strings[100];
+    for(i=0;i<100;i++)
         strcpy(lista[i],"");
-        strings[i]='\0';
-    }
 
     lecturaLabelsYSegmentos(nombAsm,rotulos,&cantRotulos,&error,strings,&nroLinea,&cantStrings,&data,&extra,&stack,lista,&nLista,indicelinea); //para guardar los rotulos y su posicion, tambien para guardar las constantes.
     if(error)
@@ -145,7 +143,6 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
                 }
                for(int j=0;j<cantStrings;j++){
                    fwrite(&strings[j],sizeof(int),1,archESCRITURA);
-                   printf("%8x\n",strings[j]);
                 }
                 while(i==indicelinea[kcom] && strcmp(lista[kcom],"")!=0){
                     printf("%3s\n",strtok(lista[kcom++],"\n"));
@@ -202,7 +199,7 @@ void procesarLinea(char linea[],char rotulo[],char mnem[],char argA[],char argB[
     strcpy(constante_valor,parsed[8] ? parsed[8] : ""); //Valor del constante
     freeline(parsed);
 }
-void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int *error,char strings[],int *nroLinea,int *cantStrings,int *data,int *extra,int *stack,char lista[][100],int *nLista,int indiceLinea[]){
+void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int *error,int strings[],int *nroLinea,int *cantStrings,int *data,int *extra,int *stack,char lista[][100],int *nLista,int indiceLinea[]){
 //Lee los rotulos, constantes y segmentos.
 
     FILE *arch=fopen(archivo,"rt");
@@ -300,7 +297,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
         *error=1;
     }
 } //fin
-void tratamiento_especial(char constante_valor[],Label rotulos[],int cantRotulos,int *nroLinea,char strings[],int *cantStrings){
+void tratamiento_especial(char constante_valor[],Label rotulos[],int cantRotulos,int *nroLinea,int strings[],int *cantStrings){
     int i=1;
     rotulos[cantRotulos].codigo=(*nroLinea);
     while(constante_valor[i]!='"'){
