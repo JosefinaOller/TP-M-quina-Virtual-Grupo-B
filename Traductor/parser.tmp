@@ -1,1 +1,1 @@
-    MOV [BX+9], -9
+                pop     ebx

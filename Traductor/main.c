@@ -164,7 +164,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
 void estructuraASM(char nombAsm[],Linea codigo[],int *conLin){ //Procesa las instrucciones
 
     FILE *arch;
-    char linea[500],rotulo[10],mnem[5],argA[16],argB[16],com[100],seg[6],size[4], constante[10],constante_valor[100];
+    char linea[500],rotulo[30],mnem[5],argA[30],argB[30],com[100],seg[6],size[4], constante[30],constante_valor[100];
     arch=fopen(nombAsm,"rt");
     if(arch!=NULL){
         *conLin=0;
@@ -203,7 +203,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
 //Lee los rotulos, constantes y segmentos.
 
     FILE *arch=fopen(archivo,"rt");
-    char linea[500],rotulo[16],mnem[5],constante[10],constante_valor[100],seg[6],size[5],argA[15],argB[15],com[50];
+    char linea[500],rotulo[30],mnem[5],constante[30],constante_valor[100],seg[6],size[5],argA[30],argB[30],com[50];
     *nLista=0; //Para imprimir las directivas y equ
     if(arch!=NULL){
         while(fgets(linea,500,arch)!=NULL){
@@ -642,16 +642,16 @@ void truncamiento(int cantOperandos, int *valor, int *flag){//Sólo entra si el o
 void salida(Linea codigo, int i, int inst, int wrgA, int wrgB){ //Impresion de las instrucciones
     printf("[%04d]: %02X %02X %02X %02X", i, (inst>>24)&0xFF, (inst>>16)&0xFF, (inst>>8)&0xFF, (inst>>0)&0xFF);
     if(strcmp(codigo.label, "") != 0)
-        printf("%12s: %s ", codigo.label, codigo.mnem);
+        printf("%20s: %s ", codigo.label, codigo.mnem);
     else
-        printf("%12d: %s ", i+1, codigo.mnem);
+        printf("%20d: %s ", i+1, codigo.mnem);
     if (strcmp(codigo.argA, "") != 0){
         switch (strlen(codigo.mnem)){
-            case 2: printf("%17s", codigo.argA);
+            case 2: printf("%20s", codigo.argA);
             break;
-            case 3: printf("%16s", codigo.argA);
+            case 3: printf("%20s", codigo.argA);
             break;
-            case 4: printf("%15s", codigo.argA);
+            case 4: printf("%20s", codigo.argA);
             break;
         }
         if (strcmp(codigo.argB, "") != 0){
