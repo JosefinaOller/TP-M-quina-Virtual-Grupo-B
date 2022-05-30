@@ -2864,11 +2864,6 @@ void decodificaOperandos(Memoria *memoria, int codigo, int instruccion, Operando
                         memoria->error = 1;
                 } else if ((op->operandoB[4] + op->segmento.ss <= op->segmento.ss) || (op->operandoB[4] + op->segmento.ss >= op->segmento.finSS)){
                     memoria->error = 1;
-                    /*printf("FINSS: %d\n",op->segmento.finSS);
-                    printf("Cuenta: %d\n",op->operandoB[4] + op->segmento.ss);
-                    printf("OP: %d\n",op->operandoB[4]);
-                    printf("SS: %d\n",op->segmento.ss);
-                    printf("BP: %08X\n",memoria->VectorDeRegistros[7]);*/
                 }
             }
             else if (op->segmento.actualB == 2)    //ES

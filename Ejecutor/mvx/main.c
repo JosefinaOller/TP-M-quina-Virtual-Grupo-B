@@ -109,12 +109,6 @@ int main(int argc, char *argv[])
             fread(&memoria,sizeof(size),1,arch);
             fclose(arch);
 
-            /*printf("Tamanio del CS leido del header: %d\n",header.bloque[4]);
-            printf("Memoriaaa\n");
-
-            for (int j=0; j<32; j++)
-                printf("Memoria[%d]: %08X\n",j,memoria.RAM[j]);*/
-
             op.cantInstrucciones=0;
             i=0;
             while (i<op.segmento.ds && op.cantInstrucciones==0){
@@ -125,8 +119,6 @@ int main(int argc, char *argv[])
                 i++;
             }
 
-            /*printf("Cant: %d\n",op.cantInstrucciones);
-            printf("DS: %d",op.segmento.ds);*/
             if (op.flags[2] == 1){
                 cod = decodificaCodigo(0xF000000F);
                 decodificaOperandos(&memoria,cod,0xF000000F,&op);
