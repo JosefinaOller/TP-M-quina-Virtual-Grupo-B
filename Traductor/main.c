@@ -554,80 +554,78 @@ int anyToInt(char *s, char **out){
 int AEntero(char vop[]){
     //Registros = {"DS","SS","ES","CS","HP","IP","SP","BP","CC","AC","A","B","C","D","E","F"};
     int valor;
-    for (int i = 0; i < strlen(vop); i++)
-        vop[i] = toupper(vop[i]);
-    if (strcmp(vop, "DS")==0)
+    if (vop[0] == 'D' && vop[1] == 'S') //Sabemos que van con strcmp pero de alguna forma por ser char, siempre arrastra basura y no se lee de manera correcta
         valor = 0x0;
-    else if (strcmp(vop, "SS")==0)
+    else if (vop[0] == 'S' && vop[1] == 'S')
         valor = 0x1;
-    else if (strcmp(vop, "ES")==0)
+    else if (vop[0] == 'E' && vop[1] == 'S')
         valor = 0x2;
-    else if (strcmp(vop, "CS")==0)
+    else if (vop[0] == 'C' && vop[1] == 'S')
         valor = 0x3;
-    else if (strcmp(vop, "HP")==0)
+    else if (vop[0] == 'H' && vop[1] == 'P')
         valor = 0x4;
-    else if (strcmp(vop, "IP")==0)
+    else if (vop[0] == 'I' && vop[1] == 'P')
         valor = 0x5 | (0x3 << 4);
-    else if (strcmp(vop, "SP")==0)
+    else if (vop[0] == 'S' && vop[1] == 'P')
         valor = 0x6 | (0x3 << 4);
-    else if (strcmp(vop, "BP")==0)
+    else if (vop[0] == 'B' && vop[1] == 'P')
         valor = 0x7 | (0x3 << 4);
-    else if (strcmp(vop, "CC")==0)
+    else if (vop[0] == 'C' && vop[1] == 'C')
         valor = 0x8;
-    else if (strcmp(vop, "AC")==0)
+    else if (vop[0] == 'A' && vop[1] == 'C')
         valor = 0x9;
-    else if (strcmp(vop, "EAX")==0 || strcmp(vop, "AX")==0 || strcmp(vop, "AH")==0 || strcmp(vop, "AL")==0){
+    else if ((vop[0] == 'E' && vop[1] == 'A' && vop[2] == 'X') || (vop[0] == 'A' && vop[1] == 'X') || (vop[0] == 'A' && vop[1] == 'H') || (vop[0] == 'A' && vop[1] == 'L')){
         valor = 0xA;
-        if (strcmp(vop, "AX")==0)
+        if (vop[0] == 'A' && vop[1] == 'X')
             valor = valor | (0x3 << 4);
-        else if (strcmp(vop, "AH")==0)
+        else if (vop[0] == 'A' && vop[1] == 'H')
             valor = valor | (0x2 << 4);
-        else if (strcmp(vop, "AL")==0)
+        else if (vop[0] == 'A' && vop[1] == 'L')
             valor = valor | (0x1 << 4);
     }
-    else if (strcmp(vop, "EBX")==0 || strcmp(vop, "BX")==0 || strcmp(vop, "BH")==0 || strcmp(vop, "BL")==0){
+    else if ((vop[0] == 'E' && vop[1] == 'B' && vop[2] == 'X') || (vop[0] == 'B' && vop[1] == 'X') || (vop[0] == 'B' && vop[1] == 'H') || (vop[0] == 'B' && vop[1] == 'L')){
         valor = 0xB;
-        if (strcmp(vop, "BX")==0)
+        if (vop[0] == 'B' && vop[1] == 'X')
             valor = valor | (0x3 << 4);
-        else if (strcmp(vop, "BH")==0)
+        else if (vop[0] == 'B' && vop[1] == 'H')
             valor = valor | (0x2 << 4);
-        else if (strcmp(vop, "BL")==0)
+        else if (vop[0] == 'B' && vop[1] == 'L')
             valor = valor | (0x1 << 4);
     }
-    else if (strcmp(vop, "ECX")==0 || strcmp(vop, "CX")==0 || strcmp(vop, "CH")==0 || strcmp(vop, "CL")==0){
+    else if ((vop[0] == 'E' && vop[1] == 'C' && vop[2] == 'X') || (vop[0] == 'C' && vop[1] == 'X') || (vop[0] == 'C' && vop[1] == 'H') || (vop[0] == 'C' && vop[1] == 'L')){
         valor = 0xC;
-        if (strcmp(vop, "CX")==0)
+        if (vop[0] == 'C' && vop[1] == 'X')
             valor = valor | (0x3 << 4);
-        else if (strcmp(vop, "CH")==0)
+        else if (vop[0] == 'C' && vop[1] == 'H')
             valor = valor | (0x2 << 4);
-        else if (strcmp(vop, "CL")==0)
+        else if (vop[0] == 'C' && vop[1] == 'L')
             valor = valor | (0x1 << 4);
     }
-    else if (strcmp(vop, "EDX")==0 || strcmp(vop, "DX")==0 || strcmp(vop, "DH")==0 || strcmp(vop, "DL")==0){
+    else if ((vop[0] == 'E' && vop[1] == 'D' && vop[2] == 'X') || (vop[0] == 'D' && vop[1] == 'X') || (vop[0] == 'D' && vop[1] == 'H') || (vop[0] == 'D' && vop[1] == 'L')){
         valor = 0xD;
-        if (strcmp(vop, "DX")==0)
+        if (vop[0] == 'D' && vop[1] == 'X')
             valor = valor | (0x3 << 4);
-        else if (strcmp(vop, "DH")==0)
+        else if (vop[0] == 'D' && vop[1] == 'H')
             valor = valor | (0x2 << 4);
-        else if (strcmp(vop, "DL")==0)
+        else if (vop[0] == 'D' && vop[1] == 'L')
             valor = valor | (0x1 << 4);
     }
-    else if (strcmp(vop, "EEX")==0 || strcmp(vop, "EX")==0 || strcmp(vop, "EH")==0 || strcmp(vop, "EL")==0){
+    else if ((vop[0] == 'E' && vop[1] == 'E' && vop[2] == 'X') || (vop[0] == 'E' && vop[1] == 'X') || (vop[0] == 'E' && vop[1] == 'H') || (vop[0] == 'E' && vop[1] == 'L')){
         valor = 0xE;
-        if (strcmp(vop, "EX")==0)
+        if (vop[0] == 'E' && vop[1] == 'X')
             valor = valor | (0x3 << 4);
-        else if (strcmp(vop, "EH")==0)
+        else if (vop[0] == 'E' && vop[1] == 'H')
             valor = valor | (0x2 << 4);
-        else if (strcmp(vop, "EL")==0)
+        else if (vop[0] == 'E' && vop[1] == 'L')
             valor = valor | (0x1 << 4);
     }
-    else if (strcmp(vop, "EFX")==0 || strcmp(vop, "FX")==0 || strcmp(vop, "FH")==0 || strcmp(vop, "FL")==0){
+    else if ((vop[0] == 'E' && vop[1] == 'F' && vop[2] == 'X') || (vop[0] == 'F' && vop[1] == 'X') || (vop[0] == 'F' && vop[1] == 'H') || (vop[0] == 'F' && vop[1] == 'L')){
         valor = 0xF;
-        if (strcmp(vop, "FX")==0)
+        if (vop[0] == 'F' && vop[1] == 'X')
             valor = valor | (0x3 << 4);
-        else if (strcmp(vop, "FH")==0)
+        else if (vop[0] == 'F' && vop[1] == 'H')
             valor = valor | (0x2 << 4);
-        else if (strcmp(vop, "FL")==0)
+        else if (vop[0] == 'F' && vop[1] == 'L')
             valor = valor | (0x1 << 4);
     }
     else//Si hubo error
