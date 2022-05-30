@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 
     inicializaFlags(&op,argc,argv);
     inicializaDiscos(&memoria,argc,argv);
-    memoria.error=0;
+    inicializaMensajesError(&memoria);
 
     if (op.flags[1] == 1)
         system("cls");
@@ -133,6 +133,11 @@ int main(int argc, char *argv[])
                 cod = decodificaCodigo(memoria.RAM[ip]);
                 decodificaOperandos(&memoria,cod,memoria.RAM[ip],&op);
                 vecF[cod](&memoria,op);
+            }
+
+            if (memoria.error!=0){
+                printf("\nError: %s\n",memoria.msjError[memoria.error].detalle);
+                exit(-1);
             }
 
         } else{

@@ -1419,7 +1419,6 @@ void SYS1(Memoria *memoria, OperandosYFlags op)
         if (i>=finSeg)
         {
             memoria->error=1;
-            printf("Segmentation Fault");
         }
     }
     else
@@ -1558,7 +1557,6 @@ void SYS3(Memoria *memoria, OperandosYFlags op)
     if (i>=finSeg)
     {
         memoria->error=1;
-        printf("Segmentation Fault");
     }
     else if (j>=cadLength)
     {
@@ -1782,12 +1780,16 @@ void SYSF(Memoria *memoria, OperandosYFlags op)
             vecF[cod](memoria,op);
         }
 
+        if (memoria->error!=0){
+            printf("\nError: %s\n",memoria->msjError[memoria->error].detalle);
+            exit(-1);
+        }
 
         if (op.flags[1]==1)
             system("cls");
 
         if (op.flags[2]==1)
-            disassembler(*memoria, op);
+            disassembler(memoria, op);
 
         printf("[%04d] cmd: ",(memoria->VectorDeRegistros[5]&0xFFFF) - 1);
 
@@ -1806,11 +1808,16 @@ void SYSF(Memoria *memoria, OperandosYFlags op)
                     vecF[cod](memoria,op);
                 }
 
+                if (memoria->error!=0){
+                    printf("\nError: %s\n",memoria->msjError[memoria->error].detalle);
+                    exit(-1);
+                }
+
                 if (op.flags[1]==1)
                     system("cls");
 
                 if (op.flags[2]==1)
-                    disassembler(*memoria, op);
+                    disassembler(memoria, op);
 
             }
             else if ( cuentaChars(sAux,' ',strlen(sAux)) == 0 )
@@ -1833,10 +1840,17 @@ void SYSF(Memoria *memoria, OperandosYFlags op)
                     dirMemoria++;
                 }
             }
+
             printf("[%04d] cmd: ",(memoria->VectorDeRegistros[5]&0xFFFF) - 1);
             fflush(stdin);
             scanf("%[^\n]%*c",sAux);
         }
+
+        if (memoria->error!=0){
+            printf("\nError: %s\n",memoria->msjError[memoria->error].detalle);
+            exit(-1);
+        }
+
         fflush(stdin);
     }
 }
@@ -1999,8 +2013,7 @@ void PUSH(Memoria *memoria, OperandosYFlags op)
         memoria->RAM[memoria->VectorDeRegistros[6]&0xFFFF] = op.operandoA[0];
     else
     {
-        memoria->error=1;
-        printf("Stack Overflow\n");
+        memoria->error=2;
     }
 }
 
@@ -2010,8 +2023,7 @@ void POP(Memoria *memoria, OperandosYFlags op)
 
     if (aux >= op.segmento.finSS)
     {
-        memoria->error=1;
-        printf("Stack Underflow");
+        memoria->error=3;
     }
     else
     {
@@ -2086,8 +2098,7 @@ void CALL(Memoria *memoria, OperandosYFlags op)
     }
     else
     {
-        memoria->error=1;
-        printf("Stack Overflow");
+        memoria->error=2;
     }
 }
 
@@ -2097,8 +2108,7 @@ void RET(Memoria *memoria, OperandosYFlags op)
 
     if (aux >= op.segmento.finSS)
     {
-        memoria->error=1;
-        printf("Stack Underflow");
+        memoria->error=3;
     }
     else
     {
@@ -2483,9 +2493,9 @@ void imprimeEstadoRegistros(int vecR[])
     printf("ECX:%12d |EDX:%12d |EEX:%12d |EFX:%12d |\n",vecR[12],vecR[13],vecR[14],vecR[15]);
 }
 
-void disassembler(Memoria memoria, OperandosYFlags op)
+void disassembler(Memoria *memoria, OperandosYFlags op)
 {
-    int ipAct = (memoria.VectorDeRegistros[5]&0xFFFF) - 1;
+    int ipAct = (memoria->VectorDeRegistros[5]&0xFFFF) - 1;
     int cod;
     int i;
 
@@ -2497,15 +2507,16 @@ void disassembler(Memoria memoria, OperandosYFlags op)
         if (i>=0)
         {
             printf(" [%04d]: ",i);
-            printf("%02X ",(memoria.RAM[i] & 0xFF000000)/0x01000000);
-            printf("%02X ",(memoria.RAM[i] & 0xFF0000)/0x00010000);
-            printf("%02X ",(memoria.RAM[i] & 0xFF00)/0x00000100);
-            printf("%02X ",(memoria.RAM[i] & 0xFF));
+            printf("%02X ",(memoria->RAM[i] & 0xFF000000)/0x01000000);
+            printf("%02X ",(memoria->RAM[i] & 0xFF0000)/0x00010000);
+            printf("%02X ",(memoria->RAM[i] & 0xFF00)/0x00000100);
+            printf("%02X ",(memoria->RAM[i] & 0xFF));
             printf("%4d: ",i+1);
-            cod = decodificaCodigo(memoria.RAM[i]);
-            decodificaOperandos(&memoria,cod,memoria.RAM[i],&op);
+            cod = decodificaCodigo(memoria->RAM[i]);
+            decodificaOperandos(memoria,cod,memoria->RAM[i],&op);
+            memoria->error=0;
             imprimeMnemonico(cod);
-            imprimeOperandos(op,cod,memoria.RAM[i]);
+            imprimeOperandos(op,cod,memoria->RAM[i]);
             printf("\n");
         }
         else
@@ -2516,31 +2527,33 @@ void disassembler(Memoria memoria, OperandosYFlags op)
 
     i=ipAct;
     printf(">[%04d]: ",i);
-    printf("%02X ",(memoria.RAM[i] & 0xFF000000)/0x01000000);
-    printf("%02X ",(memoria.RAM[i] & 0xFF0000)/0x00010000);
-    printf("%02X ",(memoria.RAM[i] & 0xFF00)/0x00000100);
-    printf("%02X ",(memoria.RAM[i] & 0xFF));
+    printf("%02X ",(memoria->RAM[i] & 0xFF000000)/0x01000000);
+    printf("%02X ",(memoria->RAM[i] & 0xFF0000)/0x00010000);
+    printf("%02X ",(memoria->RAM[i] & 0xFF00)/0x00000100);
+    printf("%02X ",(memoria->RAM[i] & 0xFF));
     printf("%4d: ",i+1);
-    cod = decodificaCodigo(memoria.RAM[i]);
-    decodificaOperandos(&memoria,cod,memoria.RAM[i],&op);
+    cod = decodificaCodigo(memoria->RAM[i]);
+    decodificaOperandos(memoria,cod,memoria->RAM[i],&op);
+    memoria->error=0;
     imprimeMnemonico(cod);
-    imprimeOperandos(op,cod,memoria.RAM[i]);
+    imprimeOperandos(op,cod,memoria->RAM[i]);
     printf("\n");
 
     for (int i=ipAct+1; i<ipAct+5; i++)
     {
         printf(" [%04d]: ",i);
-        printf("%02X ",(memoria.RAM[i] & 0xFF000000)/0x01000000);
-        printf("%02X ",(memoria.RAM[i] & 0xFF0000)/0x00010000);
-        printf("%02X ",(memoria.RAM[i] & 0xFF00)/0x00000100);
-        printf("%02X ",(memoria.RAM[i] & 0xFF));
-        if (i<(memoria.VectorDeRegistros[0]&0xFFFF) && (i<op.cantInstrucciones))
+        printf("%02X ",(memoria->RAM[i] & 0xFF000000)/0x01000000);
+        printf("%02X ",(memoria->RAM[i] & 0xFF0000)/0x00010000);
+        printf("%02X ",(memoria->RAM[i] & 0xFF00)/0x00000100);
+        printf("%02X ",(memoria->RAM[i] & 0xFF));
+        if (i<(memoria->VectorDeRegistros[0]&0xFFFF) && (i<op.cantInstrucciones))
         {
             printf("%4d: ",i+1);
-            cod = decodificaCodigo(memoria.RAM[i]);
-            decodificaOperandos(&memoria,cod,memoria.RAM[i],&op);
+            cod = decodificaCodigo(memoria->RAM[i]);
+            decodificaOperandos(memoria,cod,memoria->RAM[i],&op);
+            memoria->error=0;
             imprimeMnemonico(cod);
-            imprimeOperandos(op,cod,memoria.RAM[i]);
+            imprimeOperandos(op,cod,memoria->RAM[i]);
         }
         printf("\n");
 
@@ -2548,7 +2561,7 @@ void disassembler(Memoria memoria, OperandosYFlags op)
 
     printf("Registros:\n");
 
-    imprimeEstadoRegistros(memoria.VectorDeRegistros);
+    imprimeEstadoRegistros(memoria->VectorDeRegistros);
 }
 
 void setDisco(int nro, Memoria *memoria)
@@ -2830,7 +2843,6 @@ void decodificaOperandos(Memoria *memoria, int codigo, int instruccion, Operando
             if ((op->operandoB[4]+op->segmento.ds)>=(memoria->VectorDeRegistros[2]&0xFFFF))
             {
                 memoria->error = 1;
-                printf("Segmentation Fault\n");
             }
             else
                 op->operandoB[0] = memoria->RAM[op->operandoB[4] + op->segmento.ds];
@@ -2876,9 +2888,7 @@ void decodificaOperandos(Memoria *memoria, int codigo, int instruccion, Operando
                     memoria->error = 1;
             }
 
-            if (memoria->error==1)
-                printf("Segmentation Fault\n");
-            else if (op->operandoB[3]==7)
+            if (op->operandoB[3]==7)
                 op->operandoB[0] = memoria->RAM[op->operandoB[4]];
             else
                 op->operandoB[0] = memoria->RAM[(memoria->VectorDeRegistros[op->segmento.actualB]&0xFFFF) + op->operandoB[4]];
@@ -2952,7 +2962,6 @@ void decodificaOperandos(Memoria *memoria, int codigo, int instruccion, Operando
                 if ((op->operandoA[4]+(op->segmento.actualA))>=(memoria->VectorDeRegistros[2]&0xFFFF))
                 {
                     memoria->error = 1;
-                    printf("Segmentation Fault\n");
                 }
                 else
                     op->operandoA[0] = memoria->RAM[op->operandoA[4] + op->segmento.ds];
@@ -2993,9 +3002,7 @@ void decodificaOperandos(Memoria *memoria, int codigo, int instruccion, Operando
                         memoria->error = 1;
                 }
 
-                if (memoria->error==1)
-                    printf("Segmentation Fault\n");
-                else if (op->operandoA[3]==7)
+                if (op->operandoA[3]==7)
                     op->operandoB[0] = memoria->RAM[op->operandoA[4]];
                 else
                     op->operandoA[0] = memoria->RAM[(memoria->VectorDeRegistros[op->segmento.actualA]&0xFFFF) + op->operandoA[4]];
@@ -3071,7 +3078,6 @@ void decodificaOperandos(Memoria *memoria, int codigo, int instruccion, Operando
             if ((op->operandoA[4]+op->segmento.ds)>=(memoria->VectorDeRegistros[2]&0xFFFF))
             {
                 memoria->error = 1;
-                printf("Segmentation Fault\n");
             }
             else
                 op->operandoA[0] = memoria->RAM[op->operandoA[4] + op->segmento.ds];
@@ -3105,8 +3111,6 @@ void decodificaOperandos(Memoria *memoria, int codigo, int instruccion, Operando
                 } else if ((op->operandoA[4] + op->segmento.ss <= op->segmento.ss) || (op->operandoA[4] + op->segmento.ss >= op->segmento.finSS)){
                             memoria->error = 1;
                 }
-                /*if ((op->operandoA[4] + op->segmento.ss <= op->segmento.ss) || (op->operandoA[4] + op->segmento.ss >= op->segmento.finSS))
-                    memoria->error = 1;*/
             }
             else if (op->segmento.actualA == 2)    //ES
             {
@@ -3114,9 +3118,7 @@ void decodificaOperandos(Memoria *memoria, int codigo, int instruccion, Operando
                     memoria->error = 1;
             }
 
-            if (memoria->error==1)
-                printf("Segmentation Fault\n");
-            else if (op->operandoA[3]==7)
+            if (op->operandoA[3]==7)
                 op->operandoA[0] = memoria->RAM[op->operandoA[4]];
             else
                 op->operandoA[0] = memoria->RAM[(memoria->VectorDeRegistros[op->segmento.actualA]&0xFFFF) + op->operandoA[4]];
@@ -3161,5 +3163,13 @@ void inicializaRegistros(Memoria *mem,OperandosYFlags op)
     mem->VectorDeRegistros[5] = 0x00030000; //IP
     mem->VectorDeRegistros[6] = 0x00010000 + ((op.segmento.finSS) & 0xFFFF); //SP
     mem->VectorDeRegistros[7] = 0x00010000; //BP
+
+}
+
+void inicializaMensajesError(Memoria *memoria){
+    memoria->error=0;
+    strcpy(memoria->msjError[1].detalle,"Segmentation Fault");
+    strcpy(memoria->msjError[2].detalle,"Stack Overflow");
+    strcpy(memoria->msjError[3].detalle,"Stack Underflow");
 
 }

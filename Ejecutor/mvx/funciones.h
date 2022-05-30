@@ -86,6 +86,7 @@ int verificoHeader(Header);
 int seteoSegmentos(Memoria*,Header,OperandosYFlags*);
 int cuentaChars(char cadena[], char caracter,int longitud);
 
+void inicializaMensajesError(Memoria*);
 void imprimeMnemonico(int);
 void stringRegistro(int[],char[]);
 void imprimeEstadoRegistros(int[]);
@@ -96,7 +97,7 @@ void SYS4(Memoria *, OperandosYFlags);
 void SYS7(Memoria *, OperandosYFlags);
 void SYSD(Memoria *, OperandosYFlags);
 void SYSF(Memoria *, OperandosYFlags);
-void disassembler(Memoria,OperandosYFlags);
+void disassembler(Memoria*,OperandosYFlags);
 void iniciaVectorFunciones(VectorFunciones);
 void inicializaDisco(int, OperandosYFlags *);
 void imprimeOperandos(OperandosYFlags,int,int);

@@ -19,3 +19,23 @@
 	"memoria.h"
 	"funciones.h"
 
+1653933188 source:c:\lucho\dev\projects\c\mvxgit\tp-maquina-virtual-grupob\ejecutor\mvx\funciones.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<time.h>
+	"memoria.h"
+	"funciones.h"
+
+1653934177 c:\lucho\dev\projects\c\mvxgit\tp-maquina-virtual-grupob\ejecutor\mvx\memoria.h
+
+1653934503 c:\lucho\dev\projects\c\mvxgit\tp-maquina-virtual-grupob\ejecutor\mvx\funciones.h
+
+1653934177 source:c:\lucho\dev\projects\c\mvxgit\tp-maquina-virtual-grupob\ejecutor\mvx\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+	"memoria.h"
+	"funciones.h"
+
