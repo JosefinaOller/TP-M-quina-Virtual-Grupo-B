@@ -1,0 +1,21 @@
+# depslib dependency file v1.0
+1653897369 source:c:\lucho\dev\projects\c\mvx\funciones.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<time.h>
+	"memoria.h"
+	"funciones.h"
+
+1653891686 c:\lucho\dev\projects\c\mvx\memoria.h
+
+1653891885 c:\lucho\dev\projects\c\mvx\funciones.h
+
+1653891901 source:c:\lucho\dev\projects\c\mvx\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+	"memoria.h"
+	"funciones.h"
+
