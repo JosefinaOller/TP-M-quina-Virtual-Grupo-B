@@ -101,8 +101,11 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
     Label rotulos[100];
     Linea codigo[500];
     int i,cantRotulos=0,error=0,conLin=0,nLista=0,indicelinea[100],inst, wrgA, wrgB,kcom=0,nroLinea,data=1024,extra=1024,stack=1024,cantStrings=0;
-    for(i=0;i<100;i++)
-            strcpy(lista[i],"");
+    for(i=0;i<100;i++){
+        strcpy(lista[i],"");
+        strings[i]='\0';
+    }
+
     lecturaLabelsYSegmentos(nombAsm,rotulos,&cantRotulos,&error,strings,&nroLinea,&cantStrings,&data,&extra,&stack,lista,&nLista,indicelinea); //para guardar los rotulos y su posicion, tambien para guardar las constantes.
     if(error)
         printf("Error de archivo\n");
@@ -142,6 +145,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
                 }
                for(int j=0;j<cantStrings;j++){
                    fwrite(&strings[j],sizeof(int),1,archESCRITURA);
+                   printf("%8x\n",strings[j]);
                 }
                 while(i==indicelinea[kcom] && strcmp(lista[kcom],"")!=0){
                     printf("%3s\n",strtok(lista[kcom++],"\n"));
