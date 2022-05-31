@@ -110,7 +110,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
     else{
         estructuraASM(nombAsm,codigo,&conLin); //procesa las instrucciones asm
         int cs = nroLinea;
-        if((data+extra+stack) <= (8192 - cs) && (data>=0 && data<=65535) && (extra>=0 && extra<=65535) && (stack>=0 && stack<=65535)){ //Calculo de memoria
+        if((data+extra+stack) <= (8192 - cs)){ //Calculo de memoria
             if(conLin>=0 || nLista>=0){
                 //empiezo a generar el archivo binario
                 archESCRITURA=fopen(binario,"wb");
@@ -141,25 +141,19 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
                     } //Si el flag de ocultamiento esta desactivado, muestro lineas
 
                 }
-                for(int j=0;j<cantStrings;j++){
+               for(int j=0;j<cantStrings;j++){
                    fwrite(&strings[j],sizeof(int),1,archESCRITURA);
                 }
                 while(i==indicelinea[kcom] && strcmp(lista[kcom],"")!=0){
                     printf("%3s\n",strtok(lista[kcom++],"\n"));
                 }
-                fclose(archESCRITURA);
             }
         }
         else{
-            if((data+extra+stack) > (8192 - cs) && (data>=0 && data<=65535) && (extra>=0 && extra<=65535) && (stack>=0 && stack<=65535)){
-                error=1;
-                printf("Falta de memoria\n");
-            }
-            else{
-                error=2;
-                printf("Valores no apropiados.\n");
-            }
+            error=1;
+            printf("Falta de memoria\n");
         }
+        fclose(archESCRITURA);
     }
     if(error){ //Si hay error de traduccion, borro el archivo binario
         printf("Error de traduccion\n");
@@ -170,7 +164,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
 void estructuraASM(char nombAsm[],Linea codigo[],int *conLin){ //Procesa las instrucciones
 
     FILE *arch;
-    char linea[500],rotulo[30],mnem[5],argA[30],argB[30],com[100],seg[6],size[8], constante[30],constante_valor[100];
+    char linea[500],rotulo[30],mnem[5],argA[30],argB[30],com[1025],seg[6],size[4], constante[30],constante_valor[100];
     arch=fopen(nombAsm,"rt");
     if(arch!=NULL){
         *conLin=0;
@@ -209,7 +203,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
 //Lee los rotulos, constantes y segmentos.
 
     FILE *arch=fopen(archivo,"rt");
-    char linea[500],rotulo[30],mnem[5],constante[30],constante_valor[100],seg[6],size[8],argA[30],argB[30],com[50];
+    char linea[500],rotulo[30],mnem[5],constante[30],constante_valor[100],seg[6],size[5],argA[30],argB[30],com[1025];
     *nLista=0; //Para imprimir las directivas y equ
     if(arch!=NULL){
         while(fgets(linea,500,arch)!=NULL){
@@ -674,6 +668,20 @@ void salida(Linea codigo, int i, int inst, int wrgA, int wrgB){ //Impresion de l
                 case 3: printf("%8s%s", ";", codigo.comentario);
                 break;
                 case 4: printf("%7s%s", ";", codigo.comentario);
+                break;
+                case 5: printf("%6s%s", ";", codigo.comentario);
+                break;
+                case 6: printf("%5s%s", ";", codigo.comentario);
+                break;
+                case 7: printf("%4s%s", ";", codigo.comentario);
+                break;
+                case 8: printf("%3s%s", ";", codigo.comentario);
+                break;
+                case 9: printf("%2s%s", ";", codigo.comentario);
+                break;
+                case 10: printf("%1s%s", ";", codigo.comentario);
+                break;
+                default: printf("%10s%s", ";", codigo.comentario);
                 break;
             }
         }
