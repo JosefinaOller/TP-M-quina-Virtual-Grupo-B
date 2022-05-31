@@ -4,7 +4,13 @@
 #include <ctype.h>
 #include "prototipos.h"
 #include "parser.h"
-
+/** \brief Este programa traductor traduce instrucciones en Assembler y genera un archivo .asm.
+ *
+ * \param argc      Cantidad de argumentos.
+ * \param *argv[]   Los archivos, tanto el .asm como el .mv2, y el -o que habilita o deshabilita la salida por pantalla.
+ * \return 0
+ *
+ */
 void cargaVecMnem(Mnemonico[]);
 void traduce(char[], Mnemonico[], int, char[]);
 void estructuraASM(char[], Linea[], int*);
@@ -43,7 +49,12 @@ int main(int argc, const char *argv[]){
         printf("Faltaron parámetros\n");
     return 0;
 }
-void cargaVecMnem(Mnemonico vecMnem[]){ //Carga datos de mnenomicos
+/** \brief Carga datos de mnenomicos
+ *
+ * \param vecMnem[] es un vector de mnemónicos.
+ *
+ */
+void cargaVecMnem(Mnemonico vecMnem[]){
 
     //DOS OPERANDOS
 
@@ -93,8 +104,15 @@ void cargaVecMnem(Mnemonico vecMnem[]){ //Carga datos de mnenomicos
     cargaMnemonico("RET",0xFF0,0,&vecMnem[31]);
 
 }
+/** \brief Función que procesa las instrucciones, las imprime y genera el archivo binario
+ *
+ * \param nombAsm[] Nombre del archivo .asm.
+ * \param binario[] Nombre del archivo .mv2.
+ * \param vecMnem[] y \param o explicados anteriormente.
+ *
+ */
 
-void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcion que procesa las instrucciones,las imprime y genera el archivo binario
+void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){
 
     FILE *archESCRITURA; //para el archivo binario
     char lista[100][100];//lista incluye a las directivas,constantes y los comentarios
@@ -139,7 +157,6 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
                        }
                        salida(codigo[i], i, inst, wrgA, wrgB);
                     } //Si el flag de ocultamiento esta desactivado, muestro lineas
-
                 }
                 for(int j=0;j<cantStrings;j++){
                    fwrite(&strings[j],sizeof(int),1,archESCRITURA);
@@ -152,10 +169,11 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
         }
         else{
             if((data+extra+stack) > (8192 - cs) && (data>=0 && data<=65535) && (extra>=0 && extra<=65535) && (stack>=0 && stack<=65535)){
+                //En este caso, se genera un error si la suma de los 3 segmentos supera 8192 y los 3 valores están dentro del rango [0..65535]
                 error=1;
                 printf("Falta de memoria\n");
             }
-            else{
+            else{//En este caso, se genera un error si uno de los 3 segmentos está fuera del rango
                 error=2;
                 printf("Valores no apropiados.\n");
             }
@@ -166,8 +184,15 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){ //Funcio
         remove(binario);
     }
 }
+/** \brief Este método procesa las instrucciones.
+ *
+ * \param
+ * \param
+ * \return
+ *
+ */
 
-void estructuraASM(char nombAsm[],Linea codigo[],int *conLin){ //Procesa las instrucciones
+void estructuraASM(char nombAsm[],Linea codigo[],int *conLin){
 
     FILE *arch;
     char linea[500],rotulo[30],mnem[5],argA[30],argB[30],com[1025],seg[6],size[8], constante[30],constante_valor[100];
@@ -188,7 +213,8 @@ void estructuraASM(char nombAsm[],Linea codigo[],int *conLin){ //Procesa las ins
         printf("%s","ERROR DE ARCHIVO");
     fclose(arch);
 }
-void procesarLinea(char linea[],char rotulo[],char mnem[],char argA[],char argB[],char com[], char seg[], char size[], char constante[], char constante_valor[]){ //Separa todos los terminos de la instruccion
+/** \brief Separa todos los términos de la instrucción. */
+void procesarLinea(char linea[],char rotulo[],char mnem[],char argA[],char argB[],char com[], char seg[], char size[], char constante[], char constante_valor[]){
 
     //Utilizamos el parser de Franco, gracias por tanto crack!!
 
@@ -205,8 +231,8 @@ void procesarLinea(char linea[],char rotulo[],char mnem[],char argA[],char argB[
     strcpy(constante_valor,parsed[8] ? parsed[8] : ""); //Valor del constante
     freeline(parsed);
 }
+/** \brief Lee los rotulos, constantes y segmentos */
 void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int *error,int strings[],int *nroLinea,int *cantStrings,int *data,int *extra,int *stack,char lista[][100],int *nLista,int indiceLinea[]){
-//Lee los rotulos, constantes y segmentos.
 
     FILE *arch=fopen(archivo,"rt");
     char linea[500],rotulo[30],mnem[5],constante[30],constante_valor[100],seg[6],size[8],argA[30],argB[30],com[1025];
@@ -302,6 +328,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
         i++;
     }
 } //fin
+/** \brief Método para tratar las constantes que son <i>string</i>. */
 void tratamiento_especial(char constante_valor[],Label rotulos[],int cantRotulos,int *nroLinea,int strings[],int *cantStrings){
     int i=1;
     rotulos[cantRotulos].codigo=(*nroLinea);
@@ -313,7 +340,16 @@ void tratamiento_especial(char constante_valor[],Label rotulos[],int cantRotulos
     strings[(*cantStrings)++]='\0';
     (*nroLinea)++;
 }
-int busquedaLabel(Label rotulos[],char etiqueta[],int cantRotulos){ //Para buscar la posicion del rotulo o constante
+/** \brief Método para buscar la posicion del rótulo o constante
+ *
+ * \param rotulos[] Vector de <i>Label</i>.
+ * \param etiqueta[] Etiqueta a buscar.
+ * \param cantRotulos Cantidad de rótulos.
+ * \return rotulos[i].codigo si encontró la etiqueta. En caso contrario, \return -99999.
+ *
+ */
+
+int busquedaLabel(Label rotulos[],char etiqueta[],int cantRotulos){
     int i=0;
     while(i<cantRotulos && strcmp(etiqueta,rotulos[i].etiqueta)!=0)
         i++;
@@ -323,13 +359,22 @@ int busquedaLabel(Label rotulos[],char etiqueta[],int cantRotulos){ //Para busca
         return -99999;
     }
 }
+/** \brief Método que codifica cada instrucción Assembler.
+ *
+ * \param codigo Linea de código a codificar.
+ * \param *error Si hubo un error de sintaxis vale -1, de instrucción -2.
+ * \param *wrgA y \param *wrgB <i>warnings</i> por valor truncado.
+ * \return inst Valor de instrucción.
+ *
+ */
+
 int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int cantRotulos, int *error, int *wrgA, int *wrgB){
     int i,valorReg,off,inst = 0;//Inicializo instrucción
     size_t length;
     Mnemonico mnem;
     char *out = NULL;
     if (vecMnem!=NULL)
-        length = MNEMAX;//(sizeof(vecMnem)/sizeof(vecMnem[0]));//32
+        length = MNEMAX;
     if (strcmp(codigo.mnem, "") != 0){
         for (i = 0; i < strlen(codigo.mnem); i++)
             codigo.mnem[i] = toupper(codigo.mnem[i]);
@@ -467,6 +512,13 @@ int codificaInstruccion(Linea codigo, Mnemonico vecMnem[], Label rotulos[], int 
     }
     return inst;
 }
+/** \brief Método para analizar el tipo de operando
+ *
+ * \param vop[] valor del operando
+ * \return 0 si es inmediato, 1 de registro, 2 directo, 3 indirecto.
+ *
+ */
+
 int tipoOperando(char vop[]){
     if(isalpha(vop[0])){
         if(esRegistro(vop))
@@ -483,6 +535,13 @@ int tipoOperando(char vop[]){
             return 2;//directo
     }
 }
+/** \brief Función (que tendría que ser booleana) para analizar si es un registro
+ *
+ * \param vop[] valor del operando
+ * \return true (!=0) si es un registro, false(==0) en caso contrario
+ *
+ */
+
 int esRegistro(char vop[]){
     char vreg[10][3] = {"DS","SS","ES","CS","HP","IP","SP","BP","CC","AC"};//Sólo comtemplo los 10 primeros registros
         if((vop[0]=='E' && vop[1]>='A' && vop[1]<='F' && vop[2]=='X') || (vop[0]>='A' && vop[0]<='F' && (vop[1]=='X' || vop[1]=='H' || vop[1]=='L')))
@@ -497,6 +556,14 @@ int esRegistro(char vop[]){
                 return 0; //inmediato
     }
 }
+/** \brief Tratamiento para los operandos indirectos
+ *
+ * \param *valorReg Valor del registro.
+ * \param *off <i>Offset</i>
+ * \param vop[], \param rotulos[], \param cantRotulos y \param *error ya explicados
+ *
+ */
+
 void operandoIndirecto(char vop[], int* valorReg,int *off,Label rotulos[],int cantRotulos,int *error){
     char reg[3];
     reg[0] = vop[0]; //Puede ser EAX o AX
@@ -517,7 +584,9 @@ void operandoIndirecto(char vop[], int* valorReg,int *off,Label rotulos[],int ca
     else
         *off = (valorOpDirecto(vop,rotulos,cantRotulos,&(*error)))&0xFF;
 }
-int valorOpDirecto(char *s,Label rotulos[],int cantRotulos,int *error){ //Para obtener un valor inmediato
+/** \brief Para obtener un valor inmediato. */
+
+int valorOpDirecto(char *s,Label rotulos[],int cantRotulos,int *error){
     int i;
     if(s[0]=='\'')
         return s[1];
@@ -538,6 +607,8 @@ int valorOpDirecto(char *s,Label rotulos[],int cantRotulos,int *error){ //Para o
         return -99999;
 
 }
+/** \brief Elimina los corchetes de un operando directo o indirecto. */
+
 void eliminaCorchetes(char vop[]){
     char aux[20] = {'\0'};
     int n = strlen(vop)-1;
@@ -556,6 +627,13 @@ int anyToInt(char *s, char **out){
     }
     return strtol(s, out, base);
 }
+/** \brief Convierte el valor del registro a entero.
+ *
+ * \param vop[] ya explicado anteriormente.
+ * \return valor Valor del registro entre 0 y 15. -1 si hubo un error.
+ *
+ */
+
 int AEntero(char vop[]){
     //Registros = {"DS","SS","ES","CS","HP","IP","SP","BP","CC","AC","A","B","C","D","E","F"};
     int valor;
@@ -637,14 +715,18 @@ int AEntero(char vop[]){
         valor = 0xFFF;
     return valor;
 }
-void truncamiento(int cantOperandos, int *valor, int *flag){//Sólo entra si el operando es inmediato
+/** \brief Sólo entra si el operando es inmediato. */
+
+void truncamiento(int cantOperandos, int *valor, int *flag){
     int maxval = (cantOperandos == 2)? 0xFFF : 0xFFFF;
     if ((*valor) > maxval){
         (*flag) = 1;
         (*valor) = (*valor) % (maxval+1);
     }
 }
-void salida(Linea codigo, int i, int inst, int wrgA, int wrgB){ //Impresion de las instrucciones
+/** \brief Impresión de las instrucciones. */
+
+void salida(Linea codigo, int i, int inst, int wrgA, int wrgB){
     printf("[%04d]: %02X %02X %02X %02X", i, (inst>>24)&0xFF, (inst>>16)&0xFF, (inst>>8)&0xFF, (inst>>0)&0xFF);
     if(strcmp(codigo.label, "") != 0)
         printf("%20s: %s ", codigo.label, codigo.mnem);
@@ -701,6 +783,11 @@ void salida(Linea codigo, int i, int inst, int wrgA, int wrgB){ //Impresion de l
     if (wrgB)
         printf("Warning: Línea %d Argumento B truncado\n", i);
 }
+/** \brief Método para convertir cualquier cadena en mayúsculas.
+ *
+ * \param x[] una cadena cualquiera.
+ */
+
 void mayuscula(char x[]){
     int i;
     for (i=0;i<=strlen(x);i++)

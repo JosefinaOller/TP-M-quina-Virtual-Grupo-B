@@ -1,0 +1,343 @@
+\hypertarget{main_8c}{}\doxysection{Referencia del Archivo main.\+c}
+\label{main_8c}\index{main.c@{main.c}}
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$ctype.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}prototipos.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}parser.\+h\char`\"{}}\newline
+\doxysubsection*{Funciones}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{main_8c_a7c22f2642c14bb8553ee1c55d4c68c2b}{carga\+Vec\+Mnem}} (\mbox{\hyperlink{struct_mnemonico}{Mnemonico}}\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em Este programa traductor traduce instrucciones en Assembler y genera un archivo .asm. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_aa81c028dbd2216353a0a49d04da75045}{traduce}} (char nomb\+Asm\mbox{[}$\,$\mbox{]}, \mbox{\hyperlink{struct_mnemonico}{Mnemonico}} vec\+Mnem\mbox{[}$\,$\mbox{]}, int o, char binario\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em Función que procesa las instrucciones, las imprime y genera el archivo binario. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a2cedf44847caa8fbd4f1a778ac6615d3}{estructura\+ASM}} (char nomb\+Asm\mbox{[}$\,$\mbox{]}, \mbox{\hyperlink{struct_linea}{Linea}} codigo\mbox{[}$\,$\mbox{]}, int $\ast$con\+Lin)
+\begin{DoxyCompactList}\small\item\em Este método procesa las instrucciones. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a7e98a11e7e436b79580108034b50efa4}{procesar\+Linea}} (char linea\mbox{[}$\,$\mbox{]}, char rotulo\mbox{[}$\,$\mbox{]}, char mnem\mbox{[}$\,$\mbox{]}, char argA\mbox{[}$\,$\mbox{]}, char argB\mbox{[}$\,$\mbox{]}, char com\mbox{[}$\,$\mbox{]}, char seg\mbox{[}$\,$\mbox{]}, char size\mbox{[}$\,$\mbox{]}, char constante\mbox{[}$\,$\mbox{]}, char constante\+\_\+valor\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em Separa todos los términos de la instrucción. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a727e025503745d541a1bc6a676ae6c92}{lectura\+Labels\+YSegmentos}} (char $\ast$archivo, \mbox{\hyperlink{struct_label}{Label}} rotulos\mbox{[}$\,$\mbox{]}, int $\ast$cant\+Rotulos, int $\ast$error, int strings\mbox{[}$\,$\mbox{]}, int $\ast$nro\+Linea, int $\ast$cant\+Strings, int $\ast$data, int $\ast$extra, int $\ast$stack, char lista\mbox{[}$\,$\mbox{]}\mbox{[}100\mbox{]}, int $\ast$n\+Lista, int indice\+Linea\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em Lee los rotulos, constantes y segmentos. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{main_8c_a41ee0f6ae9c8df7702a56aa4a6c4aab0}{busqueda\+Label}} (\mbox{\hyperlink{struct_label}{Label}} rotulos\mbox{[}$\,$\mbox{]}, char etiqueta\mbox{[}$\,$\mbox{]}, int cant\+Rotulos)
+\begin{DoxyCompactList}\small\item\em Método para buscar la posicion del rótulo o constante. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{main_8c_a07276141d41ed8f807135ba55603712e}{codifica\+Instruccion}} (\mbox{\hyperlink{struct_linea}{Linea}} codigo, \mbox{\hyperlink{struct_mnemonico}{Mnemonico}} vec\+Mnem\mbox{[}$\,$\mbox{]}, \mbox{\hyperlink{struct_label}{Label}} rotulos\mbox{[}$\,$\mbox{]}, int cant\+Rotulos, int $\ast$error, int $\ast$wrgA, int $\ast$wrgB)
+\begin{DoxyCompactList}\small\item\em Método que codifica cada instrucción Assembler. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{main_8c_a53f3fd886cfb821bcdec347ca019c12d}{tipo\+Operando}} (char vop\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em Método para analizar el tipo de operando. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a76090106eb5f4a62195f3f363f0891cf}{elimina\+Corchetes}} (char vop\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em Elimina los corchetes de un operando directo o indirecto. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{main_8c_a7f8147501f6d3a65a7cb027eaba739dc}{any\+To\+Int}} (char $\ast$, char $\ast$$\ast$)
+\item 
+int \mbox{\hyperlink{main_8c_a1519cd152a4b33f690172294b5dd5cb2}{AEntero}} (char vop\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em Convierte el valor del registro a entero. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_afc1b7008bdaf6c2334e6b5b4a9c883e0}{truncamiento}} (int cant\+Operandos, int $\ast$valor, int $\ast$flag)
+\begin{DoxyCompactList}\small\item\em Sólo entra si el operando es inmediato. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_ae473e917ac70bb13745b840b1143f653}{salida}} (\mbox{\hyperlink{struct_linea}{Linea}} codigo, int i, int inst, int wrgA, int wrgB)
+\begin{DoxyCompactList}\small\item\em Impresión de las instrucciones. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a47612a0369962ce6d4308035120d3c4d}{mayuscula}} (char x\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em Método para convertir cualquier cadena en mayúsculas. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_ae7fae5e470911c3af6acc0f60f63004f}{tratamiento\+\_\+especial}} (char constante\+\_\+valor\mbox{[}$\,$\mbox{]}, \mbox{\hyperlink{struct_label}{Label}} rotulos\mbox{[}$\,$\mbox{]}, int cant\+Rotulos, int $\ast$nro\+Linea, int strings\mbox{[}$\,$\mbox{]}, int $\ast$cant\+Strings)
+\begin{DoxyCompactList}\small\item\em Método para tratar las constantes que son {\itshape string}. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a6f12f5622266eedfa0ce743c7e8b29bf}{operando\+Indirecto}} (char vop\mbox{[}$\,$\mbox{]}, int $\ast$valor\+Reg, int $\ast$off, \mbox{\hyperlink{struct_label}{Label}} rotulos\mbox{[}$\,$\mbox{]}, int cant\+Rotulos, int $\ast$error)
+\begin{DoxyCompactList}\small\item\em Tratamiento para los operandos indirectos. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{main_8c_a688636656dae265ed9bfea40dc14cea5}{valor\+Op\+Directo}} (char $\ast$s, \mbox{\hyperlink{struct_label}{Label}} rotulos\mbox{[}$\,$\mbox{]}, int cant\+Rotulos, int $\ast$error)
+\begin{DoxyCompactList}\small\item\em Para obtener un valor inmediato. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{main_8c_aabd9949ba0d3e45949e8c7a534555c05}{es\+Registro}} (char vop\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em Función (que tendría que ser booleana) para analizar si es un registro. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{main_8c_ac0f2228420376f4db7e1274f2b41667c}{main}} (int argc, const char $\ast$argv\mbox{[}$\,$\mbox{]})
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{DocumentaciÃ³n de las funciones}
+\mbox{\Hypertarget{main_8c_a1519cd152a4b33f690172294b5dd5cb2}\label{main_8c_a1519cd152a4b33f690172294b5dd5cb2}} 
+\index{main.c@{main.c}!AEntero@{AEntero}}
+\index{AEntero@{AEntero}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{AEntero()}{AEntero()}}
+{\footnotesize\ttfamily int AEntero (\begin{DoxyParamCaption}\item[{char}]{vop\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Convierte el valor del registro a entero. 
+
+
+\begin{DoxyParams}{ParÃ¡metros}
+{\em vop\mbox{[}$\,$\mbox{]}} & ya explicado anteriormente. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Devuelve}
+valor Valor del registro entre 0 y 15. -\/1 si hubo un error. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{main_8c_a7f8147501f6d3a65a7cb027eaba739dc}\label{main_8c_a7f8147501f6d3a65a7cb027eaba739dc}} 
+\index{main.c@{main.c}!anyToInt@{anyToInt}}
+\index{anyToInt@{anyToInt}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{anyToInt()}{anyToInt()}}
+{\footnotesize\ttfamily int any\+To\+Int (\begin{DoxyParamCaption}\item[{char $\ast$}]{s,  }\item[{char $\ast$$\ast$}]{out }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8c_a41ee0f6ae9c8df7702a56aa4a6c4aab0}\label{main_8c_a41ee0f6ae9c8df7702a56aa4a6c4aab0}} 
+\index{main.c@{main.c}!busquedaLabel@{busquedaLabel}}
+\index{busquedaLabel@{busquedaLabel}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{busquedaLabel()}{busquedaLabel()}}
+{\footnotesize\ttfamily int busqueda\+Label (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{struct_label}{Label}}}]{rotulos\mbox{[}$\,$\mbox{]},  }\item[{char}]{etiqueta\mbox{[}$\,$\mbox{]},  }\item[{int}]{cant\+Rotulos }\end{DoxyParamCaption})}
+
+
+
+Método para buscar la posicion del rótulo o constante. 
+
+
+\begin{DoxyParams}{ParÃ¡metros}
+{\em rotulos\mbox{[}$\,$\mbox{]}} & Vector de {\itshape \mbox{\hyperlink{struct_label}{Label}}}. \\
+\hline
+{\em etiqueta\mbox{[}$\,$\mbox{]}} & Etiqueta a buscar. \\
+\hline
+{\em cant\+Rotulos} & Cantidad de rótulos. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Devuelve}
+rotulos\mbox{[}i\mbox{]}.codigo si encontró la etiqueta. En caso contrario, 
+
+-\/99999. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{main_8c_a7c22f2642c14bb8553ee1c55d4c68c2b}\label{main_8c_a7c22f2642c14bb8553ee1c55d4c68c2b}} 
+\index{main.c@{main.c}!cargaVecMnem@{cargaVecMnem}}
+\index{cargaVecMnem@{cargaVecMnem}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{cargaVecMnem()}{cargaVecMnem()}}
+{\footnotesize\ttfamily void carga\+Vec\+Mnem (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{struct_mnemonico}{Mnemonico}}}]{vec\+Mnem\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Este programa traductor traduce instrucciones en Assembler y genera un archivo .asm. 
+
+Carga datos de mnenomicos.
+
+
+\begin{DoxyParams}{ParÃ¡metros}
+{\em argc} & Cantidad de argumentos. \\
+\hline
+{\em $\ast$argv\mbox{[}$\,$\mbox{]}} & Los archivos, tanto el .asm como el .mv2, y el -\/o que habilita o deshabilita la salida por pantalla. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Devuelve}
+0
+\end{DoxyReturn}
+
+\begin{DoxyParams}{ParÃ¡metros}
+{\em vec\+Mnem\mbox{[}$\,$\mbox{]}} & es un vector de mnemónicos. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{main_8c_a07276141d41ed8f807135ba55603712e}\label{main_8c_a07276141d41ed8f807135ba55603712e}} 
+\index{main.c@{main.c}!codificaInstruccion@{codificaInstruccion}}
+\index{codificaInstruccion@{codificaInstruccion}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{codificaInstruccion()}{codificaInstruccion()}}
+{\footnotesize\ttfamily int codifica\+Instruccion (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{struct_linea}{Linea}}}]{codigo,  }\item[{\mbox{\hyperlink{struct_mnemonico}{Mnemonico}}}]{vec\+Mnem\mbox{[}$\,$\mbox{]},  }\item[{\mbox{\hyperlink{struct_label}{Label}}}]{rotulos\mbox{[}$\,$\mbox{]},  }\item[{int}]{cant\+Rotulos,  }\item[{int $\ast$}]{error,  }\item[{int $\ast$}]{wrgA,  }\item[{int $\ast$}]{wrgB }\end{DoxyParamCaption})}
+
+
+
+Método que codifica cada instrucción Assembler. 
+
+
+\begin{DoxyParams}{ParÃ¡metros}
+{\em codigo} & \mbox{\hyperlink{struct_linea}{Linea}} de código a codificar. \\
+\hline
+{\em $\ast$error} & Si hubo un error de sintaxis vale -\/1, de instrucción -\/2. \\
+\hline
+{\em $\ast$wrgA} & y\\
+\hline
+{\em $\ast$wrgB} & {\itshape warnings} por valor truncado. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Devuelve}
+inst Valor de instrucción. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{main_8c_a76090106eb5f4a62195f3f363f0891cf}\label{main_8c_a76090106eb5f4a62195f3f363f0891cf}} 
+\index{main.c@{main.c}!eliminaCorchetes@{eliminaCorchetes}}
+\index{eliminaCorchetes@{eliminaCorchetes}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{eliminaCorchetes()}{eliminaCorchetes()}}
+{\footnotesize\ttfamily void elimina\+Corchetes (\begin{DoxyParamCaption}\item[{char}]{vop\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Elimina los corchetes de un operando directo o indirecto. 
+
+\mbox{\Hypertarget{main_8c_aabd9949ba0d3e45949e8c7a534555c05}\label{main_8c_aabd9949ba0d3e45949e8c7a534555c05}} 
+\index{main.c@{main.c}!esRegistro@{esRegistro}}
+\index{esRegistro@{esRegistro}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{esRegistro()}{esRegistro()}}
+{\footnotesize\ttfamily int es\+Registro (\begin{DoxyParamCaption}\item[{char}]{vop\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Función (que tendría que ser booleana) para analizar si es un registro. 
+
+
+\begin{DoxyParams}{ParÃ¡metros}
+{\em vop\mbox{[}$\,$\mbox{]}} & valor del operando \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Devuelve}
+true (!=0) si es un registro, false(==0) en caso contrario 
+\end{DoxyReturn}
+\mbox{\Hypertarget{main_8c_a2cedf44847caa8fbd4f1a778ac6615d3}\label{main_8c_a2cedf44847caa8fbd4f1a778ac6615d3}} 
+\index{main.c@{main.c}!estructuraASM@{estructuraASM}}
+\index{estructuraASM@{estructuraASM}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{estructuraASM()}{estructuraASM()}}
+{\footnotesize\ttfamily void estructura\+ASM (\begin{DoxyParamCaption}\item[{char}]{nomb\+Asm\mbox{[}$\,$\mbox{]},  }\item[{\mbox{\hyperlink{struct_linea}{Linea}}}]{codigo\mbox{[}$\,$\mbox{]},  }\item[{int $\ast$}]{con\+Lin }\end{DoxyParamCaption})}
+
+
+
+Este método procesa las instrucciones. 
+
+
+\begin{DoxyParams}{ParÃ¡metros}
+{\em } & \\
+\hline
+\end{DoxyParams}
+param \begin{DoxyReturn}{Devuelve}
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{main_8c_a727e025503745d541a1bc6a676ae6c92}\label{main_8c_a727e025503745d541a1bc6a676ae6c92}} 
+\index{main.c@{main.c}!lecturaLabelsYSegmentos@{lecturaLabelsYSegmentos}}
+\index{lecturaLabelsYSegmentos@{lecturaLabelsYSegmentos}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{lecturaLabelsYSegmentos()}{lecturaLabelsYSegmentos()}}
+{\footnotesize\ttfamily void lectura\+Labels\+YSegmentos (\begin{DoxyParamCaption}\item[{char $\ast$}]{archivo,  }\item[{\mbox{\hyperlink{struct_label}{Label}}}]{rotulos\mbox{[}$\,$\mbox{]},  }\item[{int $\ast$}]{cant\+Rotulos,  }\item[{int $\ast$}]{error,  }\item[{int}]{strings\mbox{[}$\,$\mbox{]},  }\item[{int $\ast$}]{nro\+Linea,  }\item[{int $\ast$}]{cant\+Strings,  }\item[{int $\ast$}]{data,  }\item[{int $\ast$}]{extra,  }\item[{int $\ast$}]{stack,  }\item[{char}]{lista\mbox{[}$\,$\mbox{]}\mbox{[}100\mbox{]},  }\item[{int $\ast$}]{n\+Lista,  }\item[{int}]{indice\+Linea\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Lee los rotulos, constantes y segmentos. 
+
+\mbox{\Hypertarget{main_8c_ac0f2228420376f4db7e1274f2b41667c}\label{main_8c_ac0f2228420376f4db7e1274f2b41667c}} 
+\index{main.c@{main.c}!main@{main}}
+\index{main@{main}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily int main (\begin{DoxyParamCaption}\item[{int}]{argc,  }\item[{const char $\ast$}]{argv\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8c_a47612a0369962ce6d4308035120d3c4d}\label{main_8c_a47612a0369962ce6d4308035120d3c4d}} 
+\index{main.c@{main.c}!mayuscula@{mayuscula}}
+\index{mayuscula@{mayuscula}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{mayuscula()}{mayuscula()}}
+{\footnotesize\ttfamily void mayuscula (\begin{DoxyParamCaption}\item[{char}]{x\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Método para convertir cualquier cadena en mayúsculas. 
+
+
+\begin{DoxyParams}{ParÃ¡metros}
+{\em x\mbox{[}$\,$\mbox{]}} & una cadena cualquiera. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{main_8c_a6f12f5622266eedfa0ce743c7e8b29bf}\label{main_8c_a6f12f5622266eedfa0ce743c7e8b29bf}} 
+\index{main.c@{main.c}!operandoIndirecto@{operandoIndirecto}}
+\index{operandoIndirecto@{operandoIndirecto}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{operandoIndirecto()}{operandoIndirecto()}}
+{\footnotesize\ttfamily void operando\+Indirecto (\begin{DoxyParamCaption}\item[{char}]{vop\mbox{[}$\,$\mbox{]},  }\item[{int $\ast$}]{valor\+Reg,  }\item[{int $\ast$}]{off,  }\item[{\mbox{\hyperlink{struct_label}{Label}}}]{rotulos\mbox{[}$\,$\mbox{]},  }\item[{int}]{cant\+Rotulos,  }\item[{int $\ast$}]{error }\end{DoxyParamCaption})}
+
+
+
+Tratamiento para los operandos indirectos. 
+
+
+\begin{DoxyParams}{ParÃ¡metros}
+{\em $\ast$valor\+Reg} & Valor del registro. \\
+\hline
+{\em $\ast$off} & {\itshape Offset} \\
+\hline
+{\em vop\mbox{[}$\,$\mbox{]}} & \\
+\hline
+\end{DoxyParams}
+param rotulos\mbox{[}\mbox{]},
+\begin{DoxyParams}{ParÃ¡metros}
+{\em cant\+Rotulos} & y\\
+\hline
+{\em $\ast$error} & ya explicados \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{main_8c_a7e98a11e7e436b79580108034b50efa4}\label{main_8c_a7e98a11e7e436b79580108034b50efa4}} 
+\index{main.c@{main.c}!procesarLinea@{procesarLinea}}
+\index{procesarLinea@{procesarLinea}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{procesarLinea()}{procesarLinea()}}
+{\footnotesize\ttfamily void procesar\+Linea (\begin{DoxyParamCaption}\item[{char}]{linea\mbox{[}$\,$\mbox{]},  }\item[{char}]{rotulo\mbox{[}$\,$\mbox{]},  }\item[{char}]{mnem\mbox{[}$\,$\mbox{]},  }\item[{char}]{argA\mbox{[}$\,$\mbox{]},  }\item[{char}]{argB\mbox{[}$\,$\mbox{]},  }\item[{char}]{com\mbox{[}$\,$\mbox{]},  }\item[{char}]{seg\mbox{[}$\,$\mbox{]},  }\item[{char}]{size\mbox{[}$\,$\mbox{]},  }\item[{char}]{constante\mbox{[}$\,$\mbox{]},  }\item[{char}]{constante\+\_\+valor\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Separa todos los términos de la instrucción. 
+
+\mbox{\Hypertarget{main_8c_ae473e917ac70bb13745b840b1143f653}\label{main_8c_ae473e917ac70bb13745b840b1143f653}} 
+\index{main.c@{main.c}!salida@{salida}}
+\index{salida@{salida}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{salida()}{salida()}}
+{\footnotesize\ttfamily void salida (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{struct_linea}{Linea}}}]{codigo,  }\item[{int}]{i,  }\item[{int}]{inst,  }\item[{int}]{wrgA,  }\item[{int}]{wrgB }\end{DoxyParamCaption})}
+
+
+
+Impresión de las instrucciones. 
+
+\mbox{\Hypertarget{main_8c_a53f3fd886cfb821bcdec347ca019c12d}\label{main_8c_a53f3fd886cfb821bcdec347ca019c12d}} 
+\index{main.c@{main.c}!tipoOperando@{tipoOperando}}
+\index{tipoOperando@{tipoOperando}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{tipoOperando()}{tipoOperando()}}
+{\footnotesize\ttfamily int tipo\+Operando (\begin{DoxyParamCaption}\item[{char}]{vop\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Método para analizar el tipo de operando. 
+
+
+\begin{DoxyParams}{ParÃ¡metros}
+{\em vop\mbox{[}$\,$\mbox{]}} & valor del operando \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Devuelve}
+0 si es inmediato, 1 de registro, 2 directo, 3 indirecto. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{main_8c_aa81c028dbd2216353a0a49d04da75045}\label{main_8c_aa81c028dbd2216353a0a49d04da75045}} 
+\index{main.c@{main.c}!traduce@{traduce}}
+\index{traduce@{traduce}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{traduce()}{traduce()}}
+{\footnotesize\ttfamily void traduce (\begin{DoxyParamCaption}\item[{char}]{nomb\+Asm\mbox{[}$\,$\mbox{]},  }\item[{\mbox{\hyperlink{struct_mnemonico}{Mnemonico}}}]{vec\+Mnem\mbox{[}$\,$\mbox{]},  }\item[{int}]{o,  }\item[{char}]{binario\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Función que procesa las instrucciones, las imprime y genera el archivo binario. 
+
+
+\begin{DoxyParams}{ParÃ¡metros}
+{\em nomb\+Asm\mbox{[}$\,$\mbox{]}} & Nombre del archivo .asm. \\
+\hline
+{\em binario\mbox{[}$\,$\mbox{]}} & Nombre del archivo .mv2. \\
+\hline
+{\em vec\+Mnem\mbox{[}$\,$\mbox{]}} & y\\
+\hline
+{\em o} & explicados anteriormente. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{main_8c_ae7fae5e470911c3af6acc0f60f63004f}\label{main_8c_ae7fae5e470911c3af6acc0f60f63004f}} 
+\index{main.c@{main.c}!tratamiento\_especial@{tratamiento\_especial}}
+\index{tratamiento\_especial@{tratamiento\_especial}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{tratamiento\_especial()}{tratamiento\_especial()}}
+{\footnotesize\ttfamily void tratamiento\+\_\+especial (\begin{DoxyParamCaption}\item[{char}]{constante\+\_\+valor\mbox{[}$\,$\mbox{]},  }\item[{\mbox{\hyperlink{struct_label}{Label}}}]{rotulos\mbox{[}$\,$\mbox{]},  }\item[{int}]{cant\+Rotulos,  }\item[{int $\ast$}]{nro\+Linea,  }\item[{int}]{strings\mbox{[}$\,$\mbox{]},  }\item[{int $\ast$}]{cant\+Strings }\end{DoxyParamCaption})}
+
+
+
+Método para tratar las constantes que son {\itshape string}. 
+
+\mbox{\Hypertarget{main_8c_afc1b7008bdaf6c2334e6b5b4a9c883e0}\label{main_8c_afc1b7008bdaf6c2334e6b5b4a9c883e0}} 
+\index{main.c@{main.c}!truncamiento@{truncamiento}}
+\index{truncamiento@{truncamiento}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{truncamiento()}{truncamiento()}}
+{\footnotesize\ttfamily void truncamiento (\begin{DoxyParamCaption}\item[{int}]{cant\+Operandos,  }\item[{int $\ast$}]{valor,  }\item[{int $\ast$}]{flag }\end{DoxyParamCaption})}
+
+
+
+Sólo entra si el operando es inmediato. 
+
+\mbox{\Hypertarget{main_8c_a688636656dae265ed9bfea40dc14cea5}\label{main_8c_a688636656dae265ed9bfea40dc14cea5}} 
+\index{main.c@{main.c}!valorOpDirecto@{valorOpDirecto}}
+\index{valorOpDirecto@{valorOpDirecto}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{valorOpDirecto()}{valorOpDirecto()}}
+{\footnotesize\ttfamily int valor\+Op\+Directo (\begin{DoxyParamCaption}\item[{char $\ast$}]{s,  }\item[{\mbox{\hyperlink{struct_label}{Label}}}]{rotulos\mbox{[}$\,$\mbox{]},  }\item[{int}]{cant\+Rotulos,  }\item[{int $\ast$}]{error }\end{DoxyParamCaption})}
+
+
+
+Para obtener un valor inmediato. 
+

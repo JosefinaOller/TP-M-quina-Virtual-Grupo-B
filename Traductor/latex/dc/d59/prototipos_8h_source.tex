@@ -1,0 +1,28 @@
+\hypertarget{prototipos_8h_source}{}\doxysection{prototipos.\+h}
+\mbox{\hyperlink{prototipos_8h}{Ir a la documentaciÃ³n de este archivo.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{preprocessor}{\#define MNEMAX 32 }\textcolor{comment}{//la cantidad maxima de mnemonicos}}
+\DoxyCodeLine{2 }
+\DoxyCodeLine{3 \textcolor{keyword}{typedef} \textcolor{keyword}{struct}\{}
+\DoxyCodeLine{4     \textcolor{keywordtype}{char} etiqueta[5];}
+\DoxyCodeLine{5     \textcolor{keywordtype}{int} \mbox{\hyperlink{struct_mnemonico_af0c00d1eb67e23501df88abb176c467b}{cantOp}};}
+\DoxyCodeLine{6     \textcolor{keywordtype}{int} \mbox{\hyperlink{struct_mnemonico_a1dca404df9f3a324448195a8d8a74a6c}{codigo}};}
+\DoxyCodeLine{7 \} \mbox{\hyperlink{struct_mnemonico}{Mnemonico}}; \textcolor{comment}{//la estructura de mnemonico}}
+\DoxyCodeLine{8 }
+\DoxyCodeLine{9 \textcolor{keyword}{typedef} \textcolor{keyword}{struct}\{}
+\DoxyCodeLine{10     \textcolor{keywordtype}{char} label[30];}
+\DoxyCodeLine{11     \textcolor{keywordtype}{char} mnem[5];}
+\DoxyCodeLine{12     \textcolor{keywordtype}{char} argA[30];}
+\DoxyCodeLine{13     \textcolor{keywordtype}{char} argB[30];}
+\DoxyCodeLine{14     \textcolor{keywordtype}{char} comentario[1025];}
+\DoxyCodeLine{15 \}\mbox{\hyperlink{struct_linea}{Linea}}; \textcolor{comment}{//la estructura de línea}}
+\DoxyCodeLine{16 }
+\DoxyCodeLine{17 \textcolor{keyword}{typedef} \textcolor{keyword}{struct}\{}
+\DoxyCodeLine{18     \textcolor{keywordtype}{char} etiqueta[30];}
+\DoxyCodeLine{19     \textcolor{keywordtype}{int} \mbox{\hyperlink{struct_label_a1dca404df9f3a324448195a8d8a74a6c}{codigo}};}
+\DoxyCodeLine{20 \} \mbox{\hyperlink{struct_label}{Label}};}
+\DoxyCodeLine{21 }
+\DoxyCodeLine{22 \textcolor{keywordtype}{void} \mbox{\hyperlink{prototipos_8h_a2d19fd7e1f921fe31c59178b4c4990f9}{cargaMnemonico}}(\textcolor{keywordtype}{char}[],\textcolor{keywordtype}{int} ,\textcolor{keywordtype}{int} , \mbox{\hyperlink{struct_mnemonico}{Mnemonico}} *);}
+\DoxyCodeLine{23 \textcolor{keywordtype}{void} \mbox{\hyperlink{prototipos_8h_a6d40731dfdf1acb9099c958ccf5b5044}{cargaLinea}}(\textcolor{keywordtype}{char} [],\textcolor{keywordtype}{char} [],\textcolor{keywordtype}{char} [], \textcolor{keywordtype}{char} [], \textcolor{keywordtype}{char} [], \mbox{\hyperlink{struct_linea}{Linea}} *);}
+
+\end{DoxyCode}

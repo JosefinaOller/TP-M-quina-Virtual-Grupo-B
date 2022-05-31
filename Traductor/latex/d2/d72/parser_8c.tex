@@ -1,0 +1,66 @@
+\hypertarget{parser_8c}{}\doxysection{Referencia del Archivo parser.\+c}
+\label{parser_8c}\index{parser.c@{parser.c}}
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}parser.\+h\char`\"{}}\newline
+\doxysubsection*{defines}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{parser_8c_ad22ca5093e6b21109a5a9b2a69d41ef2}{PARSED\+\_\+\+LENGTH}}~9
+\item 
+\#define \mbox{\hyperlink{parser_8c_a873cca955d1a1f5159089ccd2f4f0002}{PARSER}}~\char`\"{}./parser\char`\"{}
+\item 
+\#define \mbox{\hyperlink{parser_8c_a10bed19ceedeb2c12c5aad6de1d3b1a1}{TEMP}}~\char`\"{}./parser.\+tmp\char`\"{}
+\end{DoxyCompactItemize}
+\doxysubsection*{Funciones}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{parser_8c_a385847c1754822297c7ecb0f150aac05}{saveline}} (const char $\ast$line, const char $\ast$filename)
+\item 
+char $\ast$$\ast$ \mbox{\hyperlink{parser_8c_ab26feeb324296bd469f7aefb8b82542f}{parseline}} (const char $\ast$line)
+\item 
+void \mbox{\hyperlink{parser_8c_aa47eb60fb0430e1cf6e56d4fe7a9d3da}{freeline}} (char $\ast$$\ast$parsed)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Documentación de los \textquotesingle{}defines\textquotesingle{}}
+\mbox{\Hypertarget{parser_8c_ad22ca5093e6b21109a5a9b2a69d41ef2}\label{parser_8c_ad22ca5093e6b21109a5a9b2a69d41ef2}} 
+\index{parser.c@{parser.c}!PARSED\_LENGTH@{PARSED\_LENGTH}}
+\index{PARSED\_LENGTH@{PARSED\_LENGTH}!parser.c@{parser.c}}
+\doxysubsubsection{\texorpdfstring{PARSED\_LENGTH}{PARSED\_LENGTH}}
+{\footnotesize\ttfamily \#define PARSED\+\_\+\+LENGTH~9}
+
+\mbox{\Hypertarget{parser_8c_a873cca955d1a1f5159089ccd2f4f0002}\label{parser_8c_a873cca955d1a1f5159089ccd2f4f0002}} 
+\index{parser.c@{parser.c}!PARSER@{PARSER}}
+\index{PARSER@{PARSER}!parser.c@{parser.c}}
+\doxysubsubsection{\texorpdfstring{PARSER}{PARSER}}
+{\footnotesize\ttfamily \#define PARSER~\char`\"{}./parser\char`\"{}}
+
+\mbox{\Hypertarget{parser_8c_a10bed19ceedeb2c12c5aad6de1d3b1a1}\label{parser_8c_a10bed19ceedeb2c12c5aad6de1d3b1a1}} 
+\index{parser.c@{parser.c}!TEMP@{TEMP}}
+\index{TEMP@{TEMP}!parser.c@{parser.c}}
+\doxysubsubsection{\texorpdfstring{TEMP}{TEMP}}
+{\footnotesize\ttfamily \#define TEMP~\char`\"{}./parser.\+tmp\char`\"{}}
+
+
+
+\doxysubsection{Documentación de las funciones}
+\mbox{\Hypertarget{parser_8c_aa47eb60fb0430e1cf6e56d4fe7a9d3da}\label{parser_8c_aa47eb60fb0430e1cf6e56d4fe7a9d3da}} 
+\index{parser.c@{parser.c}!freeline@{freeline}}
+\index{freeline@{freeline}!parser.c@{parser.c}}
+\doxysubsubsection{\texorpdfstring{freeline()}{freeline()}}
+{\footnotesize\ttfamily void freeline (\begin{DoxyParamCaption}\item[{char $\ast$$\ast$}]{parsed }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{parser_8c_ab26feeb324296bd469f7aefb8b82542f}\label{parser_8c_ab26feeb324296bd469f7aefb8b82542f}} 
+\index{parser.c@{parser.c}!parseline@{parseline}}
+\index{parseline@{parseline}!parser.c@{parser.c}}
+\doxysubsubsection{\texorpdfstring{parseline()}{parseline()}}
+{\footnotesize\ttfamily char $\ast$$\ast$ parseline (\begin{DoxyParamCaption}\item[{const char $\ast$}]{line }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{parser_8c_a385847c1754822297c7ecb0f150aac05}\label{parser_8c_a385847c1754822297c7ecb0f150aac05}} 
+\index{parser.c@{parser.c}!saveline@{saveline}}
+\index{saveline@{saveline}!parser.c@{parser.c}}
+\doxysubsubsection{\texorpdfstring{saveline()}{saveline()}}
+{\footnotesize\ttfamily void saveline (\begin{DoxyParamCaption}\item[{const char $\ast$}]{line,  }\item[{const char $\ast$}]{filename }\end{DoxyParamCaption})}
+
