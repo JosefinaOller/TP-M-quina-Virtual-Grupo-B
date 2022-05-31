@@ -217,9 +217,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
             if(strcmp(rotulo,"")!=0){ //Hay rotulo
                 mayuscula(rotulo);
                 strcpy(rotulos[*cantRotulos].etiqueta,rotulo);
-                rotulos[*cantRotulos].codigo=*nroLinea;
-                (*cantRotulos)++;
-                (*nroLinea)++;
+                rotulos[(*cantRotulos)++].codigo=(*nroLinea)++;
             }
             else if(strcmp(mnem,"")!=0)
                 (*nroLinea)++;
@@ -254,13 +252,8 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
         fclose(arch);
         //Vuelvo a leer el archivo para las constantes, por su desplazamiento con CS.
         FILE *arch=fopen(archivo,"rt");
-        int nLinea=0;
         while(fgets(linea,500,arch)!=NULL){
             procesarLinea(linea,rotulo,mnem,argA,argB,com, seg, size, constante, constante_valor);
-            if(strcmp(rotulo,"")!=0) //Hay rotulo
-                nLinea++;
-            else if(strcmp(mnem,"")!=0)
-                nLinea++;
             if(strcmp(constante,"")!=0){ //Hay constante
                 mayuscula(constante);
                 if(busquedaLabel(rotulos,constante,*cantRotulos)==-99999){ //No hay duplicado
@@ -289,6 +282,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
                             break;
                     }
                     (*cantRotulos)++;
+
                  } //if no hay duplicado
                 else{
                     printf("Símbolo duplicado\n");
@@ -301,6 +295,11 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
     else{
         printf("Error de archivo\n");
         *error=1;
+    }
+     int i=1;
+     while(indiceLinea[i]==indiceLinea[i+2]){ //descubrimos que por sin ninguna razon, despues de realizar los tratamientos especiales, se pone indiceLinea[2]=33 cuando deberia ser indiceLinea[2] = 0, en el caso particular de discos.asm
+        indiceLinea[i+1]=indiceLinea[i];
+        i++;
     }
 } //fin
 void tratamiento_especial(char constante_valor[],Label rotulos[],int cantRotulos,int *nroLinea,int strings[],int *cantStrings){
