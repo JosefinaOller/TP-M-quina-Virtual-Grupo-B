@@ -221,7 +221,7 @@ void lecturaLabelsYSegmentos(char *archivo,Label rotulos[],int *cantRotulos,int 
             }
             else if(strcmp(mnem,"")!=0)
                 (*nroLinea)++;
-            if(strcmp(com,"")!=0 && strcmp(rotulo,"")==0  && strcmp(mnem,"")==0 && strcmp(argA,"")==0 && strcmp(argB,"")==0){
+            if(strcmp(com,"")!=0 && strcmp(rotulo,"")==0  && strcmp(mnem,"")==0 && strcmp(argA,"")==0 && strcmp(argB,"")==0 && strcmp(constante,"")==0){
                     strcpy(lista[*nLista],linea);
                     indiceLinea[(*nLista)++]=*nroLinea;
             }
