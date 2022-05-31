@@ -7,15 +7,15 @@ typedef struct{
 } Mnemonico; //la estructura de mnemonico
 
 typedef struct{
-    char label[16];
+    char label[30];
     char mnem[5];
-    char argA[16];
-    char argB[16];
+    char argA[30];
+    char argB[30];
     char comentario[1025];
 }Linea; //la estructura de línea
 
 typedef struct{
-    char etiqueta[16];
+    char etiqueta[30];
     int codigo;
 } Label;
 
