@@ -39,3 +39,46 @@
 	"memoria.h"
 	"funciones.h"
 
+1654064266 source:c:\users\luciano\desktop\mv-ii nueva\tp-maquina-virtual-grupob\ejecutor\mvx\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+	<time.h>
+	"memoria.h"
+	"funciones.h"
+
+1654064313 c:\users\luciano\desktop\mv-ii nueva\tp-maquina-virtual-grupob\ejecutor\mvx\memoria.h
+
+1654032350 c:\users\luciano\desktop\mv-ii nueva\tp-maquina-virtual-grupob\ejecutor\mvx\funciones.h
+
+1654064249 source:c:\users\luciano\desktop\mv-ii nueva\tp-maquina-virtual-grupob\ejecutor\mvx\funciones.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<time.h>
+	"memoria.h"
+	"funciones.h"
+
+1654104661 source:c:\users\luciano\desktop\mv-ii nueva\ultimo clonado\tp-maquina-virtual-grupob\ejecutor\mvx\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+	<time.h>
+	"memoria.h"
+	"funciones.h"
+
+1654064313 c:\users\luciano\desktop\mv-ii nueva\ultimo clonado\tp-maquina-virtual-grupob\ejecutor\mvx\memoria.h
+
+1654032350 c:\users\luciano\desktop\mv-ii nueva\ultimo clonado\tp-maquina-virtual-grupob\ejecutor\mvx\funciones.h
+
+1654107635 source:c:\users\luciano\desktop\mv-ii nueva\ultimo clonado\tp-maquina-virtual-grupob\ejecutor\mvx\funciones.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<time.h>
+	<unistd.h>
+	"memoria.h"
+	"funciones.h"
+

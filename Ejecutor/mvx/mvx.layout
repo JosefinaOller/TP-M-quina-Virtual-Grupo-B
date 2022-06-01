@@ -2,24 +2,65 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Debug" />
-	<File name="funciones.c" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="main.c" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="4" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="88821" topLine="2906" />
-		</Cursor>
-	</File>
-	<File name="memoria.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="4" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="396" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="main.c" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="3214" topLine="85" />
+			<Cursor1 position="81" topLine="12" />
 		</Cursor>
 	</File>
 	<File name="funciones.h" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="4" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="619" topLine="18" />
+			<Cursor1 position="3424" topLine="22" />
 		</Cursor>
+	</File>
+	<File name="memoria.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="4" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="0" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="funciones.c" open="1" top="1" tabpos="2" split="0" active="1" splitpos="0" zoom_1="5" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="55721" topLine="194" />
+		</Cursor>
+		<Folding>
+			<Collapse line="11" />
+			<Collapse line="55" />
+			<Collapse line="129" />
+			<Collapse line="203" />
+			<Collapse line="209" />
+			<Collapse line="307" />
+			<Collapse line="312" />
+			<Collapse line="317" />
+			<Collapse line="351" />
+			<Collapse line="384" />
+			<Collapse line="411" />
+			<Collapse line="438" />
+			<Collapse line="443" />
+			<Collapse line="451" />
+			<Collapse line="527" />
+			<Collapse line="613" />
+			<Collapse line="670" />
+			<Collapse line="747" />
+			<Collapse line="824" />
+			<Collapse line="901" />
+			<Collapse line="978" />
+			<Collapse line="1201" />
+			<Collapse line="1293" />
+			<Collapse line="1346" />
+			<Collapse line="1405" />
+			<Collapse line="1707" />
+			<Collapse line="1714" />
+			<Collapse line="1721" />
+			<Collapse line="1728" />
+			<Collapse line="1735" />
+			<Collapse line="1742" />
+			<Collapse line="1749" />
+			<Collapse line="1754" />
+			<Collapse line="1944" />
+			<Collapse line="1957" />
+			<Collapse line="2062" />
+			<Collapse line="2310" />
+			<Collapse line="2644" />
+			<Collapse line="2667" />
+		</Folding>
 	</File>
 </CodeBlocks_layout_file>

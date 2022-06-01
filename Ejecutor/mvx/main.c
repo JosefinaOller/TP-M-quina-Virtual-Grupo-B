@@ -2,82 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 #include "memoria.h"
 #include "funciones.h"
 
 int main(int argc, char *argv[])
 {
-    /*Memoria memoria;
-    Header header;
-    VectorFunciones vecF;
-    OperandosYFlags op;
-    int ip, cod;
-
-    inicializaFlags(&op,argc,argv);
-    inicializaDiscos(&memoria,argc,argv);
-
-    for(int i=0; i<3; i++)
-        op.flags[i]=1;
-    op.error=0;
-
-    if (op.flags[1] == 1)
-        system("cls");
-
-    srand (getpid());   //Cambia la semilla en cada ejecución del programa para la instrucción random
-
-    iniciaVectorFunciones(vecF);
-
-    inicializaRegistros(&memoria,op);
-
-
-    memoria.VectorDeRegistros[3] = 0x00C80000;//CS 0
-    memoria.VectorDeRegistros[0] = 0x03E800C8;//DS 200
-    memoria.VectorDeRegistros[2] = 0x03E807D0;//ES 1200
-    memoria.VectorDeRegistros[1] = 0x03E80BB8;//SS 2200
-
-    op.segmento.ds = memoria.VectorDeRegistros[0]&0xFFFF;
-    op.segmento.es = memoria.VectorDeRegistros[2]&0xFFFF;
-    op.segmento.ss = memoria.VectorDeRegistros[1]&0xFFFF;
-    op.segmento.finSS = (memoria.VectorDeRegistros[1]&0xFFFF) + (memoria.VectorDeRegistros[1]/0x10000);
-    memoria.VectorDeRegistros[6] = 0x00010000 + ((op.segmento.finSS+1) & 0xFFFF); //SP
-
-    memoria.VectorDeRegistros[10] = 0x00000001; //EAX
-    memoria.VectorDeRegistros[11] = 0x0000000A; //EBX
-    memoria.VectorDeRegistros[12] = 0x00020000; //ECX
-    memoria.VectorDeRegistros[13] = 0x0000000A; //EDX
-
-
-    memoria.RAM[210] = 100;
-    memoria.RAM[211] = 100;
-    memoria.RAM[212] = 100;
-    memoria.RAM[213] = 100;
-    memoria.RAM[214] = 0;
-
-    int inst = 0xF000000D;
-
-    cod = decodificaCodigo(inst);
-    decodificaOperandos(memoria,cod,inst,&op);
-    vecF[cod](&memoria,op);
-
-*/
-
-
-    /*printf("CH: %d\n",(memoria.VectorDeRegistros[12]&0xFF00)/0x100);
-    printf("CL: %d\n",memoria.VectorDeRegistros[12]&0xFF);
-    printf("DH: %d\n",(memoria.VectorDeRegistros[13]&0xFF00)/0x100);
-    printf("AH: %d\n",(memoria.VectorDeRegistros[10]&0xFF00)/0x100);*/
-   /* printf("Cod: %X\n",cod);
-    printf("OPb[0]: %d | OPa[0]: %d\n",op.operandoB[0],op.operandoA[0]);
-    printf("cc: %d",memoria.VectorDeRegistros[8]);
-    printf("smov : %c\n",memoria.RAM[210]);
-    printf("smov : %c\n",memoria.RAM[211]);
-    printf("smov : %c\n",memoria.RAM[212]);
-    printf("smov : %c\n",memoria.RAM[213]);
-    printf("smov : %d\n",memoria.RAM[214]);
-    printf("JMP: %d\n",memoria.VectorDeRegistros[5]);*/
-
-    //-----------------------------------------
-
     Memoria memoria;
     Header header;
     VectorFunciones vecF;
@@ -85,32 +15,48 @@ int main(int argc, char *argv[])
     int ip, cod;
     int i;
 
+    //Inicializa los flags
     inicializaFlags(&op,argc,argv);
+    //Inicializa los discos
     inicializaDiscos(&memoria,argc,argv);
+    //Inicializa los mensajes de error
     inicializaMensajesError(&memoria);
 
+    //Se genera una semilla para el random
+    srand(time(0));
+
+    //Se limpia la pantalla si hay un -c
     if (op.flags[1] == 1)
         system("cls");
 
+    //Se abre el archivo .mv2 para lectura
     FILE *arch=fopen(argv[1],"rb");
 
-    srand (getpid());   //Cambia la semilla en cada ejecución del programa para la instrucción random
-
+    //Se inicia el vector de funciones
     iniciaVectorFunciones(vecF);
 
+    //Se lee el header del archivo
     fread(&header,sizeof(Header),1,arch);
 
+    //Variable auxiliar utilizada para saber el tamaño del CS
     int size[header.bloque[4]];
 
+    //Si el header pertenece a la .mv2
     if (verificoHeader(header))
     {
+        //Se inicializan los segmentos
         if (seteoSegmentos(&memoria,header,&op)){
+            //Se inicializan los registros
             inicializaRegistros(&memoria,op);
+            //Se lee el CS a memoria
             fread(&memoria,sizeof(size),1,arch);
             fclose(arch);
 
+            //Se inicializa la cantidad de instrucciones
             op.cantInstrucciones=0;
             i=0;
+
+            //Se calcula cantidad de instrucciones en el CS (sin constantes strings)
             while (i<op.segmento.ds && op.cantInstrucciones==0){
                 if (((memoria.RAM[(op.segmento.cs&0xFFFF)+i] & 0xFFFFF000) / 0x1000) == 0){
                     op.cantInstrucciones = i;
@@ -119,22 +65,24 @@ int main(int argc, char *argv[])
                 i++;
             }
 
+            //Se llama al SYSF en caso de un -b
             if (op.flags[2] == 1){
                 cod = decodificaCodigo(0xF000000F);
                 decodificaOperandos(&memoria,cod,0xF000000F,&op);
                 vecF[cod](&memoria,op);
             }
 
-            //Ejecución del programa
-            while( (0 <= (memoria.VectorDeRegistros[5]&0xFFFF)) && ((memoria.VectorDeRegistros[5]&0xFFFF)<op.segmento.ds)
-                  && ((memoria.VectorDeRegistros[5]&0xFFFF)<op.cantInstrucciones) && memoria.error==0){
-
-                ip = memoria.VectorDeRegistros[5]++;
+            do{
+                //En caso de salir del SYSF se continúa ejecutando el código
+                ip=memoria.VectorDeRegistros[5] & 0xFFFF;
+                memoria.VectorDeRegistros[5]++;
                 cod = decodificaCodigo(memoria.RAM[ip]);
                 decodificaOperandos(&memoria,cod,memoria.RAM[ip],&op);
                 vecF[cod](&memoria,op);
-            }
+                fflush(stdin);
+            } while( (ip >= 0) && (ip<op.segmento.ds) && (ip<op.cantInstrucciones) && memoria.error==0 );
 
+            //Si la ejecución tuvo un error, se muestra y termina la ejecución
             if (memoria.error!=0){
                 printf("\nError: %s\n",memoria.msjError[memoria.error].detalle);
                 exit(-1);
