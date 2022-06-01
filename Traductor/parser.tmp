@@ -1,1 +1,1 @@
-str    equ 1 ; ubicación de los str    
+          SYS %4

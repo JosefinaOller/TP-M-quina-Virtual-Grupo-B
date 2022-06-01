@@ -118,7 +118,7 @@ void traduce(char nombAsm[],Mnemonico vecMnem[],int o, char binario[]){
     char lista[100][100];//lista incluye a las directivas,constantes y los comentarios
     Label rotulos[100];
     Linea codigo[500];
-    int i,cantRotulos=0,error=0,conLin=0,nLista=0,indicelinea[100],inst, wrgA, wrgB,kcom=0,nroLinea,data=1024,extra=1024,stack=1024,cantStrings=0,strings[100];
+    int i,cantRotulos=0,error=0,conLin=0,nLista=0,indicelinea[100],inst, wrgA, wrgB,kcom=0,nroLinea,data=1024,extra=1024,stack=1024,cantStrings=0,strings[500];
     for(i=0;i<100;i++)
         strcpy(lista[i],"");
 
