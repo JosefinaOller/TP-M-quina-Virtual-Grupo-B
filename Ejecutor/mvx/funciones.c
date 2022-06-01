@@ -7,7 +7,8 @@
 #include "funciones.h"
 
 
-
+/*Función MOV: Se averigua el tipo de operando al que se le va a asignar un valor
+y luego se le asigna el valor*/
 void MOV(Memoria *memoria, OperandosYFlags op)
 {
     int aux;
@@ -52,6 +53,9 @@ void MOV(Memoria *memoria, OperandosYFlags op)
 
 }
 
+/*Función ADD: Se averigua el tipo de operando al que se le va a sumar un valor
+y luego se le suma el valor, realizando un corrimiento por si el valor es negativo y debe propagar el signo.
+Además se almacena el resultado en un auxiliar para luego cambiar el cc acorde al resultado*/
 void ADD(Memoria *memoria, OperandosYFlags op)
 {
     int aux;
@@ -126,6 +130,9 @@ void ADD(Memoria *memoria, OperandosYFlags op)
         memoria->VectorDeRegistros[8] = 0;
 }
 
+/*Función SUB: Se averigua el tipo de operando al que se le va a restar un valor
+y luego se le resta el valor, realizando un corrimiento por si el valor es negativo y debe propagar el signo.
+Además se almacena el resultado en un auxiliar para luego cambiar el cc acorde al resultado*/
 void SUB(Memoria *memoria, OperandosYFlags op)
 {
     int aux;
@@ -200,6 +207,7 @@ void SUB(Memoria *memoria, OperandosYFlags op)
         memoria->VectorDeRegistros[8] = 0;
 }
 
+/*Función SWAP: Se averigua el tipo de ambos operandos. Luego se intercambian los valores acorde a los tipos*/
 void SWAP(Memoria *memoria, OperandosYFlags op)
 {
     int aux;
@@ -448,6 +456,9 @@ void SWAP(Memoria *memoria, OperandosYFlags op)
     }
 }
 
+/*Función MUL: Se averigua el tipo de operando al que se le va a multiplicar un valor
+y luego se le multiplica el valor, realizando un corrimiento por si el valor es negativo y debe propagar el signo.
+Además se almacena el resultado en un auxiliar para luego cambiar el cc acorde al resultado*/
 void MUL(Memoria *memoria, OperandosYFlags op)
 {
     int aux;
@@ -524,6 +535,11 @@ void MUL(Memoria *memoria, OperandosYFlags op)
         memoria->VectorDeRegistros[8] = 0;
 }
 
+/*Función DIV: Se averigua el tipo de operando al que se le va a dividir un valor
+y luego se le divide el valor, realizando un corrimiento por si el valor es negativo y debe propagar el signo pero sólo
+SI ESTE ES DISTINTO DE 0. Caso contrario se omite la operación.
+Además se almacena el resultado en un auxiliar para luego cambiar el cc acorde al resultado.
+Y utiliza otro auxiliar "valorInicial" para modificar el AC con el resto de la división*/
 void DIV(Memoria *memoria, OperandosYFlags op)
 {
     int aux;
@@ -610,6 +626,9 @@ void DIV(Memoria *memoria, OperandosYFlags op)
 
 }
 
+/*Función CMP: Se averigua el tipo de operando al que se le va a comparar un valor
+y luego se resta el valor en un auxiliar, realizando un corrimiento por si el valor es negativo y debe propagar el signo.
+Además se almacena el resultado en un auxiliar para luego cambiar el cc acorde al resultado*/
 void CMP(Memoria *memoria, OperandosYFlags op)
 {
     int aux=0;
@@ -667,6 +686,9 @@ void CMP(Memoria *memoria, OperandosYFlags op)
         memoria->VectorDeRegistros[8] = 0;
 }
 
+/*Función SHL: Se averigua el tipo de operando al que se le va a realizar un corrimiento
+y luego se le corre el valor, realizando un corrimiento por si el valor es negativo y debe propagar el signo.
+Además se almacena el resultado en un auxiliar para luego cambiar el cc acorde al resultado*/
 void SHL(Memoria *memoria, OperandosYFlags op)
 {
     int aux=0;
@@ -744,6 +766,9 @@ void SHL(Memoria *memoria, OperandosYFlags op)
 
 }
 
+/*Función SHR: Se averigua el tipo de operando al que se le va a realizar un corrimiento
+y luego se le corre el valor, realizando un corrimiento por si el valor es negativo y debe propagar el signo.
+Además se almacena el resultado en un auxiliar para luego cambiar el cc acorde al resultado*/
 void SHR(Memoria *memoria, OperandosYFlags op)
 {
     int aux=0;
@@ -821,6 +846,9 @@ void SHR(Memoria *memoria, OperandosYFlags op)
 
 }
 
+/*Función AND: Se averigua el tipo de operando al que se le va a realizar un AND
+y luego se realiza la operación, realizando un corrimiento por si el valor es negativo y debe propagar el signo.
+Además se almacena el resultado en un auxiliar para luego cambiar el cc acorde al resultado*/
 void AND(Memoria *memoria, OperandosYFlags op)
 {
     int aux=0;
@@ -898,6 +926,9 @@ void AND(Memoria *memoria, OperandosYFlags op)
 
 }
 
+/*Función OR: Se averigua el tipo de operando al que se le va a realizar un OR
+y luego se realiza la operación, realizando un corrimiento por si el valor es negativo y debe propagar el signo.
+Además se almacena el resultado en un auxiliar para luego cambiar el cc acorde al resultado*/
 void OR(Memoria *memoria, OperandosYFlags op)
 {
     int aux=0;
@@ -975,6 +1006,9 @@ void OR(Memoria *memoria, OperandosYFlags op)
 
 }
 
+/*Función XOR: Se averigua el tipo de operando al que se le va a realizar un XOR
+y luego se realiza la operación, realizando un corrimiento por si el valor es negativo y debe propagar el signo.
+Además se almacena el resultado en un auxiliar para luego cambiar el cc acorde al resultado*/
 void XOR(Memoria *memoria, OperandosYFlags op)
 {
     int aux=0;
@@ -1050,6 +1084,8 @@ void XOR(Memoria *memoria, OperandosYFlags op)
 
 }
 
+/*Función SLEN: Se averigua el tipo de operando, en caso de no ser correctos no se realiza la operación.
+Se calcula la longitud del string y luego acorde al tipo de operando se almacena la longitud.*/
 void SLEN(Memoria *memoria, OperandosYFlags op)
 {
     int aux, length=0;
@@ -1107,6 +1143,9 @@ void SLEN(Memoria *memoria, OperandosYFlags op)
     }
 }
 
+/*Función SMOV: Se averigua el tipo de operando, en caso de no ser correctos no se realiza la operación.
+Se obtienen en op[4] las direcciones de comienzo y destino del string y a partir de ellas
+se pasan uno a uno los valores. Una vez que termina se almacena el 0 (fin de cadena) en la siguiente posicion del destino*/
 void SMOV(Memoria *memoria, OperandosYFlags op)
 {
     int aux;
@@ -1125,6 +1164,9 @@ void SMOV(Memoria *memoria, OperandosYFlags op)
     }
 }
 
+/*Función SCMP: Se averigua el tipo de operando, en caso de no ser correctos no se realiza la operación.
+Se obtienen en op[4] las direcciones de comienzo de ambos strings y a partir de ellas
+se comparan uno a uno los valores. Si uno de ellos es mayor que otro, esto se refleja en el CC*/
 void SCMP(Memoria *memoria, OperandosYFlags op)
 {
     int cc=0,aux;
@@ -1160,6 +1202,7 @@ void SCMP(Memoria *memoria, OperandosYFlags op)
 
 }
 
+/*Funcion SYS: Llama los distintos SYS acorde al valor del operando*/
 void SYS(Memoria *memoria, OperandosYFlags op)
 {
     void (*FuncionesSYS[7])(Memoria *,OperandosYFlags);
@@ -1198,8 +1241,13 @@ void SYS(Memoria *memoria, OperandosYFlags op)
     }
 }
 
+/*Funcion SYS1: Leer especificación en TP*/
 void SYS1(Memoria *memoria, OperandosYFlags op)
 {
+    //Se almacenan las variables utilizadas en la especificación.
+    //Se utiliza un prompt para ver si se imprime la dirección de memoria por pantalla
+    //Se utiliza inputMode para saber el tipo de ingreso de datos
+
     int edx;
     int cx = memoria->VectorDeRegistros[12] & 0xFFFF;
     int ax = memoria->VectorDeRegistros[10] & 0xFFFF;
@@ -1212,6 +1260,7 @@ void SYS1(Memoria *memoria, OperandosYFlags op)
     int nroSegmento;
     int tope;
 
+    //Se averigua el tipo de segmento y acorde a ello se almacena dónde comienza éste
     nroSegmento = memoria->VectorDeRegistros[13] / 0x10000;
 
     if (nroSegmento == 0)
@@ -1235,13 +1284,14 @@ void SYS1(Memoria *memoria, OperandosYFlags op)
         finSeg = op.segmento.ds;
     }
 
+    //Se asigna la posición de comienzo de escritura
     edx = seg + (memoria->VectorDeRegistros[13] & 0xFFFF);
     tope = edx + cx;
 
 
     if (inputMode == 1)
     {
-
+        //Formato de ingreso hasta enter
         j = 0;
         char sAux[255];
 
@@ -1260,8 +1310,12 @@ void SYS1(Memoria *memoria, OperandosYFlags op)
     }
     else
     {
+        //Formato de ingreso por cantidad de valores
+
+        //Se averigua el tipo de dato
         tipoDato = (ax & 0xF);
 
+        //Acorde al tipo de dato, escribe el dato como decimal, hexa, octal.
         while ((edx<finSeg) && (edx < tope))
         {
             if (prompt == 0)
@@ -1285,13 +1339,19 @@ void SYS1(Memoria *memoria, OperandosYFlags op)
             }
             edx++;
         }
+        //Si se ingresa a un segmento de memoria fuera del límite del actual, habrá error de segmentación
         if (edx>=finSeg)
             memoria->error=1;
     }
 }
 
+/*Funcion SYS2: Leer especificación en TP*/
 void SYS2(Memoria *memoria, OperandosYFlags op)
 {
+
+    //Se almacenan las variables utilizadas en la especificación.
+    //Se utiliza un prompt para ver si se imprime la dirección de memoria por pantalla
+
     int edx;
     int cx = memoria->VectorDeRegistros[12] & 0xFFFF;
     int ax = memoria->VectorDeRegistros[10] & 0xFFFF;
@@ -1302,6 +1362,7 @@ void SYS2(Memoria *memoria, OperandosYFlags op)
     int seg;
     int tope;
 
+    //Se averigua el tipo de segmento y acorde a ello se almacena dónde comienza éste
     nroSegmento = memoria->VectorDeRegistros[13] / 0x10000;
     if (nroSegmento == 0)
         seg = op.segmento.ds;
@@ -1312,9 +1373,11 @@ void SYS2(Memoria *memoria, OperandosYFlags op)
     else if (nroSegmento == 3)
         seg = op.segmento.cs;
 
+    //Se asigna la posición de comienzo de escritura
     edx = seg + (memoria->VectorDeRegistros[13] & 0xFFFF);
     tope = edx+cx;
 
+    //Acorde al tipo de dato, se muestra el dato como decimal, hexa, octal, caracter o todos los señalados.
     while ((edx<tope) && (edx<op.segmento.finSS))
     {
         if (prompt == 0)
@@ -1338,11 +1401,13 @@ void SYS2(Memoria *memoria, OperandosYFlags op)
 
         edx++;
     }
+    //Si se intentó acceder a una posición fuera de la memoria, hay un error de segmentación
     if (edx>=op.segmento.finSS)
         memoria->error = 1;
     printf("\n");
 }
 
+/*Funcion SYS3: Leer especificación en TP*/
 void SYS3(Memoria *memoria, OperandosYFlags op)
 {
     int j;
@@ -1379,21 +1444,25 @@ void SYS3(Memoria *memoria, OperandosYFlags op)
         finSeg = op.segmento.ds;
     }
 
+    //Posicion donde se comienza a almacenar el string
     edx = seg + (memoria->VectorDeRegistros[13] & 0xFFFF);
     j = 0; //Me muevo en la cadena
     tope = edx + cx;
 
+    //Se muestra el prompt
     if ((ax && 0x800) == 0)
         printf("[%04d]: ",edx);
     strcpy(cad,fgets(cad,cx+1,stdin));
     cadLength = strlen(cad);
 
+    //Se almacena el string caracter a caracter
     while ( (edx<finSeg) && (edx<tope) && (j<cadLength) )
     {
         memoria->RAM[edx] = cad[j];
         edx++;
         j++;
     }
+    //Si se acaba el segmento, hay error de segmentación.
     if (edx>=finSeg)
         memoria->error=1;
     else if (j>=cadLength)
@@ -1402,6 +1471,7 @@ void SYS3(Memoria *memoria, OperandosYFlags op)
         memoria->RAM[edx] = 0;
 }
 
+/*Funcion SYS4: Leer especificación en TP*/
 void SYS4(Memoria *memoria, OperandosYFlags op)
 {
     int seg;
@@ -1420,29 +1490,37 @@ void SYS4(Memoria *memoria, OperandosYFlags op)
     else if (nroSegmento == 3)
         seg = op.segmento.cs;
 
+    //Posicion desde la cual se empieza a leer
     edx = seg + (memoria->VectorDeRegistros[13] & 0xFFFF);
 
+    //Se muestra o no el prompt
     if ((ax & 0x800) == 0)
         printf("[%04d]: ",edx);
 
+    //Se muestra el string hasta encontrar un fin de cadena o error de segmentación
     while ( (edx < op.segmento.finSS) && (memoria->RAM[edx] != 0) )
         printf("%c",memoria->RAM[edx++]);
 
     if (edx>= op.segmento.finSS)
         memoria->error=1;
 
+    //Escribe o no \n al final de la muestra
     if ( (ax & 0x100) == 0 )
         printf("\n");
 
 }
 
+/*Funcion SYS7: Leer especificación en TP*/
 void SYS7(Memoria *memoria, OperandosYFlags op)
 {
+    //Limpia la pantalla
     system("cls");
 }
 
+/*Funcion SYSD: Leer especificación en TP*/
 void SYSD(Memoria *memoria, OperandosYFlags op)
 {
+    //Se inicializan las variables necesarias
     int ah = (memoria->VectorDeRegistros[10] & 0xFF00) / 0x100;
     int al = memoria->VectorDeRegistros[10] & 0xFF;
     int ch = (memoria->VectorDeRegistros[12] & 0xFF00) / 0x100;
@@ -1453,15 +1531,19 @@ void SYSD(Memoria *memoria, OperandosYFlags op)
     int offset = memoria->VectorDeRegistros[11] & 0xFFFF;
     int buffer[128];
 
+    //Se obtienen los parámetros del disco
     unsigned char cantCilindros = memoria->discos.info[dl].cantCilindros;
     unsigned char cantSectores = memoria->discos.info[dl].cantSectores;
     unsigned char cantCabezas = memoria->discos.info[dl].cantCabezas;
     unsigned int tamSector = memoria->discos.info[dl].tamSector;
 
+    //Se calcula la posición inicial donde se comienza a leer o escribir
     int pos = 512 + (ch * cantCilindros * cantSectores * tamSector) + (cl * cantSectores * tamSector) + (dh * tamSector);
+    //Se calcula la posición límite física del disco
     int posMax = cantCabezas * cantCilindros * cantSectores * 512;
     int posSegAct;
     int tamReal;
+    //Se calcula la posición límite virtual del disco
     int tamRealFinal = pos + (al * 512);
 
     if ( !(ah==0 || ah==0x02 || ah==0x03 || ah==0x08) ){ //Función Inválida
@@ -1513,7 +1595,6 @@ void SYSD(Memoria *memoria, OperandosYFlags op)
                     fseek(memoria->discos.info[dl].arch,0,SEEK_END);
                     tamReal = ftell(memoria->discos.info[dl].arch);
 
-                    sleep(0);
                     while (tamReal <= tamRealFinal){
                         fwrite(&cero,sizeof(int),1,memoria->discos.info[dl].arch);
                         tamReal+=4;
@@ -1522,13 +1603,17 @@ void SYSD(Memoria *memoria, OperandosYFlags op)
                     //Se lee hasta el final del disco o la cantidad de sectores indicados
                     //También se cuentan la cantidad de sectores leídos/transferidos
 
+
+                    //Nos posicionamos en donde debemos comenzar a leer
                     fseek(memoria->discos.info[dl].arch,pos,SEEK_SET);
 
+                    //Se calcula la posición de memoria donde se comienzan a escribir los datos
                     if (seg==0)
                         posSegAct = op.segmento.ds + offset;
                     else if (seg==2)
                         posSegAct = op.segmento.es + offset;
 
+                    //Mientras no termine de leer datos del disco o llegue a su límite
                     while ( (pos<posMax) && (pos<tamRealFinal)){
                         fread(&buffer,sizeof(buffer),1,memoria->discos.info[dl].arch);
 
@@ -1542,8 +1627,10 @@ void SYSD(Memoria *memoria, OperandosYFlags op)
                     }
 
 
+                    //En caso de llegar a su límite, indico la cantidad de sectores transferidos
                     if (pos>=posMax)
                         memoria->VectorDeRegistros[10] = (memoria->VectorDeRegistros[10] & 0xFFFFFF00) + (transferidos & 0xFF);
+
                     memoria->VectorDeRegistros[10] =  memoria->VectorDeRegistros[10] & 0xFFFF00FF;
                     memoria->discos.info[dl].ultimoEstado = 0x00;
                 }
@@ -1562,25 +1649,26 @@ void SYSD(Memoria *memoria, OperandosYFlags op)
                     memoria->discos.info[dl].ultimoEstado = 0xFF;
                 }
                 else{ // Procede a escribir -> Operación exitosa
+
+                    //Nos posicionamos en la posición donde se comienza a escribir
                     fseek(memoria->discos.info[dl].arch,pos,SEEK_SET);
+
+                    //Se calcula la dirección de memoria de la cual se extraen datos
                     if (seg==0)
                         posSegAct = op.segmento.ds + offset;
                     else if (seg==2)
                         posSegAct = op.segmento.es + offset;
 
+                    //Mientras queden datos por transferir de memoria a disco se escribe en el disco
                     while (pos<tamRealFinal){
 
                         for (int i=0; i<128; i++){
-                            //buffer[i] = ((memoria->RAM[posSegAct]&0xFF)<<24) + ((memoria->RAM[posSegAct]&0xFF00)<<8)
-                            //+ ((memoria->RAM[posSegAct]&0xFF0000)>>8) + ((memoria->RAM[posSegAct]&0xFF000000)>>24);
                             buffer[i] = memoria->RAM[posSegAct];
                             posSegAct++;
                         }
 
                         fseek(memoria->discos.info[dl].arch,pos,SEEK_SET);
                         fwrite(&buffer,sizeof(int),1,memoria->discos.info[dl].arch);
-                        //fseek(memoria->discos.info[dl].arch,pos,SEEK_SET);
-                        //fwrite(&buffer,sizeof(buffer),1,memoria->discos.info[dl].arch);
                         pos+=sizeof(buffer);
                     }
                     memoria->VectorDeRegistros[10] =  memoria->VectorDeRegistros[10] & 0xFFFF00FF;
@@ -1592,15 +1680,19 @@ void SYSD(Memoria *memoria, OperandosYFlags op)
     }
 }
 
+/*Funcion SYSF: Leer especificación en TP*/
 void SYSF(Memoria *memoria, OperandosYFlags op)
 {
-    char sAux[255];
-    int ip;
-    int ipEjecutado, ipAux;
-    int cod;
-    VectorFunciones vecF;
-    unsigned int dirMemoria;
 
+    char sAux[255]; //Valor ingresado por consola
+    int ip; //Ip actual real
+    int ipEjecutado; //Ip utilizado para mostrar en el dissasembler
+    int ipAux; //Ip auxiliar utilizado para que el Ejecutado no pierda su valor
+    int cod; //Codigo de operacion
+    VectorFunciones vecF;
+    unsigned int dirMemoria; //Direccion de memoria a imprimir
+
+    //-b
     if (op.flags[0]==1)
     {
         iniciaVectorFunciones(vecF);
@@ -1608,23 +1700,31 @@ void SYSF(Memoria *memoria, OperandosYFlags op)
         ip = memoria->VectorDeRegistros[5] & 0xFFFF;
         ipEjecutado = ip;
 
+        //Si se cumplen las condiciones y no hay error, se ejecuta la instruccion
         if ( (0 <= ip) && (ip < op.segmento.ds) && (ip < op.cantInstrucciones) && memoria->error==0)
         {
             memoria->VectorDeRegistros[5]++;
+            //Se decodifica el código de operación
             cod = decodificaCodigo(memoria->RAM[ip]);
+            //Se decodifican los operandos
             decodificaOperandos(memoria,cod,memoria->RAM[ip],&op);
+            //Se ejecuta la función
             vecF[cod](memoria,op);
+            //Se guarda el nuevo ip
             ip = memoria->VectorDeRegistros[5] & 0xFFFF;
         }
 
+        //Comprobación de error
         if (memoria->error!=0){
             printf("\nError: %s\n",memoria->msjError[memoria->error].detalle);
             exit(-1);
         }
 
+        //-c
         if (op.flags[1]==1)
             system("cls");
 
+        //-d
         if (op.flags[2]==1)
             disassembler(memoria, op, ipEjecutado);
 
@@ -1633,8 +1733,10 @@ void SYSF(Memoria *memoria, OperandosYFlags op)
         ipAux = ipEjecutado;
         ipEjecutado = ip;
 
+        //Siguiente operación  (p, r, valor)
         scanf("%[^\n]s%*c",sAux);
 
+        //Se sigue utilizando el SYSF hasta ingresar R o que ocurra un error o que se terminen las instrucciones
         while ( (0 <= ip) && (ip < op.segmento.ds) && (strcmp(sAux,"r")!=0) && (ip<op.cantInstrucciones) && memoria->error==0)
         {
             if (strcmp(sAux,"p")==0)
@@ -1662,6 +1764,7 @@ void SYSF(Memoria *memoria, OperandosYFlags op)
             }
             else if ( cuentaChars(sAux,' ',strlen(sAux)) == 0 )
             {
+                //Se imprime la direccion de memoria ingresada en sAux
                 dirMemoria = atoi(sAux);
                 if (dirMemoria<4096)
                     printf("[%04d]: %04X %04X %d\n",dirMemoria,(memoria->RAM[dirMemoria] >> 16)&0xFFFF, memoria->RAM[dirMemoria]&0xFFFF,memoria->RAM[dirMemoria] );
@@ -1669,6 +1772,7 @@ void SYSF(Memoria *memoria, OperandosYFlags op)
             }
             else if ( cuentaChars(sAux,' ',strlen(sAux)) == 1 )
             {
+                //Se imprime el rango de direcciones de memoria ingresadas en sAux
                 char *token;
 
                 token = strtok(sAux," ");
@@ -1698,12 +1802,14 @@ void SYSF(Memoria *memoria, OperandosYFlags op)
     }
 }
 
+//Función JMP: Se comprueban las condiciones del salto y caso satisfactorio, se cambia el IP
 void JMP(Memoria *memoria, OperandosYFlags op)
 {
     if (op.operandoA[0] < op.cantInstrucciones)
         memoria->VectorDeRegistros[5] = op.operandoA[0];
 }
 
+//Función JZ: Se comprueban las condiciones del salto y caso satisfactorio, se cambia el IP
 void JZ(Memoria *memoria, OperandosYFlags op)
 {
     if (op.operandoA[0] < op.cantInstrucciones)
@@ -1711,6 +1817,7 @@ void JZ(Memoria *memoria, OperandosYFlags op)
             memoria->VectorDeRegistros[5] = op.operandoA[0];
 }
 
+//Función JP: Se comprueban las condiciones del salto y caso satisfactorio, se cambia el IP
 void JP(Memoria *memoria, OperandosYFlags op)
 {
     if (op.operandoA[0] < op.cantInstrucciones)
@@ -1718,6 +1825,7 @@ void JP(Memoria *memoria, OperandosYFlags op)
             memoria->VectorDeRegistros[5] = op.operandoA[0];
 }
 
+//Función JN: Se comprueban las condiciones del salto y caso satisfactorio, se cambia el IP
 void JN(Memoria *memoria, OperandosYFlags op)
 {
     if (op.operandoA[0] < op.cantInstrucciones)
@@ -1725,6 +1833,7 @@ void JN(Memoria *memoria, OperandosYFlags op)
             memoria->VectorDeRegistros[5] = op.operandoA[0];
 }
 
+//Función JNZ: Se comprueban las condiciones del salto y caso satisfactorio, se cambia el IP
 void JNZ(Memoria *memoria, OperandosYFlags op)
 {
     if (op.operandoA[0] < op.cantInstrucciones)
@@ -1732,6 +1841,7 @@ void JNZ(Memoria *memoria, OperandosYFlags op)
             memoria->VectorDeRegistros[5] = op.operandoA[0];
 }
 
+//Función JNP: Se comprueban las condiciones del salto y caso satisfactorio, se cambia el IP
 void JNP(Memoria *memoria, OperandosYFlags op)
 {
     if (op.operandoA[0] < op.cantInstrucciones)
@@ -1739,6 +1849,7 @@ void JNP(Memoria *memoria, OperandosYFlags op)
             memoria->VectorDeRegistros[5] = op.operandoA[0];
 }
 
+//Función JNN: Se comprueban las condiciones del salto y caso satisfactorio, se cambia el IP
 void JNN(Memoria *memoria, OperandosYFlags op)
 {
     if (op.operandoA[0] < op.cantInstrucciones)
@@ -1746,22 +1857,27 @@ void JNN(Memoria *memoria, OperandosYFlags op)
             memoria->VectorDeRegistros[5] = op.operandoA[0];
 }
 
+//Función LDL: Se carga la parte baja del AC
 void LDL(Memoria *memoria, OperandosYFlags op)
 {
     memoria->VectorDeRegistros[9] = (memoria->VectorDeRegistros[9] & 0xFFFF0000) + (op.operandoA[0] & 0xFFFF) ;
 }
 
+//Función LDL: Se carga la parte alta del AC
 void LDH(Memoria *memoria, OperandosYFlags op)
 {
     memoria->VectorDeRegistros[9] = ((op.operandoA[0] & 0xFFFF) * 0x10000) + (memoria->VectorDeRegistros[9] & 0xFFFF);
 }
 
+//Función RND: Se calcula un random entre 0 y el operando. Se almacena en AC
 void RND(Memoria *memoria, OperandosYFlags op)
 {
-    //srand (time(0) + rand());   //Cambia la semilla en cada ejecución del programa para la instrucción random
     memoria->VectorDeRegistros[9] = rand() % (op.operandoA[0]+1);
 }
 
+/*Función NOT: Se averigua el tipo de operando al que se le va a realizar un NOT
+y luego se realiza la operación, realizando un corrimiento por si el valor es negativo y debe propagar el signo.
+Además se almacena el resultado en un auxiliar para luego cambiar el cc acorde al resultado*/
 void NOT(Memoria *memoria, OperandosYFlags op)
 {
     int aux;
@@ -1835,13 +1951,17 @@ void NOT(Memoria *memoria, OperandosYFlags op)
         memoria->VectorDeRegistros[8] = 0;
 }
 
+/*Función PUSH: Se ingresa un dato a la pila*/
 void PUSH(Memoria *memoria, OperandosYFlags op)
 {
     int posSP;
 
+    //Se decrementa el SP
     memoria->VectorDeRegistros[6]--;
+    //Se calcula la posición a la que se ingresa un dato
     posSP = op.segmento.ss + (memoria->VectorDeRegistros[6]&0xFFFF);
 
+    //Si la posición pertenece al stack segment se almacena, sino hay stack overflow
     if (posSP > op.segmento.ss){
         memoria->RAM[posSP] = op.operandoA[0];
     }
@@ -1849,15 +1969,19 @@ void PUSH(Memoria *memoria, OperandosYFlags op)
         memoria->error=2;
 }
 
+/*Función POP: Se obtiene un dato de la pila*/
 void POP(Memoria *memoria, OperandosYFlags op)
 {
     int aux = op.segmento.ss + (memoria->VectorDeRegistros[6]&0xFFFF) + 1;   //SP+1
+    //Se averigua la posición de la cual se toma un valor
     int posSP = op.segmento.ss + (memoria->VectorDeRegistros[6]&0xFFFF);
 
+    //Se averigua que no haya Stack Underflow
     if (aux >= op.segmento.finSS)
         memoria->error=3;
     else
     {
+        //Se averigua el tipo de operando y se almacena el valor en el operando. Además se incrementa el SP
         if (op.operandoA[1] == 1)
         {
             //Si el operando A es de registro
@@ -1903,18 +2027,23 @@ void POP(Memoria *memoria, OperandosYFlags op)
     }
 }
 
+/*Función CALL: Se llama a un procedimiento*/
 void CALL(Memoria *memoria, OperandosYFlags op)
 {
     int posSP;
     int posDestino;
 
+    //Se decrementa el SP
     memoria->VectorDeRegistros[6]--;
+    //Se averigua la posición relativa del SP al Stack segment
     posSP = op.segmento.ss + (memoria->VectorDeRegistros[6]&0xFFFF);
 
+    //Si no hay stack overflow, se almacena el valor del IP al que retornar luego
     if (posSP > op.segmento.ss){
         memoria->RAM[posSP] = memoria->VectorDeRegistros[5]&0xFFFF;
         posDestino = op.operandoA[0];
 
+        //Si el IP es válido se almacena, sino hay segmentation fault
         if (posDestino>=op.cantInstrucciones)
             memoria->error=1;
         else
@@ -1923,11 +2052,15 @@ void CALL(Memoria *memoria, OperandosYFlags op)
         memoria->error=2;
 }
 
+/*Función RET: Se retorna de un procedimiento*/
 void RET(Memoria *memoria, OperandosYFlags op)
 {
+    //Se aumenta el SP
     int aux = op.segmento.ss + (memoria->VectorDeRegistros[6]&0xFFFF) + 1;   //SP+1
+    //Se calcula la posición relativa actual
     int posSP = op.segmento.ss + (memoria->VectorDeRegistros[6]&0xFFFF);
 
+    //Si no hay stack underflow, se cambia el IP a la posición obtenida de la pila
     if (aux >= op.segmento.finSS)
         memoria->error=3;
     else
@@ -1941,6 +2074,7 @@ void RET(Memoria *memoria, OperandosYFlags op)
     }
 }
 
+/*Función STOP: detiene la ejecución del programa*/
 void STOP(Memoria *memoria, OperandosYFlags op)
 {
     exit(-1);
@@ -1954,6 +2088,7 @@ void STOP(Memoria *memoria, OperandosYFlags op)
 //----------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
 
+//Función que acorde al código de operación, imprime un mnemónico*/
 void imprimeMnemonico(int cod)
 {
     char aux[6];
@@ -2059,6 +2194,7 @@ void imprimeMnemonico(int cod)
     printf("%6s",aux);
 }
 
+//Función que imprime un operando en consola
 void stringRegistro(int op[],char aux[])
 {
     if (op[3]<10)
@@ -2210,6 +2346,7 @@ void stringRegistro(int op[],char aux[])
     }
 }
 
+//Función encargada de formatear y llamar la impresión de operandos por consola
 void imprimeOperandos(OperandosYFlags op,int cod,int instruccion)
 {
     char aux[10], offset[10];
@@ -2307,6 +2444,7 @@ void imprimeOperandos(OperandosYFlags op,int cod,int instruccion)
     } //No imprime nada con 0 operandos
 }
 
+//Función encargada de imprimir los registros actuales por consola
 void imprimeEstadoRegistros(int vecR[], OperandosYFlags op)
 {
     printf(" DS:%12d | SS:%12d | ES:%12d | CS:%12d |\n",vecR[0]&0xFFFF,vecR[1]&0xFFFF, vecR[2]&0xFFFF, vecR[3]&0xFFFF);
@@ -2315,6 +2453,7 @@ void imprimeEstadoRegistros(int vecR[], OperandosYFlags op)
     printf("ECX:%12d |EDX:%12d |EEX:%12d |EFX:%12d |\n",vecR[12],vecR[13],vecR[14],vecR[15]);
 }
 
+//Función encargada de la impresión en consola
 void disassembler(Memoria *memoria, OperandosYFlags op, int ipEjecutado)
 {
     int cod;
@@ -2384,6 +2523,7 @@ void disassembler(Memoria *memoria, OperandosYFlags op, int ipEjecutado)
     imprimeEstadoRegistros(memoria->VectorDeRegistros,op);
 }
 
+//Función encargada de cargar o escribir discos nuevos
 void setDisco(int nro, Memoria *memoria,char nombreD[])
 {
     FILE *arch;
@@ -2396,6 +2536,7 @@ void setDisco(int nro, Memoria *memoria,char nombreD[])
 
     arch = fopen(nombreD,"r+");
     if (arch!=NULL){
+        //Si el disco ya existe, se obtienen sus parámetros
         memoria->discos.info[nro].arch = arch;
         memoria->discos.info[nro].nroUnidad = nro;
         fseek(arch,33, SEEK_SET);
@@ -2419,6 +2560,7 @@ void setDisco(int nro, Memoria *memoria,char nombreD[])
     }
     else
     {
+        //Si el disco no existe, se generan los parámetros por defecto y se escribe
         int auxEscritura;
         memoria->discos.info[nro].arch = fopen(nombreD,"w+");
         if (memoria->discos.info[nro].arch!=NULL)
@@ -2559,6 +2701,8 @@ void setDisco(int nro, Memoria *memoria)
     }
 }
 */
+
+//Función que se encarga de inicializar los discos en la memoria
 void inicializaDiscos(Memoria *memoria, int argc,char *argv[]){
     memoria->discos.cant=0;
     for (int i=0; i<255; i++){
@@ -2566,6 +2710,7 @@ void inicializaDiscos(Memoria *memoria, int argc,char *argv[]){
         memoria->discos.info[i].ultimoEstado = 0;
     }
 
+    //Llama a la creación o lectura de discos a memoria
     for(int i=2; i<argc; i++){
         if( strstr(argv[i],"vdd") != NULL){
             setDisco(memoria->discos.cant,memoria,argv[i]);
@@ -2574,7 +2719,7 @@ void inicializaDiscos(Memoria *memoria, int argc,char *argv[]){
     }
 }
 
-
+//Función que se encarga de inicializar los flags en memoria
 void inicializaFlags(OperandosYFlags *op,int argc,char *argv[]){
     for(int i=0; i<3; i++)
         op->flags[i]=0;
@@ -2590,6 +2735,7 @@ void inicializaFlags(OperandosYFlags *op,int argc,char *argv[]){
     }
 }
 
+//Función que se encarga de inicializar las funciones en un vector
 void iniciaVectorFunciones(VectorFunciones vecF)
 {
     vecF[0x00]=&MOV;
@@ -2628,6 +2774,7 @@ void iniciaVectorFunciones(VectorFunciones vecF)
     vecF[0xFF1]=&STOP;
 }
 
+//Función que verifica que el header sea de la MV2
 int verificoHeader(Header header)
 {
     int ret=0;
@@ -2641,6 +2788,7 @@ int verificoHeader(Header header)
     return ret;
 }
 
+//Función que setea los segmentos relativamente a los demás en la memoria
 int seteoSegmentos(Memoria *mem,Header header,OperandosYFlags *op)
 {
     int segSize = header.bloque[1] + header.bloque[2] + header.bloque[3] + header.bloque[4];
@@ -2664,6 +2812,7 @@ int seteoSegmentos(Memoria *mem,Header header,OperandosYFlags *op)
     return ret;
 }
 
+//Función que decodifica el código de operación
 int decodificaCodigo(int instruccion)
 {
     unsigned int cod = instruccion;
@@ -2686,7 +2835,8 @@ int decodificaCodigo(int instruccion)
     return cod;
 }
 
-
+//Función que decodifica y almacena partes de los operandos
+//Sus valores se explican en funciones.h
 void decodificaOperandos(Memoria *memoria, int codigo, int instruccion, OperandosYFlags *op)
 {
     if (codigo < 15)
@@ -3066,6 +3216,7 @@ void decodificaOperandos(Memoria *memoria, int codigo, int instruccion, Operando
     }
 }
 
+//Funcion que quita caracter (utilizada para quitar por ejemplo el "%" de %08 ingresado por consola
 void QuitaCaracter(char cadena[],char caracter,int longitud)
 {
     char aux[longitud];
@@ -3083,6 +3234,7 @@ void QuitaCaracter(char cadena[],char caracter,int longitud)
     strcpy(cadena,aux);
 }
 
+//Funcion que cuenta cantidad de caracteres utilizada para saber la cantidad de datos ingresados por consola
 int cuentaChars(char cadena[], char caracter,int longitud)
 {
     int cont=0;
@@ -3094,6 +3246,7 @@ int cuentaChars(char cadena[], char caracter,int longitud)
     return cont;
 }
 
+//Inicializa los registros según la especificación
 void inicializaRegistros(Memoria *mem,OperandosYFlags op)
 {
     for (int i=8; i<16; i++)
@@ -3106,6 +3259,7 @@ void inicializaRegistros(Memoria *mem,OperandosYFlags op)
 
 }
 
+//Inicializa los mensajes de error según la especificación
 void inicializaMensajesError(Memoria *memoria){
     memoria->error=0;
     strcpy(memoria->msjError[1].detalle,"Segmentation Fault");
